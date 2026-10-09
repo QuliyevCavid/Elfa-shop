@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>ELFA — Alış-verişin yeni üzü</title>
+<style>
+/* Geri qayıtma düyməsi */
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  margin-bottom: 18px;
+  border: 1px solid #e8e6e1;
+  border-radius: 25px;
+  background: #fff;
+  color: #171717;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.back-btn:hover {
+  background: #171717;
+  color: #fff;
+}
+
+#cats .catbtn,
+#cats a {
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  line-height: 1.5 !important;
+  font-family: Arial, Helvetica, sans-serif !important;
+}
+
+#cats .catbtn {
+  position: relative;
+  top: 0;
+}
+</style>
+<style>
+/* SEVİMLİLƏR - BÖYÜK MƏHSUL GÖRÜNÜŞÜ */
+.fav-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:18px;
+  margin-top:18px;
+}
+
+.fav-card{
+  background:#fff;
+  border:1px solid #e8e6e1;
+  border-radius:16px;
+  overflow:hidden;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.fav-card:hover{
+  transform:translateY(-3px);
+  box-shadow:0 10px 25px rgba(0,0,0,.10);
+}
+
+.fav-photo{
+  height:260px;
+  background:#ece9e4;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+}
+
+.fav-photo .fake-product{
+  transform:scale(.9);
+}
+
+.fav-info{
+  padding:16px;
+}
+
+.fav-info .brand{
+  display:block;
+}
+
+.fav-info .name{
+  font-size:18px;
+  margin:7px 0;
+}
+
+.fav-price{
+  font-weight:700;
+  font-size:15px;
+}
+
+/* MƏHSUL ƏTRAFLI */
+.product-detail{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:25px;
+}
+
+.product-detail-photo{
+  min-height:430px;
+  border-radius:16px;
+  background:#ece9e4;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+}
+
+.product-detail-photo .fake-product{
+  transform:scale(1.35);
+}
+
+.product-detail-info{
+  padding:10px 0;
+}
+
+.product-detail-info .brand{
+  display:block;
+  margin-bottom:8px;
+}
+
+.product-detail-info h2{
+  font-size:30px;
+  margin-bottom:12px;
+}
+
+.product-detail-price{
+  font-size:22px;
+  font-weight:700;
+  margin:15px 0;
+}
+
+.product-detail-video{
+  margin-top:20px;
+  height:230px;
+  border-radius:14px;
+  background:#171717;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:50px;
+  cursor:pointer;
+}
+
+.product-detail-video span{
+  font-size:13px;
+  margin-left:10px;
+}
+
+@media(max-width:700px){
+  .fav-grid{grid-template-columns:1fr 1fr;gap:10px}
+  .fav-photo{height:210px}
+  .product-detail{grid-template-columns:1fr}
+  .product-detail-photo{min-height:330px}
+}
+#orderAddress,#delivery,#payMethod{width:100%;padding:14px 15px;margin-top:0;margin-bottom:10px;border:1px solid #ddd;border-radius:10px;background:#fff;color:#171717;font-family:Arial,Helvetica,sans-serif;font-size:14px;outline:none;display:block}
+#orderAddress{min-height:130px;resize:vertical}
+#orderAddress:focus,#delivery:focus{border-color:#171717}
+#delivery,#payMethod{cursor:pointer;height:48px}
+.phone-box{display:flex;align-items:center;border:1px solid #ddd;border-radius:10px;background:#fff;margin-bottom:10px;overflow:hidden}
+.phone-box:focus-within{border-color:#171717}
+.phone-box span{padding:0 12px;height:42px;display:flex;align-items:center;background:#f3f3f3;border-right:1px solid #ddd;font-size:14px;color:#444}
+.modal .phone-box input{border:0;border-radius:0;margin:0;flex:1;height:42px;outline:none}
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#f7f6f3;--white:#fff;--text:#171717;--muted:#777;--line:#e8e6e1;--dark:#171717}
+body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
+button,input{font:inherit}
+button{cursor:pointer;border:0}
+a{text-decoration:none;color:inherit;cursor:pointer}
+.topbar{background:#171717;color:#fff;text-align:center;padding:9px 20px;font-size:12px;letter-spacing:.4px}
+header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
+.nav{width:min(1400px,94%);height:76px;margin:auto;display:flex;align-items:center;gap:28px}
+.logo{font-size:28px;font-weight:800;letter-spacing:5px;min-width:110px}
+.search{flex:1;max-width:650px;margin:auto;position:relative}
+.search input{width:100%;height:44px;border:1px solid #ddd;border-radius:24px;padding:0 50px 0 20px;outline:none;background:#fafafa}
+.search input:focus{border-color:#aaa;background:#fff}
+.search button{position:absolute;right:5px;top:5px;width:34px;height:34px;border-radius:50%;background:#171717;color:#fff}
+.nav-actions{display:flex;align-items:center;gap:19px}
+.action{font-size:13px;white-space:nowrap;display:flex;align-items:center;gap:6px;position:relative}
+.icon{font-size:20px}
+.badge{background:#d22;color:#fff;border-radius:10px;font-size:10px;padding:2px 6px;position:absolute;top:-6px;left:14px;display:none}
+.categories{background:#fff;border-bottom:1px solid var(--line)}
+.cat-inner{width:min(1400px,94%);margin:auto;display:flex;gap:30px;overflow:auto;padding:13px 0;scrollbar-width:none}
+.cat-inner::-webkit-scrollbar{display:none}
+.cat-inner a{font-size:13px;white-space:nowrap;color:#444;padding-bottom:3px;border-bottom:2px solid transparent}
+.cat-inner a:hover{color:#000}
+.cat-inner a.active{color:#000;font-weight:700;border-color:#000}
+.hero{width:min(1400px,94%);margin:24px auto 0;min-height:430px;border-radius:22px;overflow:hidden;background:#202020;position:relative;color:#fff;display:flex;align-items:center}
+.hero-bg{position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.82),rgba(0,0,0,.32),rgba(0,0,0,.12)),radial-gradient(circle at 75% 40%,#777 0,#383838 28%,#171717 65%)}
+.hero-content{position:relative;padding:60px;max-width:650px}
+.eyebrow{font-size:11px;letter-spacing:3px;text-transform:uppercase;opacity:.7;margin-bottom:18px}
+.hero h1{font-size:58px;line-height:1.02;letter-spacing:-2px;margin-bottom:20px}
+.hero p{color:#ddd;line-height:1.7;max-width:500px;font-size:15px}
+.hero-btn{margin-top:28px;background:#fff;color:#111;padding:13px 24px;border-radius:25px;font-size:13px;font-weight:700}
+.play{position:absolute;right:55px;bottom:45px;width:64px;height:64px;border:1px solid rgba(255,255,255,.5);border-radius:50%;background:rgba(255,255,255,.08);color:#fff;font-size:21px}
+.section{width:min(1400px,94%);margin:58px auto}
+.section-head{display:flex;justify-content:space-between;align-items:end;margin-bottom:22px}
+.section-head h2{font-size:30px;letter-spacing:-.7px}
+.section-head p{font-size:13px;color:var(--muted);margin-top:7px}
+.see{font-size:13px;text-decoration:underline}
+.products{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.card{background:#fff;border-radius:16px;overflow:hidden;position:relative}
+.card.hide{display:none}
+.photo{height:330px;background:#ece9e4;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.fake-product{width:125px;height:205px;border-radius:8px 8px 20px 20px;background:linear-gradient(110deg,#d5d0c9,#fafafa 45%,#bcb7af);box-shadow:0 18px 30px rgba(0,0,0,.16);position:relative}
+.fake-product:before{content:"ELFA";position:absolute;left:0;right:0;top:92px;text-align:center;font-size:13px;letter-spacing:4px;color:#555}
+.fake-cap{position:absolute;width:45px;height:45px;top:-38px;left:40px;border-radius:5px 5px 2px 2px;background:#8e8981}
+.heart{position:absolute;right:13px;top:13px;width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.92);font-size:19px}
+.video{position:absolute;left:13px;bottom:13px;background:#111;color:#fff;border-radius:20px;padding:7px 11px;font-size:11px}
+.info{padding:17px}
+.brand{font-size:11px;color:#888;text-transform:uppercase;letter-spacing:1px}
+.name{font-size:16px;margin:7px 0 10px}
+.bottom{display:flex;justify-content:space-between;align-items:center}
+.price{font-weight:700}
+.buy{font-size:12px;border:1px solid #ddd;padding:8px 12px;border-radius:20px;background:#fff}
+.buy:hover{background:#171717;color:#fff}
+.empty{display:none;text-align:center;color:var(--muted);padding:40px 0;grid-column:1/-1}
+.video-section{background:#171717;color:#fff;padding:55px 0;margin-top:20px}
+.video-inner{width:min(1400px,94%);margin:auto}
+.video-inner .section-head p{color:#aaa}
+.video-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.reel{height:410px;border-radius:18px;overflow:hidden;position:relative;cursor:pointer;background:linear-gradient(145deg,#b8b1a9,#48443f 55%,#1d1d1d)}
+.reel:nth-child(2){background:linear-gradient(145deg,#d5c7bb,#75695e 55%,#24211f)}
+.reel:nth-child(3){background:linear-gradient(145deg,#9a9a96,#494b48 55%,#161717)}
+.reel:after{content:"▶";position:absolute;left:18px;top:18px;width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.9);color:#111;display:flex;align-items:center;justify-content:center;font-size:15px}
+.reel-info{position:absolute;left:20px;right:20px;bottom:20px}
+.reel-info strong{display:block;font-size:20px;margin-bottom:5px}
+.reel-info span{font-size:12px;color:#ddd}
+.stores{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+.store{background:#fff;border:1px solid var(--line);border-radius:15px;padding:20px;text-align:center;cursor:pointer}
+.store:hover{border-color:#171717}
+.store-logo{width:58px;height:58px;border-radius:50%;background:#eee;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px}
+.store strong{font-size:14px}
+.store p{font-size:11px;color:#888;margin-top:5px}
+footer{margin-top:70px;background:#171717;color:#fff;padding:45px 0}
+.footer-inner{width:min(1400px,94%);margin:auto;display:flex;justify-content:space-between}
+.footer-logo{font-size:25px;letter-spacing:4px;font-weight:800}
+.footer-inner p{font-size:12px;color:#aaa;margin-top:10px}
+.footer-links{display:flex;gap:25px;font-size:12px;color:#bbb}
+/* modal + toast */
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:50;display:none;align-items:center;justify-content:center;padding:16px}
+.ov.open{display:flex}
+.modal{background:#fff;border-radius:18px;width:min(460px,100%);max-height:85vh;overflow:auto;padding:26px;position:relative}
+.modal h3{font-size:20px;margin-bottom:14px}
+.modal .x{position:absolute;right:14px;top:12px;background:none;font-size:22px}
+.modal p{font-size:14px;line-height:1.6;color:#444}
+.modal input{width:100%;height:42px;border:1px solid #ddd;border-radius:10px;padding:0 12px;margin-bottom:10px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.row small{color:#888;display:block;font-size:12px}
+.qty button{width:26px;height:26px;border-radius:50%;background:#eee}
+.qty span{display:inline-block;min-width:22px;text-align:center}
+.ci{display:flex;gap:12px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line)}
+.thumb{width:72px;height:84px;border-radius:10px;background:#ece9e4;display:flex;align-items:flex-end;justify-content:center;overflow:hidden;flex:none;padding-bottom:6px}
+.thumb>div{transform:scale(.3);transform-origin:bottom center;height:0;display:flex;align-items:flex-end}
+.cmid{flex:1;min-width:0}
+.cmid b{display:block;font-size:14px;margin:3px 0 8px}
+.cmid .u{font-size:12px;color:#888}
+.cr{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.del{background:none;color:#d22;font-size:12px;text-decoration:underline}
+.categories{position:relative;z-index:9}
+.catbtn{background:none;font-weight:700;font-size:13px;white-space:nowrap;display:flex;align-items:center;gap:6px}
+.yeni{background:#e53935;color:#fff;font-style:normal;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:4px}
+.mega{display:none;position:absolute;left:0;right:0;top:100%;background:#fff;border-bottom:1px solid var(--line);box-shadow:0 14px 24px rgba(0,0,0,.08)}
+.mega.open{display:block}
+.mega-in{width:min(1400px,94%);margin:auto;display:flex;min-height:380px;max-height:70vh}
+.msb{width:190px;flex:none;padding:12px 12px 12px 0;border-right:1px solid var(--line);overflow:auto}
+.ms{padding:15px 14px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;display:flex;justify-content:space-between;margin-bottom:6px}
+.ms.on{background:#fdf0e6;color:#BD0D0D}
+.mcols{flex:1;padding:18px 0 18px 30px;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:18px 20px;align-content:start;overflow:auto}
+.mg h4{color:#BD0D0D;font-size:14px;margin-bottom:10px;cursor:pointer}
+.mg a{display:block;font-size:13px;padding:6px 0;color:#222}
+.mg a:hover{color:#BD0D0D}
+.mg .more{font-size:13px;font-weight:700;text-decoration:underline;cursor:pointer;display:inline-block;margin-top:4px}
+@media(max-width:600px){.mega-in{flex-direction:column;max-height:75vh}.msb{width:100%;display:flex;gap:6px;border:0;padding:8px 0;overflow:auto}.ms{white-space:nowrap;margin:0}.ms span{display:none}.mcols{padding:10px 0}}
+.modal.wide{width:min(760px,100%)}
+.ord{border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:12px;font-size:14px}
+.ord small{color:#888;display:block;margin:2px 0 6px;font-size:12px}
+.st{background:#eee;border-radius:12px;padding:3px 10px;font-size:12px}
+.stats{display:flex;gap:10px;margin-bottom:14px}
+.stat{flex:1;background:#f7f6f3;border-radius:12px;padding:12px;text-align:center;font-size:12px;color:#777}
+.stat b{display:block;font-size:18px;color:#171717}
+.ord select{width:100%;height:38px;border:1px solid #ddd;border-radius:8px;margin-top:8px;padding:0 8px}
+.cardrow{display:flex;gap:10px}
+.btn.alt{background:#eee;color:#171717}
+.btn{width:100%;margin-top:14px;background:#171717;color:#fff;padding:12px;border-radius:24px;font-weight:700;font-size:14px}
+.vid{height:240px;border-radius:12px;background:linear-gradient(145deg,#b8b1a9,#48443f 55%,#1d1d1d);display:flex;align-items:center;justify-content:center;color:#fff;font-size:44px;cursor:pointer;margin-bottom:12px}
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);background:#171717;color:#fff;padding:11px 20px;border-radius:24px;font-size:13px;opacity:0;pointer-events:none;transition:.25s;z-index:60}
+.toast.show{opacity:1;transform:translateX(-50%)}
+@media(max-width:900px){.nav{gap:14px}.nav-actions .action span:last-child{display:none}.products{grid-template-columns:repeat(2,1fr)}.video-grid{grid-template-columns:1fr 1fr}.reel:last-child{display:none}.stores{grid-template-columns:repeat(3,1fr)}.hero h1{font-size:46px}}
+@media(max-width:600px){.topbar{font-size:10px}.nav{height:65px}.logo{font-size:22px;letter-spacing:3px;min-width:auto}.search{order:3;position:absolute;top:72px;left:3%;right:3%;max-width:none}header{height:132px}.nav-actions{margin-left:auto;gap:12px}.cat-inner{padding-top:13px}.hero{margin-top:60px;min-height:470px;border-radius:16px}.hero-content{padding:35px 28px}.hero h1{font-size:40px}.play{right:25px;bottom:25px}.section{margin:42px auto}.section-head h2{font-size:24px}.products{grid-template-columns:1fr 1fr;gap:10px}.photo{height:230px}.fake-product{transform:scale(.75)}.info{padding:12px}.name{font-size:14px}.buy{display:none}.video-grid{grid-template-columns:1fr}.reel{height:390px}.reel:nth-child(2),.reel:nth-child(3){display:none}.stores{grid-template-columns:repeat(2,1fr)}.footer-inner{display:block}.footer-links{margin-top:25px;flex-wrap:wrap}}
+.cats .catbtn,
+.cats a {
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  line-height: 1 !important;
+  font-family: Arial, Helvetica, sans-serif !important;
+}
+.modal.wide{
+  width:100vw !important;
+  max-width:none !important;
+  min-height:100vh !important;
+  height:100vh !important;
+  border-radius:0 !important;
+  margin:0 !important;
+  padding:35px !important;
+  overflow-y:auto !important;
+}
+</style>
+</head>
+<body>
+<div class="topbar">ELFA-DA YENİ MƏHSULLARI KƏŞF ET · VİDEO İLƏ BAX, SEÇ VƏ AL</div>
+<header>
+  <div class="nav">
+    <a class="logo" id="logo">ELFA</a>
+    <div class="search">
+      <input type="text" id="q" placeholder="Məhsul, mağaza və ya katiqoriya axtar...">
+      <button id="sbtn">⌕</button>
+    </div>
+    <div class="nav-actions">
+      <a class="action" id="favBtn"><span class="icon">♡</span><span>Sevimlilər</span><b class="badge" id="favN"></b></a>
+      <a class="action" id="cartBtn"><span class="icon">🛒</span><span>Səbət</span><b class="badge" id="cartN"></b></a>
+      <a class="action" id="profBtn"><span class="icon">♙</span><span>Profil</span></a>
+    </div>
+  </div>
+</header>
+<nav class="categories" id="catnav">
+  <div class="cat-inner" id="cats">
+    <button class="catbtn" id="megaBtn">☰ Bütün məhsullar <i class="yeni">Yeni</i></button>
+    <a data-c="Qadın" data-k="Qadın">Qadın</a><a data-c="Kişi" data-k="Kişi">Kişi</a><a data-c="Digər" data-k="Ana & Uşaq">Ana & Uşaq</a><a data-c="Ev & Yaşam" data-k="Ev & Yaşayış">Ev & Yaşayış</a><a data-c="Kosmetika" data-k="Kosmetika">Kosmetika</a><a data-c="Elektronika" data-k="Elektronika">Elektronika</a><a data-sp="Qaynar məhsullar">Qaynar Məhsullar <i class="yeni">Yeni</i></a><a data-sp="Çox satılanlar">Çox Satılanlar <i class="yeni">Yeni</i></a>
+  </div>
+  <div class="mega" id="mega"><div class="mega-in"><div class="msb" id="msb"></div><div class="mcols" id="mcols"></div></div></div>
+</nav>
+<main>
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-content">
+      <div class="eyebrow">ELFA · YENİ NƏSİL MARKETPLACE</div>
+      <h1>Sadəcə baxma.<br>Kəşf et.</h1>
+      <p>Məhsulları şəkildən deyil, real videolardan da kəşf et. Sevdiyini tap, mağazanı seç və alış-verişə başla.</p>
+      <button class="hero-btn" id="heroBtn">Məhsulları kəşf et →</button>
+    </div>
+    <button class="play" data-video="Tanıtım videosu">▶</button>
+  </section>
+
+  <section class="section" id="prodSec">
+    <div class="section-head">
+      <div><h2 id="prodTitle">Trend məhsullar</h2><p>İndi ən çox diqqət çəkən məhsullar</p></div>
+      <a class="see" id="seeAll">Hamısına bax →</a>
+    </div>
+    <div class="products" id="products">
+      <article class="card" data-id="1" data-brand="ELFA STORE" data-name="Premium Parfum" data-price="49.90" data-cat="Kosmetika,Qadın,Kişi">
+        <div class="photo"><div class="fake-product"><div class="fake-cap"></div></div><button class="heart">♡</button><span class="video" data-video="Premium Parfum">▶ Video</span></div>
+        <div class="info"><span class="brand">ELFA STORE</span><div class="name">Premium Parfum</div><div class="bottom"><span class="price">49.90 AZN</span><button class="buy">Səbətə at</button></div></div>
+      </article>
+      <article class="card" data-id="2" data-brand="NOVA SHOP" data-name="Minimal Sneaker" data-price="89.00" data-cat="Ayaqqabı,Kişi,Qadın">
+        <div class="photo"><div class="fake-product" style="transform:rotate(-4deg)"><div class="fake-cap"></div></div><button class="heart">♡</button><span class="video" data-video="Minimal Sneaker">▶ Video</span></div>
+        <div class="info"><span class="brand">NOVA SHOP</span><div class="name">Minimal Sneaker</div><div class="bottom"><span class="price">89.00 AZN</span><button class="buy">Səbətə at</button></div></div>
+      </article>
+      <article class="card" data-id="3" data-brand="MODO" data-name="Gündəlik Çanta" data-price="65.00" data-cat="Aksesuar,Qadın">
+        <div class="photo"><div class="fake-product" style="height:175px;width:155px;border-radius:14px"><div class="fake-cap"></div></div><button class="heart">♡</button><span class="video" data-video="Gündəlik Çanta">▶ Video</span></div>
+        <div class="info"><span class="brand">MODO</span><div class="name">Gündəlik Çanta</div><div class="bottom"><span class="price">65.00 AZN</span><button class="buy">Səbətə at</button></div></div>
+      </article>
+      <article class="card" data-id="4" data-brand="LUNE" data-name="Baxım Seti" data-price="37.50" data-cat="Kosmetika,Qadın,Ev & Yaşam">
+        <div class="photo"><div class="fake-product" style="height:190px;width:100px"><div class="fake-cap"></div></div><button class="heart">♡</button><span class="video" data-video="Baxım Seti">▶ Video</span></div>
+        <div class="info"><span class="brand">LUNE</span><div class="name">Baxım Seti</div><div class="bottom"><span class="price">37.50 AZN</span><button class="buy">Səbətə at</button></div></div>
+      </article>
+      <div class="empty" id="empty">Heç nə tapılmadı 🔍</div>
+    </div>
+  </section>
+
+  <section class="video-section">
+    <div class="video-inner">
+      <div class="section-head">
+        <div><h2>Videoda kəşf et</h2><p>Məhsulu real şəkildə gör və daha rahat qərar ver.</p></div>
+        <a class="see" id="moreVid">Daha çox video →</a>
+      </div>
+      <div class="video-grid">
+        <div class="reel" data-video="Yeni kolleksiya"><div class="reel-info"><strong>Yeni kolleksiya</strong><span>@elfastore · 12 saniyə</span></div></div>
+        <div class="reel" data-video="Günün seçimi"><div class="reel-info"><strong>Günün seçimi</strong><span>@modoshop · 18 saniyə</span></div></div>
+        <div class="reel" data-video="Stilini tamamla"><div class="reel-info"><strong>Stilini tamamla</strong><span>@lunestore · 15 saniyə</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="storeSec">
+    <div class="section-head">
+      <div><h2>Mağazaları kəşf et</h2><p>Sevdiyin sahibkarları və brendləri izləməyə başla.</p></div>
+      <a class="see" id="allStores">Bütün mağazalar →</a>
+    </div>
+    <div class="stores">
+      <div class="store" data-s="ELFA STORE"><div class="store-logo">ES</div><strong>ELFA STORE</strong><p>124 məhsul</p></div>
+      <div class="store" data-s="NOVA SHOP"><div class="store-logo">NS</div><strong>NOVA SHOP</strong><p>86 məhsul</p></div>
+      <div class="store" data-s="MODO"><div class="store-logo">MO</div><strong>MODO</strong><p>213 məhsul</p></div>
+      <div class="store" data-s="LUNE"><div class="store-logo">LU</div><strong>LUNE</strong><p>57 məhsul</p></div>
+      <div class="store" data-s="VERA"><div class="store-logo">VE</div><strong>VERA</strong><p>91 məhsul</p></div>
+    </div>
+  </section>
+</main>
+<footer>
+  <div class="footer-inner">
+    <div><div class="footer-logo">ELFA</div><p>Alış-verişin yeni üzü.</p></div>
+    <div class="footer-links"><a data-info="Haqqımızda">Haqqımızda</a><a data-info="Satıcı ol">Satıcı ol</a><a data-info="Yardım">Yardım</a><a data-info="Əlaqə">Əlaqə</a></div>
+  </div>
+</footer>
+
+<div class="ov" id="ov"><div class="modal"><button class="x" id="mx">×</button><div id="mb"></div></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const cards=$$('.card'); let cat='',store='',term='',showAll=false,label='';
+let favs=new Set(), cart={};
+document.addEventListener('input',e=>{
+  if(e.target.id==='orderPhone'){
+    const d=e.target.value.replace(/\D/g,'').replace(/^0+/,'').slice(0,9);
+    e.target.value=d.replace(/^(\d{2})(\d{0,3})(\d{0,2})(\d{0,2}).*/,(m,a,b,c,f)=>[a,b,c,f].filter(Boolean).join(' '));
+  }
+});
+const INFO={
+ "Haqqımızda":"ELFA — məhsulları video ilə kəşf etməyə imkan verən yeni nəsil marketplace-dir.",
+ "Satıcı ol":"Mağazanı aç və məhsullarını minlərlə alıcıya göstər.",
+ "Yardım":"Sifariş, çatdırılma və qaytarma ilə bağlı suallarınız üçün bizə yazın.",
+ "Əlaqə":"E-poçt: info@elfa.az · Tel: +994 12 000 00 00"};
+let tt;
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),1800)}
+function modal(h,w){$('#mb').innerHTML=h;$('.modal').classList.toggle('wide',!!w);$('#ov').classList.add('open')}
+function closeM(){$('#ov').classList.remove('open')}
+$('#mx').onclick=closeM;$('#ov').onclick=e=>{if(e.target.id==='ov')closeM()};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeM()});
+
+function filter(){
+  let n=0;
+  cards.forEach((c,i)=>{
+    const t=(c.dataset.name+' '+c.dataset.brand+' '+c.dataset.cat).toLowerCase();
+    const ok=(!cat||c.dataset.cat.split(',').includes(cat))&&(!store||c.dataset.brand===store)&&(!term||t.includes(term.toLowerCase()));
+    c.classList.toggle('hide',!ok);if(ok)n++;
+  });
+  $('#empty').style.display=n?'none':'block';
+  $('#prodTitle').textContent=label||(store?store+' məhsulları':cat?cat:'Trend məhsullar');
+}
+$$('#cats a').forEach(a=>a.onclick=()=>{
+  $$('#cats a').forEach(x=>x.classList.remove('active'));a.classList.add('active');
+  if(a.dataset.k){            // Qadın, Kişi, Ana & Uşaq və s.
+    openMega(a.dataset.k);    // menyunu həmin bölmə ilə aç
+    return;
+  }
+  cat=a.dataset.c;store='';label=a.dataset.k||'';filter();$('#prodSec').scrollIntoView({behavior:'smooth'});
+});
+function doSearch(){term=$('#q').value.trim();filter();$('#prodSec').scrollIntoView({behavior:'smooth'});if(term)toast('Axtarış: '+term)}
+$('#sbtn').onclick=doSearch;
+$('#q').addEventListener('keydown',e=>{if(e.key==='Enter')doSearch()});
+$('#q').addEventListener('input',e=>{term=e.target.value.trim();filter()});
+function reset(){cat='';store='';term='';label='';$('#q').value='';$$('#cats a').forEach((x,i)=>x.classList.remove('active'));filter()}
+$('#logo').onclick=()=>{reset();window.scrollTo({top:0,behavior:'smooth'})};
+$('#heroBtn').onclick=()=>$('#prodSec').scrollIntoView({behavior:'smooth'});
+$('#seeAll').onclick=()=>{reset();toast('Bütün məhsullar göstərilir');$('#prodSec').scrollIntoView({behavior:'smooth'})};
+$('#allStores').onclick=()=>{reset();$('#storeSec').scrollIntoView({behavior:'smooth'})};
+$$('.store').forEach(s=>s.onclick=()=>{
+  store=s.dataset.s;cat='';term='';label='';$$('#cats a').forEach((x,i)=>x.classList.remove('active'));filter();
+  if(!cards.some(c=>c.dataset.brand===store))toast(store+' mağazasında hələlik məhsul yoxdur');
+  $('#prodSec').scrollIntoView({behavior:'smooth'});
+});
+
+/* hearts */
+function badge(el,n){el.textContent=n;el.style.display=n?'block':'none'}
+$$('.heart').forEach(h=>h.onclick=e=>{
+  e.stopPropagation();const id=h.closest('.card').dataset.id;
+  if(favs.has(id)){favs.delete(id);h.innerHTML='♡';h.style.color='#171717';toast('Sevimlilərdən çıxarıldı')}
+  else{favs.add(id);h.innerHTML='♥';h.style.color='#d22';toast('Sevimlilərə əlavə olundu')}
+  badge($('#favN'),favs.size);
+});
+/* cart */
+$$('.buy').forEach(b=>b.onclick=()=>{
+  const id=b.closest('.card').dataset.id;cart[id]=(cart[id]||0)+1;updCart();toast('Səbətə əlavə olundu ✓');
+});
+const prod=id=>cards.find(c=>c.dataset.id===id).dataset;
+function updCart(){badge($('#cartN'),Object.values(cart).reduce((a,b)=>a+b,0))}
+function thumb(id){const c=cards.find(c=>c.dataset.id===id);return `<div class="thumb"><div>${c.querySelector('.fake-product').outerHTML}</div></div>`}
+function showCart(){
+  const ids=Object.keys(cart);
+  if(!ids.length)return modal('<h3>Səbət</h3><p>Səbətiniz boşdur.</p>');
+  let tot=0,cnt=0;
+  const rows=ids.map(id=>{const p=prod(id),q=cart[id];tot+=p.price*q;cnt+=q;
+    return `<div class="ci">${thumb(id)}<div class="cmid"><span class="brand">${p.brand}</span><b>${p.name}</b><span class="u">${(+p.price).toFixed(2)} AZN / ədəd</span></div><div class="cr"><strong>${(p.price*q).toFixed(2)} AZN</strong><div class="qty"><button data-m="${id}">−</button><span>${q}</span><button data-p="${id}">+</button></div><button class="del" data-d="${id}">🗑 Sil</button></div></div>`}).join('');
+  modal(`<h3>Səbət (${cnt})</h3>${rows}<div class="row"><strong>Cəmi</strong><strong>${tot.toFixed(2)} AZN</strong></div><button class="btn" id="order">Sifarişi tamamla</button>`);
+  $$('#mb [data-p]').forEach(b=>b.onclick=()=>{cart[b.dataset.p]++;updCart();showCart()});
+  $$('#mb [data-m]').forEach(b=>b.onclick=()=>{const i=b.dataset.m;if(--cart[i]<=0)delete cart[i];updCart();showCart()});
+  $$('#mb [data-d]').forEach(b=>b.onclick=()=>{delete cart[b.dataset.d];updCart();showCart();toast('Məhsul səbətdən silindi')});
+  $('#order').onclick=()=>{
+    modal(`<h3>Sifarişi tamamla</h3>
+    <input id="orderName" type="text" placeholder="Ad və soyad">
+    <div class="phone-box"><span>+994</span><input id="orderPhone" type="tel" inputmode="numeric" maxlength="12" placeholder="50 123 45 67" autocomplete="tel-national"></div>
+    <textarea id="orderAddress" placeholder="Ünvan"></textarea>
+    <select id="delivery">
+      <option value="">Çatdırılma üsulunu seçin</option>
+      <option value="courier">🚚 Kuryer ilə çatdırılma</option>
+      <option value="pickup">📍 Təhvil məntəqəsindən götürmə</option>
+    </select>
+    <select id="payMethod">
+      <option value="">Ödəniş üsulunu seçin</option>
+      <option value="cash">💵 Qapıda nağd ödəniş</option>
+      <option value="card">💳 Kartla onlayn ödəniş</option>
+    </select>
+    <div id="cardBox" style="display:none"><input id="cn" inputmode="numeric" placeholder="Kart nömrəsi (16 rəqəm)" autocomplete="cc-number"><div class="cardrow"><input id="ce" inputmode="numeric" placeholder="AA/İİ"><input id="cc" type="password" inputmode="numeric" maxlength="3" placeholder="CVV"></div><p style="font-size:11px;color:#888;margin-bottom:8px">Demo ödəniş: kart məlumatları heç yerdə saxlanmır.</p></div>
+    <button class="btn" id="confirmOrder">Sifarişi təsdiqlə</button>`);
+    bindCard();$('#payMethod').onchange=e=>$('#cardBox').style.display=e.target.value==='card'?'block':'none';
+    $('#confirmOrder').onclick=()=>{
+      const name=$('#orderName').value.trim(),phone=$('#orderPhone').value.trim(),
+            address=$('#orderAddress').value.trim(),delivery=$('#delivery').value,pay=$('#payMethod').value;
+      if(phone.replace(/\s/g,'').length!==9)return toast('Telefon nömrəsi 9 rəqəm olmalıdır');
+      if(!name||!phone||!address||!delivery||!pay)return toast('Bütün sahələri doldurun');
+      const info={name,phone:'+994 '+phone,address,delivery:delivery==='courier'?'Kuryer ilə çatdırılma':'Təhvil məntəqəsi',pay};
+      if(pay==='card'){
+        if(!cardOk())return;
+        const bt=$('#confirmOrder');bt.disabled=true;bt.textContent='Ödəniş emal olunur...';
+        return setTimeout(()=>done(saveOrder(info,true)),1200);
+      }
+      done(saveOrder(info,false));
+    };
+  };
+}
+$('#cartBtn').onclick=showCart;
+$('#favBtn').onclick=()=>{
+  if(!favs.size){
+    return modal(`
+      <h3>Sevimlilər</h3>
+      <p>Hələ sevimli məhsulunuz yoxdur. ♡ düyməsinə basın.</p>
+    `);
+  }
+
+  const html=[...favs].map(id=>{
+    const c=cards.find(c=>c.dataset.id===id);
+    const p=c.dataset;
+
+    return `
+      <div class="fav-card" data-fav-product="${id}">
+        <div class="fav-photo">
+          ${c.querySelector('.fake-product').outerHTML}
+        </div>
+
+        <div class="fav-info">
+          <span class="brand">${esc(p.brand)}</span>
+          <div class="name">${esc(p.name)}</div>
+          <div class="fav-price">${money(p.price)}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  modal(`
+    <h3>Sevimlilər</h3>
+    <div class="fav-grid">${html}</div>
+  `,true);
+
+  $$('#mb [data-fav-product]').forEach(card=>{
+    card.onclick=()=>{
+      showProduct(card.dataset.favProduct);
+    };
+  });
+};
+$('#profBtn').onclick=()=>user?profMenu():loginM();
+function loginM(){
+  modal('<h3>Daxil ol</h3><input id="em" type="email" placeholder="E-poçt"><input id="pw" type="password" placeholder="Şifrə"><button class="btn" id="login">Daxil ol</button>');
+  $('#login').onclick=()=>{const e=$('#em').value.trim();if(!e||!$('#pw').value)return toast('Bütün sahələri doldurun');
+    user={email:e};LS.s('elfa_user',user);toast('Xoş gəldin, '+e.split('@')[0]+'!');profMenu()};
+}
+function profMenu(){
+  modal(`<h3>Profil</h3><p style="margin-bottom:6px">${esc(user.email)}</p><button class="btn" id="mo">📦 Sifarişlərim</button><button class="btn" id="sp">🏪 Satıcı paneli</button><button class="btn alt" id="lo">Çıxış</button>`);
+  $('#mo').onclick=myOrders;$('#sp').onclick=sellerPanel;
+  $('#lo').onclick=()=>{user=null;LS.s('elfa_user',null);closeM();toast('Çıxış edildi')};
+}
+
+/* storage + orders */
+const LS={g(k,d){try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}},s(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const money=n=>(+n).toFixed(2)+' AZN';
+const STATUS=['Gözləyir','Hazırlanır','Göndərildi','Çatdırıldı','Ləğv edildi'];
+let user=LS.g('elfa_user',null);
+const cartTotal=()=>Object.keys(cart).reduce((a,id)=>a+prod(id).price*cart[id],0);
+function saveOrder(info,paid){
+  const items=Object.keys(cart).map(id=>{const p=prod(id);return{id,name:p.name,brand:p.brand,price:+p.price,qty:cart[id]}});
+  const o={id:'EL'+Date.now().toString().slice(-7),date:new Date().toLocaleString('az-AZ'),user:user?user.email:'qonaq',items,total:cartTotal(),...info,paid,status:'Gözləyir'};
+  const all=LS.g('elfa_orders',[]);all.unshift(o);LS.s('elfa_orders',all);
+  cart={};updCart();return o;
+}
+function done(o){
+  modal(`<h3>Sifarişiniz qəbul olundu 🎉</h3><p>Sifariş nömrəsi: <b>${o.id}</b></p><p>Məbləğ: <b>${money(o.total)}</b> · ${o.paid?'Kartla ödənildi ✅':'Ödəniş qapıda'}</p><button class="btn" id="go">Sifarişlərimə bax</button>`);
+  $('#go').onclick=myOrders;
+}
+/* payment (demo — kart məlumatları saxlanmır) */
+function bindCard(){
+  $('#cn').oninput=e=>e.target.value=e.target.value.replace(/\D/g,'').slice(0,16).replace(/(\d{4})(?=\d)/g,'$1 ');
+  $('#ce').oninput=e=>e.target.value=e.target.value.replace(/\D/g,'').slice(0,4).replace(/^(\d{2})(\d)/,'$1/$2');
+  $('#cc').oninput=e=>e.target.value=e.target.value.replace(/\D/g,'');
+}
+function cardOk(){
+  const n=$('#cn').value.replace(/\s/g,''),ex=$('#ce').value.split('/'),m=+ex[0];
+  if(!n)return toast('Kart nömrəsini yazın'),false;
+  if(n.length!==16)return toast('Kart nömrəsi 16 rəqəm olmalıdır'),false;
+  if(!(m>=1&&m<=12)||(ex[1]||'').length!==2)return toast('Bitmə tarixi düzgün deyil (AA/İİ)'),false;
+  if($('#cc').value.length!==3)return toast('CVV 3 rəqəm olmalıdır'),false;
+  return true;
+}
+/* orders */
+function orderHtml(o,seller){
+  return `<div class="ord"><div class="row"><b>#${o.id}</b><span class="st">${o.status}</span></div><small>${o.date}${seller?' · '+esc(o.name)+' · '+esc(o.phone)+' · '+esc(o.address):''}</small>`+
+  o.items.map(i=>`<div class="row"><span>${esc(i.name)} × ${i.qty}</span><span>${money(i.price*i.qty)}</span></div>`).join('')+
+  `<div class="row"><b>Cəmi</b><b>${money(o.total)}</b></div><small>${o.paid?'✅ Kartla ödənilib':'💵 Qapıda ödəniş'} · ${o.delivery}</small>`+
+  (seller?`<select data-oid="${o.id}">${STATUS.map(s=>`<option${s===o.status?' selected':''}>${s}</option>`).join('')}</select>`:'')+`</div>`;
+}
+function myOrders(){
+  const me=user?user.email:'qonaq',list=LS.g('elfa_orders',[]).filter(o=>o.user===me);
+  modal('<h3>Sifarişlərim</h3>'+(list.length?list.map(o=>orderHtml(o)).join(''):'<p>Hələ sifarişiniz yoxdur.</p>'),true);
+}
+function sellerPanel(){
+  const all=LS.g('elfa_orders',[]),ok=all.filter(o=>o.status!=='Ləğv edildi');
+  const rev=ok.reduce((a,o)=>a+o.total,0),paid=ok.filter(o=>o.paid).reduce((a,o)=>a+o.total,0);
+  modal(`<h3>Satıcı paneli</h3><div class="stats"><div class="stat"><b>${all.length}</b>Sifariş</div><div class="stat"><b>${money(rev)}</b>Ümumi gəlir</div><div class="stat"><b>${money(paid)}</b>Onlayn ödənilib</div></div>`+
+    (all.length?all.map(o=>orderHtml(o,true)).join(''):'<p>Hələ sifariş yoxdur.</p>'),true);
+  $$('#mb [data-oid]').forEach(sel=>sel.onchange=()=>{
+    const l=LS.g('elfa_orders',[]),o=l.find(x=>x.id===sel.dataset.oid);o.status=sel.value;LS.s('elfa_orders',l);
+    toast('Status yeniləndi');sellerPanel();
+  });
+}
+
+/* mega menu */
+const G=(t,i,x)=>({t,i,x});
+const MENU={
+ 'Qadın':[G('Geyim',['Paltar','Tshirt','Köynək','Cins şalvar','Kot Ceket'],['Ətək','Şort','Gödəkçə']),G('Çanta',['Omuz Çantası','Sırt Çantası','Bel Çantası','Okul Çantası','Laptop Çantası'],['Cüzdan','Kuryer çantası','Səyahət çantası']),G('Kosmetika',['Ətir','Göz Makyajı','Dəriyə qulluq','Saç baxımı','Makiyaj'],['Parfum seti','Dırnaq qulluğu','Dodaq boyası']),
+  G('Ayaqqabı',['Hündürdaban ayaqqabı','İdman ayaqqabısı','Gündəlik ayaqqabılar','Babet','Sandalet'],['Bot','Çəkmə','Terlik']),G('İç geyim',['Pijama Dəsti','Gecə','Bustqalter','Alt paltarı dəstləri','Fantaziya geyimləri'],['Corab','Kombinezon','Korset']),G('Spor & Outdoor',['Sweatshirt','Tişört','Spor Sütyeni','Tayt','Eşofman'],['Şort','Gödəkçə','Spor ayaqqabısı']),
+  G('Aksesuar&Çanta',['Çanta','Saat'],['Gözlük','Kəmər','Şərf']),G('Lüks',['Lüks Çanta','Lüks Giyim','Lüks Ayakkabı'])],
+ 'Kişi':[G('Geyim',['Köynək','Tişört','Şalvar','Kostyum','Gödəkçə']),G('Ayaqqabı',['İdman ayaqqabısı','Klassik ayaqqabı','Bot','Sandalet']),G('Aksesuar',['Saat','Kəmər','Cüzdan','Çanta']),G('Kosmetika',['Ətir','Təraş vasitələri','Dəriyə qulluq'])],
+ 'Ana & Uşaq':[G('Körpə',['Bədən','Tulum','Bələk','Qidalanma']),G('Uşaq geyimi',['Tişört','Şalvar','Paltar','Gödəkçə']),G('Oyuncaq',['Konstruktor','Kuklalar','Təhsil oyuncaqları']),G('Ana',['Hamilə geyimi','Əmizdirmə vasitələri'])],
+ 'Ev & Yaşayış':[G('Mətbəx',['Qab-qacaq','Çaynik','Bıçaq dəsti']),G('Ev tekstili',['Yataq dəsti','Yorğan','Xalça','Pərdə']),G('Dekor',['Vaza','Şam','Çərçivə','Güzgü']),G('Təmizlik',['Təmizlik vasitələri','Səbət'])],
+ 'Kosmetika':[G('Ətir',['Qadın ətri','Kişi ətri','Dezodorant']),G('Makiyaj',['Göz makiyajı','Dodaq boyası','Pudra']),G('Dəriyə qulluq',['Krem','Maska','Serum','Günəşdən qoruyucu']),G('Saç',['Şampun','Saç yağı','Fen'])],
+ 'Elektronika':[G('Telefon',['Smartfon','Qoruyucu şüşə','Qab','Adapter']),G('Kompüter',['Noutbuk','Klaviatura','Siçan']),G('Audio',['Qulaqlıq','Dinamik','Bluetooth qulaqlıq']),G('Ağıllı saat',['Ağıllı saat','Qolbaq'])]
+};
+const GC={'Geyim':'Geyim','Ayaqqabı':'Ayaqqabı','Aksesuar&Çanta':'Aksesuar','Aksesuar':'Aksesuar','Çanta':'Aksesuar','Kosmetika':'Kosmetika','Ətir':'Kosmetika','Makiyaj':'Kosmetika','Dəriyə qulluq':'Kosmetika','Saç':'Kosmetika'};
+const TOP={'Qadın':'Qadın','Kişi':'Kişi','Ana & Uşaq':'Digər','Ev & Yaşayış':'Ev & Yaşam','Kosmetika':'Kosmetika','Elektronika':'Elektronika'};
+const mega=$('#mega');let tab='Qadın';
+function renderMega(){
+  $('#msb').innerHTML=Object.keys(MENU).map(k=>`<div class="ms${k===tab?' on':''}" data-k="${k}">${k}<span>›</span></div>`).join('');
+  $('#mcols').innerHTML=MENU[tab].map((g,gi)=>`<div class="mg"><h4 data-g="${gi}">${g.t} ›</h4>${g.i.map(i=>`<a data-i="${i}" data-gi="${gi}">${i}</a>`).join('')}${g.x?`<span class="more">Daha çox göstər ⌄</span><div hidden>${g.x.map(i=>`<a data-i="${i}" data-gi="${gi}">${i}</a>`).join('')}</div>`:''}</div>`).join('');
+}
+function openMega(k){tab=k||tab;renderMega();mega.classList.add('open')}
+function closeMega(){mega.classList.remove('open')}
+$('#megaBtn').onclick=e=>{e.stopPropagation();mega.classList.contains('open')?closeMega():openMega('Qadın')};
+document.addEventListener('click',e=>{if(!e.target.closest('#catnav'))closeMega()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMega()});
+mega.addEventListener('mouseover',e=>{const k=e.target.closest('.ms');if(k&&k.dataset.k!==tab){tab=k.dataset.k;renderMega()}});
+mega.addEventListener('click',e=>{
+  const k=e.target.closest('.ms');if(k){tab=k.dataset.k;renderMega();return}
+  const m=e.target.closest('.more');if(m){const ex=m.nextElementSibling;ex.hidden=!ex.hidden;m.textContent=ex.hidden?'Daha çox göstər ⌄':'Daha az göstər ⌃';return}
+  const it=e.target.closest('[data-i],[data-g]');if(!it)return;
+  const g=MENU[tab][+(it.dataset.gi??it.dataset.g)],nm=it.dataset.i||g.t;
+  cat=GC[g.t]||TOP[tab];store='';term='';$('#q').value='';label=tab+' › '+nm;
+  $$('#cats a').forEach(x=>x.classList.toggle('active',x.dataset.k===tab));
+  filter();closeMega();toast(nm);$('#prodSec').scrollIntoView({behavior:'smooth'});
+});
+$$('#cats a[data-sp]').forEach(a=>a.onclick=()=>{reset();label=a.dataset.sp.replace(/^./,c=>c.toUpperCase());filter();$('#prodSec').scrollIntoView({behavior:'smooth'})});
+
+/* məhsul ətraflı */
+function showProduct(id){
+  const c=cards.find(c=>c.dataset.id===id);
+  if(!c)return;
+
+  const p=c.dataset;
+  const product=c.querySelector('.fake-product').outerHTML;
+
+  modal(`
+    <div class="product-detail">
+
+      <div>
+        <div class="product-detail-photo">
+          ${product}
+        </div>
+
+        <div class="product-detail-video" data-detail-video="${esc(p.name)}">
+          ▶
+          <span>Məhsul videosuna bax</span>
+        </div>
+      </div>
+
+      <div class="product-detail-info">
+        <span class="brand">${esc(p.brand)}</span>
+
+        <h2>${esc(p.name)}</h2>
+
+        <div class="product-detail-price">
+          ${money(p.price)}
+        </div>
+
+        <p style="margin-bottom:18px">
+          Bu məhsul haqqında daha ətraflı məlumatı burada görə bilərsiniz.
+          Məhsulun şəkillərinə və videosuna baxaraq daha rahat seçim edə bilərsiniz.
+        </p>
+
+        <button class="btn" id="detailCart">
+          Səbətə at
+        </button>
+
+        <button class="btn alt" id="detailFav">
+          ♥ Sevimlilərdən çıxar
+        </button>
+      </div>
+
+    </div>
+  `,true);
+
+  $('#detailCart').onclick=()=>{
+    cart[id]=(cart[id]||0)+1;
+    updCart();
+    toast('Səbətə əlavə olundu ✓');
+  };
+
+  $('#detailFav').onclick=()=>{
+    favs.delete(id);
+
+    const original=cards.find(c=>c.dataset.id===id);
+    if(original){
+      const heart=original.querySelector('.heart');
+      if(heart){
+        heart.innerHTML='♡';
+        heart.style.color='#171717';
+      }
+    }
+
+    badge($('#favN'),favs.size);
+    closeM();
+    toast('Sevimlilərdən çıxarıldı');
+  };
+
+  $('[data-detail-video]').onclick=()=>{
+    video(p.name);
+  };
+}
+
+/* video */
+function video(t){modal(`<h3>${t}</h3><div class="vid" id="vp">▶</div><p>Video nümayişi (demo). Oynatmaq üçün ▶ düyməsinə basın.</p>`);
+  $('#vp').onclick=function(){this.textContent=this.textContent==='▶'?'⏸':'▶'}}
+$$('[data-video]').forEach(v=>v.onclick=e=>{e.stopPropagation();video(v.dataset.video)});
+$('#moreVid').onclick=()=>toast('Yeni videolar tezliklə əlavə olunacaq');
+$$('[data-info]').forEach(a=>a.onclick=()=>modal(`<h3>${a.dataset.info}</h3><p>${INFO[a.dataset.info]}</p>`));
+</script>
+</body>
+</html>
