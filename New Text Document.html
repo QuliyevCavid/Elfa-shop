@@ -5,28 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>ELFA — Alış-verişin yeni üzü</title>
 <style>
-/* Geri qayıtma düyməsi */
-.back-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  margin-bottom: 18px;
-  border: 1px solid #e8e6e1;
-  border-radius: 25px;
-  background: #fff;
-  color: #171717;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.back-btn:hover {
-  background: #171717;
-  color: #fff;
-}
-
 #cats .catbtn,
 #cats a {
   font-size: 12px !important;
@@ -38,6 +16,26 @@
 #cats .catbtn {
   position: relative;
   top: 0;
+
+.product-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-bottom: 15px;
+  border: 1px solid #e8e6e1;
+  border-radius: 50%;
+  background: #fff;
+  color: #171717;
+  font-size: 28px;
+  cursor: pointer;
+}
+
+.product-back:hover {
+  background: #171717;
+  color: #fff;
+}
 }
 </style>
 <style>
@@ -310,6 +308,28 @@ footer{margin-top:70px;background:#171717;color:#fff;padding:45px 0}
   margin:0 !important;
   padding:35px !important;
   overflow-y:auto !important;
+}
+.product-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-bottom: 15px;
+  position: relative;
+  top: -20px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: #171717;
+  font-size: 32px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.product-back:hover {
+  background: transparent;
+  color: #777;
 }
 </style>
 </head>
@@ -673,7 +693,9 @@ function showProduct(id){
   const p=c.dataset;
   const product=c.querySelector('.fake-product').outerHTML;
 
-  modal(`
+ modal(`
+    <button class="product-back" id="productBack" title="Sevimlilərə qayıt">&#11013;</button>
+
     <div class="product-detail">
 
       <div>
@@ -712,6 +734,10 @@ function showProduct(id){
 
     </div>
   `,true);
+  
+$('#productBack').onclick = () => {
+  closeM();
+};
 
   $('#detailCart').onclick=()=>{
     cart[id]=(cart[id]||0)+1;
@@ -732,7 +758,7 @@ function showProduct(id){
     }
 
     badge($('#favN'),favs.size);
-    closeM();
+    $('#favBtn').click();
     toast('Sevimlilərdən çıxarıldı');
   };
 
@@ -740,6 +766,17 @@ function showProduct(id){
     video(p.name);
   };
 }
+
+
+/* Məhsul kartına klik etdikdə ətraflı məlumatı aç */
+cards.forEach(card => {
+  card.style.cursor = 'pointer';
+  card.addEventListener('click', e => {
+    // Sevimli, səbət və video düymələrinin öz funksiyaları qalsın.
+    if (e.target.closest('button, a, .heart, .buy, .video')) return;
+    showProduct(card.dataset.id);
+  });
+});
 
 /* video */
 function video(t){modal(`<h3>${t}</h3><div class="vid" id="vp">▶</div><p>Video nümayişi (demo). Oynatmaq üçün ▶ düyməsinə basın.</p>`);
