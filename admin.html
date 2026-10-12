@@ -1,23 +1,165 @@
-<!doctype html>
-<html lang="az"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ELFA — Administrator paneli</title><style>
-:root{--bg:#f6f1eb;--card:#fffaf5;--text:#241f1b;--muted:#7b7067;--accent:#6f3f2b;--border:#e7ddd3}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);font:15px Arial,sans-serif;color:var(--text)}header{background:var(--card);border-bottom:1px solid var(--border);padding:18px 5%}.logo{font-size:24px;letter-spacing:6px;font-weight:900;text-decoration:none;color:inherit}.wrap{max-width:1100px;margin:28px auto;padding:0 18px}.panel{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:24px;margin-bottom:18px}.muted{color:var(--muted);line-height:1.5}h1{margin:0 0 8px}label{display:block;font-weight:700;font-size:13px;margin:12px 0 6px}input{width:100%;padding:12px;border:1px solid var(--border);border-radius:10px;font:inherit}.btn{border:0;border-radius:9px;padding:10px 13px;font-weight:700;cursor:pointer;background:var(--accent);color:white}.btn.reject{background:#8d2d25}.btn.alt{background:#e7ddd3;color:var(--text)}.actions{display:flex;gap:8px;flex-wrap:wrap}.msg{padding:12px;border-radius:10px;margin-top:12px;display:none}.ok{display:block;background:#e6f4e8;color:#24572c}.err{display:block;background:#fde9e6;color:#8b2920}.seller{border:1px solid var(--border);background:white;border-radius:14px;padding:16px;margin-top:12px}.top{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}.pill{display:inline-block;padding:6px 10px;border-radius:20px;background:#f0e4c7;font-size:12px;font-weight:800}.pending{background:#f0e4c7}.approved{background:#d9efdc}.rejected{background:#fde0dc}.stats{display:flex;gap:10px;flex-wrap:wrap}.stats span{background:white;border:1px solid var(--border);border-radius:10px;padding:12px}
-</style></head><body><header><a href="/" class="logo">ELFA</a></header><main class="wrap">
-<section id="loginPanel" class="panel"><h1>Administrator girişi</h1><p class="muted">Bu paneldən satıcı müraciətlərini yoxlayıb təsdiqləyə və ya rədd edə bilərsən.</p><form id="loginForm"><label>Administrator e-poçtu</label><input id="email" type="email" required autocomplete="username"><label>Şifrə</label><input id="password" type="password" required autocomplete="current-password"><button class="btn" style="margin-top:16px">Daxil ol</button></form><div id="msg" class="msg"></div></section>
-<section id="adminPanel" class="panel" hidden><div class="top"><div><h1>Satıcıların idarə edilməsi</h1><p class="muted">Təsdiq verdiyin mağazalar marketplace-də aktivləşəcək.</p></div><button id="logout" class="btn alt">Çıxış</button></div><div class="stats" id="stats"></div><div id="list"></div></section><p><a href="/">← Müştəri saytına qayıt</a></p></main>
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>ELFA — Admin panel</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#f7f6f3;--text:#171717;--muted:#777;--line:#e8e6e1;--red:#d22;--green:#1a7a35}
+body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
+button,input,select{font:inherit}
+button{cursor:pointer;border:0}
+header{background:#171717;color:#fff}
+.nav{width:min(1200px,94%);height:64px;margin:auto;display:flex;align-items:center;justify-content:space-between}
+.logo{font-size:22px;font-weight:800;letter-spacing:4px}
+.logo small{font-size:11px;letter-spacing:2px;opacity:.6;margin-left:10px;font-weight:400}
+.out{background:none;color:#fff;font-size:13px;text-decoration:underline}
+.wrap{width:min(1200px,94%);margin:28px auto 60px}
+.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:26px}
+.login{max-width:420px;margin:70px auto}
+h2{font-size:24px;letter-spacing:-.5px;margin-bottom:6px}
+.sub{font-size:13px;color:var(--muted);margin-bottom:18px;line-height:1.5}
+input,select{width:100%;height:44px;border:1px solid #ddd;border-radius:10px;padding:0 14px;background:#fff;outline:none;font-size:14px}
+input:focus,select:focus{border-color:#171717}
+.btn{width:100%;margin-top:14px;background:#171717;color:#fff;padding:13px;border-radius:24px;font-weight:700;font-size:14px}
+.btn:hover{background:#333}
+.btn:disabled{opacity:.6}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;text-align:center;font-size:12px;color:var(--muted);cursor:pointer}
+.stat b{display:block;font-size:24px;color:var(--text);margin-bottom:2px}
+.stat.on{border-color:#171717}
+.tools{display:flex;gap:12px;margin-bottom:16px}
+.tools input{flex:1}
+.tools select{width:190px}
+.item{border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px;display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;background:#fff}
+.item h3{font-size:16px;margin-bottom:4px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.meta{font-size:12px;color:var(--muted);line-height:1.7}
+.about{font-size:13px;color:#444;margin-top:8px;line-height:1.5}
+.badge{border-radius:12px;padding:3px 10px;font-size:12px;font-weight:400;background:#eee}
+.badge.approved{background:#e3f6e8;color:var(--green)}
+.badge.pending{background:#fff3d6;color:#8a6200}
+.badge.rejected{background:#fde4e4;color:var(--red)}
+.acts{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.acts button{padding:9px 16px;border-radius:20px;font-size:13px;font-weight:700;background:#eee;color:#171717}
+.acts .ok{background:#171717;color:#fff}
+.acts .no{background:#fde4e4;color:var(--red)}
+.acts button:disabled{opacity:.5}
+.empty{text-align:center;color:var(--muted);padding:40px 0;font-size:14px}
+.hide{display:none!important}
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);background:#171717;color:#fff;padding:11px 20px;border-radius:24px;font-size:13px;opacity:0;pointer-events:none;transition:.25s;z-index:60}
+.toast.show{opacity:1;transform:translateX(-50%)}
+@media(max-width:700px){.stats{grid-template-columns:1fr 1fr}.tools{flex-direction:column}.tools select{width:100%}.item{grid-template-columns:1fr}.acts{justify-content:flex-start}}
+</style>
+</head>
+<body>
+<header><div class="nav"><div class="logo">ELFA<small>ADMIN</small></div><button class="out hide" id="logout">Çıxış</button></div></header>
+
+<main class="wrap">
+  <section class="card login" id="loginView">
+    <h2>Admin girişi</h2>
+    <p class="sub">Serverdə təyin etdiyin <b>ADMIN_TOKEN</b> dəyərini daxil et.</p>
+    <input id="tok" type="password" placeholder="Admin token" autocomplete="off">
+    <button class="btn" id="loginBtn">Daxil ol</button>
+  </section>
+
+  <section id="dashView" class="hide">
+    <div class="stats">
+      <div class="stat on" data-f=""><b id="nAll">0</b>Hamısı</div>
+      <div class="stat" data-f="pending"><b id="nPending">0</b>Gözləyir</div>
+      <div class="stat" data-f="approved"><b id="nApproved">0</b>Təsdiqlənib</div>
+      <div class="stat" data-f="rejected"><b id="nRejected">0</b>Rədd edilib</div>
+    </div>
+    <div class="tools">
+      <input id="search" placeholder="Mağaza, ad, e-poçt və ya telefon axtar...">
+      <select id="sort">
+        <option value="new">Ən yenilər əvvəl</option>
+        <option value="old">Ən köhnələr əvvəl</option>
+        <option value="name">Mağaza adı (A-Z)</option>
+      </select>
+    </div>
+    <div id="list"></div>
+  </section>
+</main>
+<div class="toast" id="toast"></div>
+
 <script>
-const $=id=>document.getElementById(id);
-async function api(url,options={}){const r=await fetch(url,{credentials:'same-origin',headers:{'Content-Type':'application/json',...(options.headers||{})},...options});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.detail||'Sorğu uğursuz oldu.');return d}
-function esc(s){return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
-function statusName(s){return s==='approved'?'Təsdiqlənib':s==='rejected'?'Rədd edilib':'Gözləyir'}
-function message(t,ok=false){$('msg').className='msg '+(ok?'ok':'err');$('msg').textContent=t}
-async function loadSellers(){const all=await api('/api/admin/sellers');const pending=all.filter(x=>x.status==='pending').length,approved=all.filter(x=>x.status==='approved').length;
-$('stats').innerHTML=`<span><b>${all.length}</b> satıcı</span><span><b>${pending}</b> gözləyən müraciət</span><span><b>${approved}</b> aktiv mağaza</span>`;
-$('list').innerHTML=all.length?all.map(s=>`<article class="seller"><div class="top"><div><h3 style="margin:0 0 6px">${esc(s.store_name)}</h3><div class="muted">${esc(s.full_name)} · ${esc(s.email)} · ${esc(s.phone)}</div><div class="muted">Müraciət tarixi: ${new Date(s.created_at).toLocaleString('az-AZ')}</div></div><span class="pill ${s.status}">${statusName(s.status)}</span></div><div class="actions" style="margin-top:14px">${s.status!=='approved'?`<button class="btn" data-decision="approved" data-id="${s.id}">Təsdiqlə</button>`:''}${s.status!=='rejected'?`<button class="btn reject" data-decision="rejected" data-id="${s.id}">Rədd et</button>`:''}</div></article>`).join(''):'<p class="muted">Hələ satıcı qeydiyyatı yoxdur.</p>';
-document.querySelectorAll('[data-decision]').forEach(b=>b.onclick=async()=>{const action=b.dataset.decision==='approved'?'təsdiqləmək':'rədd etmək';if(!confirm('Bu satıcı müraciətini '+action+' istəyirsən?'))return;try{await api('/api/admin/sellers/'+b.dataset.id+'/decision',{method:'PATCH',body:JSON.stringify({status:b.dataset.decision})});await loadSellers()}catch(e){alert(e.message)}})}
-async function showAdmin(){try{const d=await api('/api/auth/me');if(d.user.role!=='admin')throw new Error('Bu hesab administrator deyil.');$('loginPanel').hidden=true;$('adminPanel').hidden=false;await loadSellers()}catch(e){$('loginPanel').hidden=false}}
-$('loginForm').onsubmit=async e=>{e.preventDefault();try{const d=await api('/api/auth/login',{method:'POST',body:JSON.stringify({email:$('email').value,password:$('password').value})});if(d.user.role!=='admin'){await api('/api/auth/logout',{method:'POST'});throw new Error('Bu hesab administrator deyil.')} $('loginPanel').hidden=true;$('adminPanel').hidden=false;await loadSellers()}catch(e){message(e.message)}};
-$('logout').onclick=async()=>{await api('/api/auth/logout',{method:'POST'});location.reload()};
-showAdmin();
-</script></body></html>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2200)}
+const LABEL={pending:'Gözləyir',approved:'Təsdiqlənib',rejected:'Rədd edilib'};
+let TOKEN=null,DATA=[],filter='';
+try{TOKEN=sessionStorage.getItem('elfa_admin')}catch(e){}
+
+async function api(path,opts){
+  const r=await fetch(path,Object.assign({},opts,{headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN}}));
+  let j=null;try{j=await r.json()}catch(e){}
+  if(!r.ok){const e=new Error((j&&j.error)||'Xəta baş verdi');e.status=r.status;throw e}
+  return j;
+}
+function fmtDate(s){try{return new Date(s).toLocaleString('az-AZ')}catch(e){return s}}
+
+async function load(){
+  try{
+    DATA=await api('/api/admin/sellers');
+    $('#loginView').classList.add('hide');$('#dashView').classList.remove('hide');$('#logout').classList.remove('hide');
+    render();
+  }catch(e){
+    if(e.status===401||e.status===403||e.status===503){
+      TOKEN=null;try{sessionStorage.removeItem('elfa_admin')}catch(_){}
+      $('#dashView').classList.add('hide');$('#logout').classList.add('hide');$('#loginView').classList.remove('hide');
+    }
+    toast(e.message==='Failed to fetch'?'Serverə qoşulmaq olmadı':e.message);
+  }
+}
+function render(){
+  const c=s=>DATA.filter(x=>x.status===s).length;
+  $('#nAll').textContent=DATA.length;$('#nPending').textContent=c('pending');
+  $('#nApproved').textContent=c('approved');$('#nRejected').textContent=c('rejected');
+  document.querySelectorAll('.stat').forEach(s=>s.classList.toggle('on',s.dataset.f===filter));
+  const q=$('#search').value.trim().toLowerCase(),sort=$('#sort').value;
+  let list=DATA.filter(x=>(!filter||x.status===filter)&&
+    (!q||[x.store_name,x.owner_name,x.email,x.phone,x.city].join(' ').toLowerCase().includes(q)));
+  list.sort((a,b)=>sort==='name'?a.store_name.localeCompare(b.store_name):
+    sort==='old'?a.id-b.id:b.id-a.id);
+  $('#list').innerHTML=list.length?list.map(s=>`
+    <div class="item">
+      <div>
+        <h3>${esc(s.store_name)}<span class="badge ${esc(s.status)}">${esc(LABEL[s.status]||s.status)}</span></h3>
+        <div class="meta">${esc(s.owner_name)} · ${esc(s.category)}${s.city?' · '+esc(s.city):''}<br>
+          ${esc(s.email)} · ${esc(s.phone)}<br>Müraciət: ${esc(fmtDate(s.created_at))}${s.product_count!=null?' · Məhsul: '+esc(s.product_count):''}</div>
+        ${s.about?`<div class="about">${esc(s.about)}</div>`:''}
+      </div>
+      <div class="acts">
+        ${s.status!=='approved'?`<button class="ok" data-id="${s.id}" data-s="approved">Təsdiqlə</button>`:''}
+        ${s.status!=='rejected'?`<button class="no" data-id="${s.id}" data-s="rejected">Rədd et</button>`:''}
+        ${s.status!=='pending'?`<button data-id="${s.id}" data-s="pending">Gözləməyə qaytar</button>`:''}
+      </div>
+    </div>`).join(''):'<div class="empty">Heç nə tapılmadı</div>';
+  document.querySelectorAll('.acts button').forEach(b=>b.onclick=()=>setStatus(+b.dataset.id,b.dataset.s,b));
+}
+async function setStatus(id,status,btn){
+  const s=DATA.find(x=>x.id===id);
+  if(status!=='approved'&&!confirm((s?s.store_name:'Mağaza')+' üçün status "'+LABEL[status]+'" olsun?')) return;
+  btn.disabled=true;
+  try{
+    await api('/api/admin/sellers/'+id+'/status',{method:'POST',body:JSON.stringify({status})});
+    if(s) s.status=status;
+    toast('Status yeniləndi');render();
+  }catch(e){toast(e.message);btn.disabled=false}
+}
+$('#loginBtn').onclick=()=>{
+  const v=$('#tok').value.trim();if(!v) return toast('Token yazın');
+  TOKEN=v;try{sessionStorage.setItem('elfa_admin',v)}catch(e){}
+  $('#tok').value='';load();
+};
+$('#tok').addEventListener('keydown',e=>{if(e.key==='Enter')$('#loginBtn').click()});
+$('#logout').onclick=()=>{TOKEN=null;try{sessionStorage.removeItem('elfa_admin')}catch(e){}
+  $('#dashView').classList.add('hide');$('#logout').classList.add('hide');$('#loginView').classList.remove('hide')};
+document.querySelectorAll('.stat').forEach(s=>s.onclick=()=>{filter=s.dataset.f;render()});
+$('#search').oninput=render;$('#sort').onchange=render;
+if(TOKEN) load();
+</script>
+</body>
+</html>
