@@ -281,7 +281,7 @@ def admin_sellers(status: Optional[str] = None):
     with db() as con:
         rows = con.execute(q + " ORDER BY id DESC", args).fetchall()
     return [dict(r) for r in rows]
-
+"""
 
 @app.post("/api/admin/sellers/{sid}/status", dependencies=[Depends(require_admin)])
 def admin_set_status(sid: int, data: StatusIn):
