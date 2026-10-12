@@ -1,4 +1,3 @@
-"""
 ELFA marketplace backend (FastAPI + SQLite)
 
 Qurulum:
@@ -318,7 +317,7 @@ def page(name: str):
 @app.get("/")
 @app.get("/elfa.html")
 def home():
-    return page("elfa.html")
+    return page("index.html")
 
 
 @app.get("/seller-register.html")
