@@ -432,8 +432,12 @@ def page(name: str):
 @app.get("/elfa.html")
 def home():
     return page("index.html")
-
+    
+@app.get("/admin")
+def admin_page():
+    return page("admin.html")
 
 @app.get("/seller-register.html")
 def seller_page():
     return page("seller-register.html")
+
