@@ -1,4 +1,3 @@
-
 import hashlib
 import hmac
 import os
@@ -304,8 +303,6 @@ def add_product(
     data: ProductIn,
     s: sqlite3.Row = Depends(current_seller),
 ):
-    if s["status"] != "approved":
-        raise HTTPException(403, "Magazaniz hele tesdiqlenmeyib")
 
     img = data.image_url.strip()
 
@@ -364,7 +361,7 @@ def public_products():
             """SELECT p.*, s.store_name
                FROM products p
                JOIN sellers s ON s.id = p.seller_id
-               WHERE s.status = 'approved' AND p.stock > 0
+                WHERE s.status = 'approved'
                ORDER BY p.id DESC
                LIMIT 200"""
         ).fetchall()
