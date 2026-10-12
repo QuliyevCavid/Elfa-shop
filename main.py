@@ -1,15 +1,3 @@
-ELFA marketplace backend (FastAPI + SQLite)
-
-Qurulum:
-    pip install fastapi "uvicorn[standard]"
-
-İşə salma:
-    set ADMIN_TOKEN=guclu-gizli-token        (Windows)
-    export ADMIN_TOKEN=guclu-gizli-token     (Mac/Linux)
-    uvicorn main:app --reload
-
-Sonra brauzerdə: http://127.0.0.1:8000
-"""
 import hashlib
 import hmac
 import os
@@ -50,7 +38,7 @@ def db():
 def init_db():
     with db() as con:
         con.executescript(
-            """
+            
             CREATE TABLE IF NOT EXISTS sellers (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 store_name TEXT NOT NULL,
@@ -323,3 +311,4 @@ def home():
 @app.get("/seller-register.html")
 def seller_page():
     return page("seller-register.html")
+    
