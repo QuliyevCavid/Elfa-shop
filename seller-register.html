@@ -185,8 +185,11 @@ footer{background:#171717;color:#aaa;padding:30px 0;text-align:center;font-size:
 <div class="toast" id="toast"></div>
 
 <script>
-const $=s=>document.querySelector(s);
 const LS={g(k,d){try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}},s(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+function session() {
+  return LS.g('elfa_seller_session', null);
+}
+const $=s=>document.querySelector(s);
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const money=n=>(+n||0).toFixed(2)+' AZN';
 let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2200)}
@@ -217,17 +220,44 @@ async function hash(s){
   catch(e){return btoa(unescape(encodeURIComponent(s)))}
 }
 
-/* API + localStorage ehtiyat (server işləmirsə) */
-async function api(path,opts){
-  try{
-    const r=await fetch(path,Object.assign({headers:{'Content-Type':'application/json'}},opts));
-    if(!r.ok){let m='';try{m=(await r.json()).error}catch(e){}throw new Error(m||'API')}
-    return await r.json();
-  }catch(e){ if(e.message&&e.message!=='API'&&e.message!=='Failed to fetch'&&!/NetworkError|Load failed/i.test(e.message)) throw e; return null; }
+
+/* API — yalnız serverlə işləyir */
+
+async function api(path, opts = {}) {
+  let response;
+
+  try {
+    response = await fetch(path, {
+      ...opts,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(opts.headers || {})
+      }
+    });
+  } catch (error) {
+    throw new Error(
+      'Serverə qoşulmaq mümkün olmadı. Backend-i yoxlayın.'
+    );
+  }
+
+  let data;
+
+  try {
+    data = await response.json();
+  } catch {
+    throw new Error('Serverdən düzgün cavab alınmadı.');
+  }
+
+  if (!response.ok) {
+    throw new Error(
+      data.detail || data.error || `Server xətası (${response.status})`
+    );
+  }
+
+  return data;
 }
-const sellers=()=>LS.g('elfa_sellers',[]);
-const saveSellers=l=>LS.s('elfa_sellers',l);
-const session=()=>LS.g('elfa_seller_session',null);
+
+
 
 /* Qeydiyyat */
 $('#regForm').addEventListener('submit',async e=>{
@@ -248,36 +278,75 @@ $('#regForm').addEventListener('submit',async e=>{
   const btn=$('#regBtn');btn.disabled=true;btn.textContent='Göndərilir...';
   try{
     v.phone='+994'+v.phone;
-    const res=await api('/api/sellers/register',{method:'POST',body:JSON.stringify(Object.assign({},v,{password:pw}))});
-    if(!res){
-      const list=sellers();
-      if(list.some(s=>s.email===v.email)) throw new Error('Bu e-poçt artıq qeydiyyatdan keçib');
-      list.push(Object.assign({id:'S'+Date.now(),status:'pending',created:new Date().toISOString(),pwHash:await hash(pw)},v));
-      saveSellers(list);
-    }
-    $('#regForm').reset();show('doneView');
-  }catch(err){toast(err.message||'Xəta baş verdi')}
-  btn.disabled=false;btn.textContent='Müraciət göndər';
+        await api('/api/sellers/register', {
+      method: 'POST',
+      body: JSON.stringify({
+        ...v,
+        password: pw
+      })
+    });
+
+    $('#regForm').reset();
+    show('doneView');
+
+  } catch (err) {
+    toast(err.message || 'Xəta baş verdi');
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Müraciət göndər';
 });
 
+
 /* Giriş */
-$('#loginBtn').onclick=async()=>{
-  const email=$('#lem').value.trim().toLowerCase(),pw=$('#lpw').value;
-  if(!email||!pw) return toast('E-poçt və şifrəni yazın');
-  const btn=$('#loginBtn');btn.disabled=true;
-  try{
-    const res=await api('/api/sellers/login',{method:'POST',body:JSON.stringify({email,password:pw})});
-    if(res){LS.s('elfa_seller_session',{email,store_name:res.store_name,status:res.status,token:res.token||null,remote:true})}
-    else{
-      const s=sellers().find(x=>x.email===email);
-      if(!s||s.pwHash!==await hash(pw)) throw new Error('E-poçt və ya şifrə yanlışdır');
-      LS.s('elfa_seller_session',{email,store_name:s.store_name,status:s.status,remote:false});
+$('#loginBtn').onclick = async () => {
+  const email = $('#lem').value.trim().toLowerCase();
+  const pw = $('#lpw').value;
+
+  if (!email || !pw) {
+    return toast('E-poçt və şifrəni yazın');
+  }
+
+  const btn = $('#loginBtn');
+  btn.disabled = true;
+
+  try {
+    const res = await api('/api/sellers/login', {
+      method: 'POST',
+      body: JSON.stringify({
+        email,
+        password: pw
+      })
+    });
+
+    if (!res || !res.token) {
+      throw new Error('Serverdən düzgün cavab alınmadı');
     }
-    $('#lpw').value='';openDash();
-  }catch(err){toast(err.message||'Xəta baş verdi')}
-  btn.disabled=false;
+
+    LS.s('elfa_seller_session', {
+      email,
+      store_name: res.store_name,
+      status: res.status,
+      token: res.token,
+      remote: true
+    });
+
+    $('#lpw').value = '';
+    openDash();
+
+  } catch (err) {
+    toast(err.message || 'Giriş zamanı xəta baş verdi');
+  } finally {
+    btn.disabled = false;
+  }
 };
-$('#logout').onclick=()=>{LS.s('elfa_seller_session',null);show('loginView');toast('Çıxış edildi')};
+
+$('#logout').onclick = () => {
+  LS.s('elfa_seller_session', null);
+  show('loginView');
+  toast('Çıxış edildi');
+};
+
 
 /* Panel */
 async function myProducts(){
@@ -293,17 +362,54 @@ function currentStatus(){
   if(!s.remote){const x=sellers().find(v=>v.email===s.email);if(x) return x.status}
   return s.status||'pending';
 }
-async function openDash(){
-  const s=session();if(!s) return show('loginView');
+
+async function openDash() {
+  const s = session();
+
+  if (!s) {
+    return show('loginView');
+  }
+
   show('dashView');
-  $('#dStore').textContent=s.store_name||'Mağaza';
-  const st=currentStatus(),ok=st==='approved';
-  const b=$('#dStatus');b.textContent=ok?'Təsdiqlənib':(st==='rejected'?'Rədd edilib':'Yoxlanılır');
-  b.className='badge '+(ok?'green':'wait');
-  $('#pendingNote').classList.toggle('hide',ok);
-  $('#addP').disabled=!ok;
+  $('#dStore').textContent = s.store_name || 'Mağaza';
+
+  let st = s.status || 'pending';
+
+  try {
+    const res = await api('/api/seller/me', {
+      headers: {
+        Authorization: `Bearer ${s.token}`
+      }
+    });
+
+    st = res.status || st;
+
+    LS.s('elfa_seller_session', {
+      ...s,
+      status: st,
+      store_name: res.store_name || s.store_name,
+      remote: true
+    });
+  } catch (err) {
+    toast(err.message || 'Satıcı məlumatları yenilənmədi');
+  }
+
+  const ok = st === 'approved';
+  const b = $('#dStatus');
+
+  b.textContent = ok
+    ? 'Təsdiqlənib'
+    : st === 'rejected'
+      ? 'Rədd edilib'
+      : 'Yoxlanılır';
+
+  b.className = 'badge ' + (ok ? 'green' : 'wait');
+  $('#pendingNote').classList.toggle('hide', ok);
+  $('#addP').disabled = !ok;
+
   await renderProducts();
 }
+
 async function renderProducts(){
   const list=await myProducts();
   $('#sCount').textContent=list.length;
