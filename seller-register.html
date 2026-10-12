@@ -1,34 +1,356 @@
-<!doctype html>
-<html lang="az"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ELFA — Satıcı qeydiyyatı</title><style>
-:root{--bg:#f6f1eb;--card:#fffaf5;--text:#241f1b;--muted:#7b7067;--accent:#6f3f2b;--border:#e7ddd3}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);font:15px Arial,sans-serif;color:var(--text);min-height:100vh;display:grid;place-items:center;padding:22px}
-.card{width:min(100%,520px);background:var(--card);border:1px solid var(--border);border-radius:22px;padding:30px;box-shadow:0 18px 55px #241f1b12}
-.logo{font-size:28px;letter-spacing:7px;font-weight:900;margin-bottom:8px}.muted{color:var(--muted);line-height:1.55}h1{font-size:25px;margin:20px 0 8px}
-label{display:block;font-size:13px;font-weight:700;margin:14px 0 6px}input{width:100%;padding:13px 14px;border:1px solid var(--border);border-radius:11px;background:#fff;font:inherit;outline-color:var(--accent)}
-button,.btn{display:block;width:100%;border:0;border-radius:11px;padding:14px;margin-top:18px;background:var(--accent);color:white;font-weight:700;font-size:15px;cursor:pointer;text-align:center;text-decoration:none}
-a{color:var(--accent);font-weight:700}.msg{margin-top:14px;padding:12px;border-radius:10px;display:none;line-height:1.5}.ok{display:block;background:#e6f4e8;color:#24572c}.err{display:block;background:#fde9e6;color:#8b2920}.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:480px){.row{grid-template-columns:1fr}.card{padding:22px}}
-</style></head><body><main class="card">
-<a href="/" style="text-decoration:none;color:inherit"><div class="logo">ELFA</div></a>
-<div class="muted">Öz mağazanı yarat, məhsullarını ELFA marketplace-də təqdim et.</div>
-<h1>Satıcı qeydiyyatı</h1>
-<p class="muted">Məlumatların göndərildikdən sonra administrator yoxlayacaq. Təsdiq gələnədək mağazan müştərilərə görünməyəcək.</p>
-<form id="form">
-<div class="row"><div><label for="full_name">Ad və soyad</label><input id="full_name" required minlength="2" autocomplete="name"></div>
-<div><label for="store_name">Mağaza adı</label><input id="store_name" required minlength="2" autocomplete="organization"></div></div>
-<label for="phone">Telefon</label><input id="phone" required autocomplete="tel" placeholder="+994 50 123 45 67">
-<label for="email">E-poçt</label><input id="email" type="email" required autocomplete="email">
-<label for="password">Şifrə (ən azı 8 simvol)</label><input id="password" type="password" required minlength="8" autocomplete="new-password">
-<button type="submit">Qeydiyyat göndər</button></form>
-<div id="msg" class="msg" role="status"></div>
-<p class="muted">Artıq hesabın var? <a href="/seller.html">Satıcı panelinə daxil ol</a></p>
-<p class="muted"><a href="/">← ELFA ana səhifəsinə qayıt</a></p>
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>ELFA — Satıcı ol</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#f7f6f3;--white:#fff;--text:#171717;--muted:#777;--line:#e8e6e1;--dark:#171717;--red:#d22}
+body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer;border:0}
+a{text-decoration:none;color:inherit;cursor:pointer}
+.topbar{background:#171717;color:#fff;text-align:center;padding:9px 20px;font-size:12px;letter-spacing:.4px}
+header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
+.nav{width:min(1100px,94%);height:70px;margin:auto;display:flex;align-items:center;justify-content:space-between}
+.logo{font-size:26px;font-weight:800;letter-spacing:5px}
+.back{display:inline-flex;align-items:center;gap:8px;font-size:14px;background:none;color:#171717}
+.back:hover{color:#777}
+.wrap{width:min(1100px,94%);margin:34px auto 60px;display:grid;grid-template-columns:1fr 1.2fr;gap:28px;align-items:start}
+.intro{background:#171717;color:#fff;border-radius:22px;padding:42px;position:sticky;top:96px}
+.intro .eyebrow{font-size:11px;letter-spacing:3px;text-transform:uppercase;opacity:.7;margin-bottom:16px}
+.intro h1{font-size:40px;line-height:1.08;letter-spacing:-1.5px;margin-bottom:16px}
+.intro p{color:#ddd;line-height:1.7;font-size:14px}
+.intro ul{list-style:none;margin-top:24px;display:grid;gap:14px}
+.intro li{display:flex;gap:12px;font-size:14px;color:#eee;line-height:1.5}
+.intro li b{flex:none;width:26px;height:26px;border-radius:50%;background:#fff;color:#171717;display:flex;align-items:center;justify-content:center;font-size:12px}
+.panel{background:#fff;border-radius:22px;padding:30px;border:1px solid var(--line)}
+.tabs{display:flex;gap:6px;background:#f3f2ee;border-radius:24px;padding:5px;margin-bottom:24px}
+.tab{flex:1;padding:11px;border-radius:20px;background:none;font-size:14px;font-weight:700;color:#777}
+.tab.on{background:#171717;color:#fff}
+h2{font-size:24px;letter-spacing:-.5px;margin-bottom:6px}
+.sub{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.5}
+label{display:block;font-size:12px;font-weight:700;margin:0 0 6px;color:#444}
+.f{margin-bottom:14px}
+input,select,textarea{width:100%;border:1px solid #ddd;border-radius:10px;padding:12px 14px;background:#fff;color:#171717;outline:none;font-size:14px}
+input,select{height:46px}
+textarea{min-height:100px;resize:vertical}
+input:focus,select:focus,textarea:focus{border-color:#171717}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.phone-box{display:flex;align-items:center;border:1px solid #ddd;border-radius:10px;background:#fff;overflow:hidden}
+.phone-box:focus-within{border-color:#171717}
+.phone-box span{padding:0 12px;height:44px;display:flex;align-items:center;background:#f3f3f3;border-right:1px solid #ddd;font-size:14px;color:#444}
+.phone-box input{border:0;border-radius:0;height:44px}
+.chk{display:flex;gap:10px;align-items:flex-start;font-size:13px;color:#444;line-height:1.5;margin:6px 0 4px}
+.chk input{width:18px;height:18px;margin-top:2px;flex:none}
+.btn{width:100%;margin-top:16px;background:#171717;color:#fff;padding:14px;border-radius:24px;font-weight:700;font-size:14px}
+.btn:hover{background:#333}
+.btn.alt{background:#eee;color:#171717}
+.btn:disabled{opacity:.6;cursor:not-allowed}
+.hint{font-size:11px;color:#888;margin-top:5px}
+.note{background:#fdf0e6;color:#8a4b12;border-radius:12px;padding:12px 14px;font-size:13px;line-height:1.5;margin-bottom:16px}
+.ok{text-align:center;padding:20px 6px}
+.ok .big{font-size:46px;margin-bottom:10px}
+.hide{display:none!important}
+.stats{display:flex;gap:10px;margin-bottom:18px}
+.stat{flex:1;background:#f7f6f3;border-radius:12px;padding:12px;text-align:center;font-size:12px;color:#777}
+.stat b{display:block;font-size:18px;color:#171717}
+.badge{display:inline-block;border-radius:12px;padding:3px 10px;font-size:12px;background:#eee}
+.badge.green{background:#e3f6e8;color:#1a7a35}
+.badge.wait{background:#fff3d6;color:#8a6200}
+.plist{display:grid;gap:10px;margin-top:6px}
+.pi{display:flex;gap:12px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:10px}
+.pi .im{width:60px;height:60px;border-radius:10px;background:#ece9e4;flex:none;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:11px;color:#888}
+.pi .im img{width:100%;height:100%;object-fit:cover}
+.pi .mid{flex:1;min-width:0}
+.pi .mid b{display:block;font-size:14px;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pi .mid small{color:#888;font-size:12px}
+.del{background:none;color:var(--red);font-size:12px;text-decoration:underline}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}
+.row .link{background:none;font-size:13px;text-decoration:underline;color:#444}
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);background:#171717;color:#fff;padding:11px 20px;border-radius:24px;font-size:13px;opacity:0;pointer-events:none;transition:.25s;z-index:60;max-width:90%;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%)}
+footer{background:#171717;color:#aaa;padding:30px 0;text-align:center;font-size:12px}
+@media(max-width:860px){.wrap{grid-template-columns:1fr}.intro{position:static;padding:30px}.intro h1{font-size:32px}}
+@media(max-width:560px){.two{grid-template-columns:1fr}.panel{padding:20px}.stats{flex-direction:column}}
+</style>
+</head>
+<body>
+<div class="topbar">ELFA-DA SATICI OL · MƏHSULLARINI MİNLƏRLƏ ALICIYA GÖSTƏR</div>
+<header>
+  <div class="nav">
+    <a class="logo" href="/elfa.html">ELFA</a>
+    <button class="back" id="backBtn">← Geri</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <aside class="intro">
+    <div class="eyebrow">ELFA · SATICI PROQRAMI</div>
+    <h1>Mağazanı aç.<br>Satışa başla.</h1>
+    <p>Məhsullarını şəkil və video ilə təqdim et, alıcıların diqqətini çək və ELFA-da böyü.</p>
+    <ul>
+      <li><b>1</b><span>Qeydiyyatdan keç və mağaza məlumatlarını doldur.</span></li>
+      <li><b>2</b><span>ELFA komandası müraciətini yoxlayıb təsdiqləyir.</span></li>
+      <li><b>3</b><span>Təsdiqdən sonra məhsullarını əlavə et və sifarişləri idarə et.</span></li>
+    </ul>
+  </aside>
+
+  <section class="panel">
+    <div class="tabs">
+      <button class="tab on" id="tabReg">Qeydiyyat</button>
+      <button class="tab" id="tabLogin">Satıcı paneli</button>
+    </div>
+
+    <!-- QEYDİYYAT -->
+    <div id="regView">
+      <h2>Satıcı qeydiyyatı</h2>
+      <p class="sub">Məlumatlar yoxlanıldıqdan sonra mağazan aktiv olacaq.</p>
+      <form id="regForm" novalidate>
+        <div class="f"><label for="storeName">Mağaza adı *</label><input id="storeName" maxlength="40" placeholder="Məs: ELFA STORE"></div>
+        <div class="two">
+          <div class="f"><label for="ownerName">Ad və soyad *</label><input id="ownerName" placeholder="Ad Soyad" autocomplete="name"></div>
+          <div class="f"><label for="category">Əsas kateqoriya *</label>
+            <select id="category">
+              <option value="">Seçin</option>
+              <option>Qadın</option><option>Kişi</option><option>Ana &amp; Uşaq</option>
+              <option>Ev &amp; Yaşayış</option><option>Kosmetika</option><option>Elektronika</option><option>Digər</option>
+            </select>
+          </div>
+        </div>
+        <div class="f"><label for="phone">Telefon *</label>
+          <div class="phone-box"><span>+994</span><input id="phone" type="tel" inputmode="numeric" maxlength="12" placeholder="50 123 45 67" autocomplete="tel-national"></div>
+        </div>
+        <div class="f"><label for="email">E-poçt *</label><input id="email" type="email" placeholder="ad@mail.com" autocomplete="email"></div>
+        <div class="two">
+          <div class="f"><label for="pw">Şifrə *</label><input id="pw" type="password" placeholder="Ən azı 6 simvol" autocomplete="new-password"></div>
+          <div class="f"><label for="pw2">Şifrənin təkrarı *</label><input id="pw2" type="password" placeholder="Təkrar yazın" autocomplete="new-password"></div>
+        </div>
+        <div class="f"><label for="city">Şəhər</label><input id="city" placeholder="Bakı"></div>
+        <div class="f"><label for="about">Mağaza haqqında</label><textarea id="about" maxlength="500" placeholder="Nə satırsınız? Qısa məlumat yazın..."></textarea></div>
+        <label class="chk"><input type="checkbox" id="agree"><span>ELFA satıcı qaydaları ilə tanış oldum və razıyam.</span></label>
+        <button class="btn" id="regBtn" type="submit">Müraciət göndər</button>
+      </form>
+    </div>
+
+    <!-- UĞUR -->
+    <div id="doneView" class="hide ok">
+      <div class="big">🎉</div>
+      <h2>Müraciətiniz qəbul olundu</h2>
+      <p class="sub" style="margin-top:10px">Müraciətiniz yoxlanılır. Təsdiqdən sonra məhsul əlavə edə biləcəksiniz. Bu zaman Satıcı panelinə daxil ola bilərsiniz.</p>
+      <button class="btn" id="goLogin">Satıcı panelinə keç</button>
+      <button class="btn alt" id="goHome">Ana səhifəyə qayıt</button>
+    </div>
+
+    <!-- GİRİŞ -->
+    <div id="loginView" class="hide">
+      <h2>Satıcı girişi</h2>
+      <p class="sub">Qeydiyyatda istifadə etdiyiniz e-poçt və şifrə ilə daxil olun.</p>
+      <div class="f"><label for="lem">E-poçt</label><input id="lem" type="email" placeholder="ad@mail.com" autocomplete="email"></div>
+      <div class="f"><label for="lpw">Şifrə</label><input id="lpw" type="password" placeholder="Şifrə" autocomplete="current-password"></div>
+      <button class="btn" id="loginBtn">Daxil ol</button>
+    </div>
+
+    <!-- PANEL -->
+    <div id="dashView" class="hide">
+      <div class="row">
+        <div><h2 id="dStore">Mağaza</h2><span class="badge wait" id="dStatus">Yoxlanılır</span></div>
+        <button class="link" id="logout">Çıxış</button>
+      </div>
+      <div class="stats">
+        <div class="stat"><b id="sCount">0</b>Məhsul</div>
+        <div class="stat"><b id="sStock">0</b>Ümumi stok</div>
+        <div class="stat"><b id="sValue">0.00 AZN</b>Stok dəyəri</div>
+      </div>
+      <div class="note hide" id="pendingNote">Mağazanız hələ təsdiqlənməyib. Təsdiqdən sonra məhsullarınız ana səhifədə görünəcək.</div>
+
+      <h2 style="font-size:19px;margin:6px 0 14px">Yeni məhsul əlavə et</h2>
+      <div class="f"><label for="pName">Məhsul adı *</label><input id="pName" maxlength="80" placeholder="Məs: Premium Parfum"></div>
+      <div class="two">
+        <div class="f"><label for="pPrice">Qiymət (AZN) *</label><input id="pPrice" type="number" min="0" step="0.01" inputmode="decimal" placeholder="49.90"></div>
+        <div class="f"><label for="pStock">Stok sayı *</label><input id="pStock" type="number" min="0" step="1" inputmode="numeric" placeholder="10"></div>
+      </div>
+      <div class="f"><label for="pImg">Şəkil linki</label><input id="pImg" type="url" placeholder="https://..."><div class="hint">Şəkil əlavə etməsəniz standart görünüş göstəriləcək.</div></div>
+      <div class="f"><label for="pDesc">Təsvir</label><textarea id="pDesc" maxlength="600" placeholder="Məhsul haqqında məlumat..."></textarea></div>
+      <button class="btn" id="addP">Məhsulu əlavə et</button>
+
+      <h2 style="font-size:19px;margin:28px 0 12px">Məhsullarım</h2>
+      <div class="plist" id="plist"></div>
+    </div>
+  </section>
+</main>
+
+<footer>© ELFA — Alış-verişin yeni üzü.</footer>
+<div class="toast" id="toast"></div>
+
 <script>
-const form=document.getElementById('form'),msg=document.getElementById('msg');
-form.addEventListener('submit',async e=>{e.preventDefault();msg.className='msg';msg.textContent='';
-const body={full_name:full_name.value.trim(),store_name:store_name.value.trim(),phone:phone.value.trim(),email:email.value.trim(),password:password.value};
-try{const r=await fetch('/api/auth/register-seller',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const d=await r.json();
-if(!r.ok)throw new Error(d.detail||'Qeydiyyat alınmadı.');
-msg.className='msg ok';msg.textContent=d.message+' İndi satıcı panelinə daxil olub statusu yoxlaya bilərsən.';form.reset();
-}catch(err){msg.className='msg err';msg.textContent=err.message||'Serverə qoşulmaq mümkün olmadı.';}});
-</script></main></body></html>
+const $=s=>document.querySelector(s);
+const LS={g(k,d){try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}},s(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const money=n=>(+n||0).toFixed(2)+' AZN';
+let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2200)}
+
+/* Geri */
+$('#backBtn').onclick=()=>{ if(history.length>1) history.back(); else location.href='/elfa.html'; };
+$('#goHome').onclick=()=>location.href='/elfa.html';
+
+/* Tablar */
+function show(v){
+  ['regView','doneView','loginView','dashView'].forEach(id=>$('#'+id).classList.toggle('hide',id!==v));
+  $('#tabReg').classList.toggle('on',v==='regView'||v==='doneView');
+  $('#tabLogin').classList.toggle('on',v==='loginView'||v==='dashView');
+}
+$('#tabReg').onclick=()=>show('regView');
+$('#tabLogin').onclick=()=>show(session()?'dashView':'loginView');
+$('#goLogin').onclick=()=>show('loginView');
+
+/* Telefon: 9 rəqəm, 50 123 45 67 */
+$('#phone').addEventListener('input',e=>{
+  const d=e.target.value.replace(/\D/g,'').replace(/^0+/,'').slice(0,9);
+  e.target.value=d.replace(/^(\d{2})(\d{0,3})(\d{0,2})(\d{0,2}).*/,(m,a,b,c,f)=>[a,b,c,f].filter(Boolean).join(' '));
+});
+
+/* Şifrə hash (demo üçün; real layihədə server tərəfdə bcrypt/argon2 istifadə edin) */
+async function hash(s){
+  try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+  catch(e){return btoa(unescape(encodeURIComponent(s)))}
+}
+
+/* API + localStorage ehtiyat (server işləmirsə) */
+async function api(path,opts){
+  try{
+    const r=await fetch(path,Object.assign({headers:{'Content-Type':'application/json'}},opts));
+    if(!r.ok){let m='';try{m=(await r.json()).error}catch(e){}throw new Error(m||'API')}
+    return await r.json();
+  }catch(e){ if(e.message&&e.message!=='API'&&e.message!=='Failed to fetch'&&!/NetworkError|Load failed/i.test(e.message)) throw e; return null; }
+}
+const sellers=()=>LS.g('elfa_sellers',[]);
+const saveSellers=l=>LS.s('elfa_sellers',l);
+const session=()=>LS.g('elfa_seller_session',null);
+
+/* Qeydiyyat */
+$('#regForm').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const v={
+    store_name:$('#storeName').value.trim(),owner_name:$('#ownerName').value.trim(),category:$('#category').value,
+    phone:$('#phone').value.replace(/\s/g,''),email:$('#email').value.trim().toLowerCase(),
+    city:$('#city').value.trim(),about:$('#about').value.trim()
+  };
+  const pw=$('#pw').value,pw2=$('#pw2').value;
+  if(!v.store_name||!v.owner_name||!v.category||!v.phone||!v.email||!pw) return toast('Ulduzlu sahələri doldurun');
+  if(v.phone.length!==9) return toast('Telefon nömrəsi 9 rəqəm olmalıdır');
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email)) return toast('E-poçt düzgün deyil');
+  if(pw.length<6) return toast('Şifrə ən azı 6 simvol olmalıdır');
+  if(pw!==pw2) return toast('Şifrələr üst-üstə düşmür');
+  if(!$('#agree').checked) return toast('Qaydalarla razılaşmalısınız');
+
+  const btn=$('#regBtn');btn.disabled=true;btn.textContent='Göndərilir...';
+  try{
+    v.phone='+994'+v.phone;
+    const res=await api('/api/sellers/register',{method:'POST',body:JSON.stringify(Object.assign({},v,{password:pw}))});
+    if(!res){
+      const list=sellers();
+      if(list.some(s=>s.email===v.email)) throw new Error('Bu e-poçt artıq qeydiyyatdan keçib');
+      list.push(Object.assign({id:'S'+Date.now(),status:'pending',created:new Date().toISOString(),pwHash:await hash(pw)},v));
+      saveSellers(list);
+    }
+    $('#regForm').reset();show('doneView');
+  }catch(err){toast(err.message||'Xəta baş verdi')}
+  btn.disabled=false;btn.textContent='Müraciət göndər';
+});
+
+/* Giriş */
+$('#loginBtn').onclick=async()=>{
+  const email=$('#lem').value.trim().toLowerCase(),pw=$('#lpw').value;
+  if(!email||!pw) return toast('E-poçt və şifrəni yazın');
+  const btn=$('#loginBtn');btn.disabled=true;
+  try{
+    const res=await api('/api/sellers/login',{method:'POST',body:JSON.stringify({email,password:pw})});
+    if(res){LS.s('elfa_seller_session',{email,store_name:res.store_name,status:res.status,token:res.token||null,remote:true})}
+    else{
+      const s=sellers().find(x=>x.email===email);
+      if(!s||s.pwHash!==await hash(pw)) throw new Error('E-poçt və ya şifrə yanlışdır');
+      LS.s('elfa_seller_session',{email,store_name:s.store_name,status:s.status,remote:false});
+    }
+    $('#lpw').value='';openDash();
+  }catch(err){toast(err.message||'Xəta baş verdi')}
+  btn.disabled=false;
+};
+$('#logout').onclick=()=>{LS.s('elfa_seller_session',null);show('loginView');toast('Çıxış edildi')};
+
+/* Panel */
+async function myProducts(){
+  const s=session();if(!s) return [];
+  if(s.remote){
+    const r=await api('/api/seller/products',{headers:{'Content-Type':'application/json','Authorization':'Bearer '+(s.token||'')}});
+    if(r) return r;
+  }
+  return LS.g('elfa_seller_products',[]).filter(p=>p.seller===s.email);
+}
+function currentStatus(){
+  const s=session();if(!s) return 'pending';
+  if(!s.remote){const x=sellers().find(v=>v.email===s.email);if(x) return x.status}
+  return s.status||'pending';
+}
+async function openDash(){
+  const s=session();if(!s) return show('loginView');
+  show('dashView');
+  $('#dStore').textContent=s.store_name||'Mağaza';
+  const st=currentStatus(),ok=st==='approved';
+  const b=$('#dStatus');b.textContent=ok?'Təsdiqlənib':(st==='rejected'?'Rədd edilib':'Yoxlanılır');
+  b.className='badge '+(ok?'green':'wait');
+  $('#pendingNote').classList.toggle('hide',ok);
+  $('#addP').disabled=!ok;
+  await renderProducts();
+}
+async function renderProducts(){
+  const list=await myProducts();
+  $('#sCount').textContent=list.length;
+  $('#sStock').textContent=list.reduce((a,p)=>a+(+p.stock||0),0);
+  $('#sValue').textContent=money(list.reduce((a,p)=>a+(+p.price||0)*(+p.stock||0),0));
+  $('#plist').innerHTML=list.length?list.map(p=>`
+    <div class="pi">
+      <div class="im">${p.image_url?`<img src="${esc(p.image_url)}" alt="">`:'ELFA'}</div>
+      <div class="mid"><b>${esc(p.name)}</b><small>${money(p.price)} · Stok: ${esc(p.stock)}</small></div>
+      <button class="del" data-del="${esc(p.id)}">Sil</button>
+    </div>`).join(''):'<p class="sub">Hələ məhsul əlavə etməmisiniz.</p>';
+  document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>delProduct(b.dataset.del));
+}
+$('#addP').onclick=async()=>{
+  const s=session();if(!s) return;
+  if(currentStatus()!=='approved') return toast('Mağazanız hələ təsdiqlənməyib');
+  const p={name:$('#pName').value.trim(),price:parseFloat($('#pPrice').value),stock:parseInt($('#pStock').value,10),image_url:$('#pImg').value.trim(),description:$('#pDesc').value.trim()};
+  if(!p.name||isNaN(p.price)||isNaN(p.stock)) return toast('Ad, qiymət və stoku yazın');
+  if(p.price<0||p.stock<0) return toast('Qiymət və stok mənfi ola bilməz');
+  if(p.image_url&&!/^https?:\/\//i.test(p.image_url)) return toast('Şəkil linki http(s) ilə başlamalıdır');
+  const btn=$('#addP');btn.disabled=true;
+  try{
+    let res=null;
+    if(s.remote) res=await api('/api/seller/products',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(s.token||'')},body:JSON.stringify(p)});
+    if(!res){
+      const all=LS.g('elfa_seller_products',[]);
+      all.push(Object.assign({id:'P'+Date.now(),seller:s.email,store_name:s.store_name},p));
+      LS.s('elfa_seller_products',all);
+    }
+    ['pName','pPrice','pStock','pImg','pDesc'].forEach(id=>$('#'+id).value='');
+    toast('Məhsul əlavə olundu ✓');await renderProducts();
+  }catch(err){toast(err.message||'Xəta baş verdi')}
+  btn.disabled=false;
+};
+async function delProduct(id){
+  if(!confirm('Bu məhsulu silmək istəyirsiniz?')) return;
+  const s=session();
+  try{
+    let res=null;
+    if(s.remote) res=await api('/api/seller/products/'+encodeURIComponent(id),{method:'DELETE',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(s.token||'')}});
+    if(!res){LS.s('elfa_seller_products',LS.g('elfa_seller_products',[]).filter(p=>p.id!==id))}
+    toast('Məhsul silindi');await renderProducts();
+  }catch(err){toast(err.message||'Xəta baş verdi')}
+}
+
+/* Başlanğıc */
+if(session()) openDash();
+</script>
+</body>
+</html>
