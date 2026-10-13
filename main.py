@@ -906,3 +906,46 @@ def admin_page():
 @app.get("/seller-register.html")
 def seller_page():
     return page("seller-register.html")
+
+# Admin: butun magazalarin mehsullarini goster
+@app.get(
+    "/api/admin/products",
+    dependencies=[Depends(require_admin)],
+)
+def admin_products():
+    with db() as con:
+        rows = con.execute(
+            """SELECT p.*, s.store_name, s.status AS store_status
+               FROM products p
+               JOIN sellers s ON s.id = p.seller_id
+               ORDER BY p.id DESC"""
+        ).fetchall()
+
+    result = []
+    for r in rows:
+        item = product_dict(r)
+        item["seller_id"] = r["seller_id"]
+        item["created_at"] = r["created_at"]
+        item["store_status"] = r["store_status"]
+        result.append(item)
+
+    return result
+
+
+# Admin: mehsulu sil
+@app.delete(
+    "/api/admin/products/{pid}",
+    dependencies=[Depends(require_admin)],
+)
+def admin_delete_product(pid: int):
+    with db() as con:
+        cur = con.execute(
+            "DELETE FROM products WHERE id = ?",
+            (pid,),
+        )
+
+    if cur.rowcount == 0:
+        raise HTTPException(404, "Mehsul tapilmadi")
+
+    return {"ok": True}
+
