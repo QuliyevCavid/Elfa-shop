@@ -16,6 +16,7 @@
 #cats .catbtn {
   position: relative;
   top: 0;
+}
 
 .product-back {
   display: inline-flex;
@@ -35,7 +36,6 @@
 .product-back:hover {
   background: #171717;
   color: #fff;
-}
 }
 </style>
 <style>
@@ -331,6 +331,47 @@ footer{margin-top:70px;background:#171717;color:#fff;padding:45px 0}
   background: transparent;
   color: #777;
 }
+  
+.search-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  padding: 18px;
+  background: #fff;
+  border: 1px solid #e8e6e1;
+  border-radius: 14px;
+}
+
+.search-filter-grid label {
+  display: block;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.search-filter-grid select,
+.search-filter-grid input {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  height: 40px;
+  margin-top: 7px;
+  padding: 0 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  font: inherit;
+  font-size: 13px;
+}
+
+@media (max-width: 800px) {
+  .search-filter-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    padding: 12px;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -373,6 +414,87 @@ footer{margin-top:70px;background:#171717;color:#fff;padding:45px 0}
       <div><h2 id="prodTitle">Trend məhsullar</h2><p>İndi ən çox diqqət çəkən məhsullar</p></div>
       <a class="see" id="seeAll">Hamısına bax →</a>
     </div>
+    
+<div id="searchResultsHeading" style="display:none;margin:25px 0 18px">
+  <h2>Bütün məhsullar</h2>
+  <p style="color:#777;font-size:13px;margin-top:7px">
+    ELFA-da təsdiqlənmiş mağazaların məhsulları
+  </p>
+</div>
+
+<div id="searchFilters" style="display:none;margin-bottom:20px">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px">
+    <h3>Filtrlər</h3>
+    <button id="clearSearchFilters" style="background:none;text-decoration:underline">
+      Təmizlə
+    </button>
+  </div>
+
+  <div class="search-filter-grid">
+    <label>Kategori
+      <select id="fCategory"><option value="">Bütün kategoriyalar</option></select>
+    </label>
+
+    <label>Marka
+      <select id="fBrand"><option value="">Bütün markalar</option></select>
+    </label>
+
+    <label>Cinsiyyət
+      <select id="fGender">
+        <option value="">Hamısı</option>
+        <option>Qadın</option>
+        <option>Kişi</option>
+        <option>Uniseks</option>
+        <option>Qız</option>
+        <option>Oğlan</option>
+      </select>
+    </label>
+
+    <label>Ölçü
+      <select id="fSize">
+        <option value="">Bütün ölçülər</option>
+        <option>XS</option><option>S</option><option>M</option>
+        <option>L</option><option>XL</option><option>XXL</option>
+        <option>36</option><option>37</option><option>38</option>
+        <option>39</option><option>40</option><option>41</option>
+        <option>42</option><option>43</option><option>44</option><option>45</option>
+      </select>
+    </label>
+
+    <label>Rəng
+      <select id="fColor">
+        <option value="">Bütün rənglər</option>
+        <option>Qara</option><option>Ağ</option><option>Qırmızı</option>
+        <option>Mavi</option><option>Yaşıl</option><option>Sarı</option>
+        <option>Çəhrayı</option><option>Boz</option><option>Qəhvəyi</option>
+        <option>Bej</option>
+      </select>
+    </label>
+
+    <label>Qiymət (AZN)
+      <div style="display:flex;gap:7px;margin-top:7px">
+        <input id="fMinPrice" type="number" min="0" placeholder="Min"
+          style="width:50%;min-width:0;padding:10px;border:1px solid #ddd;border-radius:8px">
+        <input id="fMaxPrice" type="number" min="0" placeholder="Max"
+          style="width:50%;min-width:0;padding:10px;border:1px solid #ddd;border-radius:8px">
+      </div>
+    </label>
+
+    <label>Boyut / ölçülər
+      <input id="fDimensions" type="text" placeholder="Məsələn: 20 × 30 sm"
+        style="width:100%;margin-top:7px;padding:10px;border:1px solid #ddd;border-radius:8px">
+    </label>
+
+    <label>Material
+      <select id="fMaterial">
+        <option value="">Bütün materiallar</option>
+        <option>Pambıq</option><option>Yun</option><option>Kətan</option>
+        <option>Dəri</option><option>Süni dəri</option><option>Polyester</option>
+        <option>İpək</option>
+      </select>
+    </label>
+  </div>
+</div>
     <div class="products" id="products">
       <article class="card" data-id="1" data-brand="ELFA STORE" data-name="Premium Parfum" data-price="49.90" data-cat="Kosmetika,Qadın,Kişi">
         <div class="photo"><div class="fake-product"><div class="fake-cap"></div></div><button class="heart">♡</button><span class="video" data-video="Premium Parfum">▶ Video</span></div>
@@ -454,17 +576,129 @@ function closeM(){$('#ov').classList.remove('open')}
 $('#mx').onclick=closeM;$('#ov').onclick=e=>{if(e.target.id==='ov')closeM()};
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeM()});
 
-function filter(){
-  let n=0;
-  cards.forEach((c,i)=>{
-    const t=(c.dataset.name+' '+c.dataset.brand+' '+c.dataset.cat).toLowerCase();
-    const ok=(!cat||c.dataset.cat.split(',').includes(cat))&&(!store||c.dataset.brand===store)&&(!term||t.includes(term.toLowerCase()));
-    c.classList.toggle('hide',!ok);if(ok)n++;
+
+function fillSearchFilterOptions() {
+  const categorySelect = $('#fCategory');
+  const brandSelect = $('#fBrand');
+
+  const categories = new Set();
+  const brands = new Set();
+
+  cards.forEach(card => {
+    (card.dataset.cat || '').split(',').forEach(value => {
+      value = value.trim();
+      if (value) categories.add(value);
+    });
+
+    const brand = (card.dataset.brand || '').trim();
+    if (brand) brands.add(brand);
   });
-  $('#empty').style.display=n?'none':'block';
-  $('#prodTitle').textContent=label||(store?store+' məhsulları':cat?cat:'Trend məhsullar');
+
+  [...categories].sort().forEach(value => {
+    categorySelect.add(new Option(value, value));
+  });
+
+  [...brands].sort().forEach(value => {
+    brandSelect.add(new Option(value, value));
+  });
 }
-$$('#cats a').forEach(a=>a.onclick=()=>{
+
+function filter() {
+  const searchHeading = $('#searchResultsHeading');
+  const searchFilters = $('#searchFilters');
+
+  const category = $('#fCategory').value;
+  const brand = $('#fBrand').value;
+  const gender = $('#fGender').value;
+  const size = $('#fSize').value;
+  const color = $('#fColor').value;
+  const material = $('#fMaterial').value;
+  const dimensions = $('#fDimensions').value.trim().toLowerCase();
+
+  const minValue = $('#fMinPrice').value;
+  const maxValue = $('#fMaxPrice').value;
+  const minPrice = minValue === '' ? null : Number(minValue);
+  const maxPrice = maxValue === '' ? null : Number(maxValue);
+
+  let count = 0;
+
+  cards.forEach(card => {
+    const name = (card.dataset.name || '').toLowerCase();
+    const cardBrand = card.dataset.brand || '';
+    const categories = (card.dataset.cat || '')
+      .split(',')
+      .map(value => value.trim());
+
+    const price = Number(card.dataset.price || 0);
+
+    const text = (
+      name + ' ' + cardBrand + ' ' + categories.join(' ')
+    ).toLowerCase();
+
+    const matches =
+      (!cat || categories.includes(cat)) &&
+      (!store || cardBrand === store) &&
+      (!term || text.includes(term.toLowerCase())) &&
+      (!category || categories.includes(category)) &&
+      (!brand || cardBrand === brand) &&
+      (minPrice === null || price >= minPrice) &&
+      (maxPrice === null || price <= maxPrice) &&
+      (!gender || (card.dataset.gender || '').split(',').includes(gender)) &&
+      (!size || (card.dataset.size || '').split(',').includes(size)) &&
+      (!color || (card.dataset.color || '').split(',').includes(color)) &&
+      (!material || (card.dataset.material || '').split(',').includes(material)) &&
+      (!dimensions || (card.dataset.dimensions || '').toLowerCase().includes(dimensions));
+
+    card.classList.toggle('hide', !matches);
+
+    if (matches) count++;
+  });
+
+  $('#empty').style.display = count ? 'none' : 'block';
+
+  const searching = term.length > 0;
+  searchHeading.style.display = searching && count > 0 ? 'block' : 'none';
+  searchFilters.style.display = searching && count > 0 ? 'block' : 'none';
+
+  $('#prodTitle').textContent =
+    label || (store ? store + ' məhsulları' : cat ? cat : 'Trend məhsullar');
+}
+
+fillSearchFilterOptions();
+
+[
+  '#fCategory',
+  '#fBrand',
+  '#fGender',
+  '#fSize',
+  '#fColor',
+  '#fMinPrice',
+  '#fMaxPrice',
+  '#fDimensions',
+  '#fMaterial'
+].forEach(selector => {
+  $(selector).addEventListener('change', filter);
+  $(selector).addEventListener('input', filter);
+});
+
+$('#clearSearchFilters').onclick = () => {
+  [
+    '#fCategory',
+    '#fBrand',
+    '#fGender',
+    '#fSize',
+    '#fColor',
+    '#fMinPrice',
+    '#fMaxPrice',
+    '#fDimensions',
+    '#fMaterial'
+  ].forEach(selector => {
+    $(selector).value = '';
+  });
+
+  filter();
+};
+
   $$('#cats a').forEach(x=>x.classList.remove('active'));a.classList.add('active');
   if(a.dataset.k){            // Qadın, Kişi, Ana & Uşaq və s.
     openMega(a.dataset.k);    // menyunu həmin bölmə ilə aç
