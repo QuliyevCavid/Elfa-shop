@@ -699,13 +699,26 @@ $('#clearSearchFilters').onclick = () => {
   filter();
 };
 
-  $$('#cats a').forEach(x=>x.classList.remove('active'));a.classList.add('active');
-  if(a.dataset.k){            // Qadın, Kişi, Ana & Uşaq və s.
-    openMega(a.dataset.k);    // menyunu həmin bölmə ilə aç
-    return;
-  }
-  cat=a.dataset.c;store='';label=a.dataset.k||'';filter();$('#prodSec').scrollIntoView({behavior:'smooth'});
+
+$$('#cats a').forEach(a => {
+  a.onclick = () => {
+    $$('#cats a').forEach(x => x.classList.remove('active'));
+    a.classList.add('active');
+
+    if (a.dataset.k) {
+      openMega(a.dataset.k);
+      return;
+    }
+
+    cat = a.dataset.c || '';
+    store = '';
+    label = a.dataset.k || '';
+    filter();
+
+    $('#prodSec').scrollIntoView({ behavior: 'smooth' });
+  };
 });
+
 function doSearch(){term=$('#q').value.trim();filter();$('#prodSec').scrollIntoView({behavior:'smooth'});if(term)toast('Axtarış: '+term)}
 $('#sbtn').onclick=doSearch;
 $('#q').addEventListener('keydown',e=>{if(e.key==='Enter')doSearch()});
