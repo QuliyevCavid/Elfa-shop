@@ -1,179 +1,359 @@
+
 <!DOCTYPE html>
 <html lang="az">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="robots" content="noindex,nofollow">
-    <title>ELFA — Admin panel</title>
-    <style>
-        *{box-sizing:border-box;margin:0;padding:0}
-        :root{--bg:#f7f6f3;--text:#171717;--muted:#777;--line:#e8e6e1;--red:#d22;--green:#1a7a35}
-        body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
-        button,input,select{font:inherit}
-        button{cursor:pointer;border:0}
-        header{background:#171717;color:#fff}
-        .nav-wrapper{width:min(1200px,94%);margin:auto;display:flex;align-items:center;justify-content:between;height:64px}
-        .nav{display:flex;align-items:center;gap:20px;flex:1}
-        .logo{font-size:22px;font-weight:800;letter-spacing:4px;margin-right:20px}
-        .logo small{font-size:11px;letter-spacing:2px;opacity:.6;margin-left:5px;font-weight:400}
-        .nav-menu{display:flex;gap:15px}
-        .nav-link{color:#ccc;text-decoration:none;font-size:14px;font-weight:700;padding:6px 12px;border-radius:8px}
-        .nav-link:hover, .nav-link.active{color:#fff;background:#333}
-        .out{background:none;color:#fff;font-size:13px;text-decoration:underline}
-        .wrap{width:min(1200px,94%);margin:28px auto 60px}
-        .card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:26px}
-        .login{max-width:420px;margin:70px auto}
-        h2{font-size:24px;letter-spacing:-.5px;margin-bottom:6px}
-        .sub{font-size:13px;color:var(--muted);margin-bottom:18px;line-height:1.5}
-        input,select{width:100%;height:44px;border:1px solid #ddd;border-radius:10px;padding:0 14px;background:#fff;outline:none;font-size:14px}
-        input:focus,select:focus{border-color:#171717}
-        .btn{width:100%;margin-top:14px;background:#171717;color:#fff;padding:13px;border-radius:24px;font-weight:700;font-size:14px}
-        .btn:hover{background:#333}
-        .btn:disabled{opacity:.6}
-        .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
-        .stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;text-align:center;font-size:12px;color:var(--muted);cursor:pointer}
-        .stat b{display:block;font-size:24px;color:var(--text);margin-bottom:2px}
-        .stat.on{border-color:#171717}
-        .tools{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap}
-        .tools input{flex:2;min-width:200px}
-        .tools select{flex:1;min-width:150px}
-        .item{border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px;display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;background:#fff}
-        .item h3{font-size:16px;margin-bottom:4px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-        .p-img{width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
-        .p-info{display:flex;gap:14px;align-items:center}
-        .meta{font-size:12px;color:var(--muted);line-height:1.7}
-        .about{font-size:13px;color:#444;margin-top:8px;line-height:1.5}
-        .badge{border-radius:12px;padding:3px 10px;font-size:12px;font-weight:400;background:#eee}
-        .badge.approved{background:#e3f6e8;color:var(--green)}
-        .badge.pending{background:#fff3d6;color:#8a6200}
-        .badge.rejected{background:#fde4e4;color:var(--red)}
-        .acts{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
-        .acts button{padding:9px 16px;border-radius:20px;font-size:13px;font-weight:700;background:#eee;color:#171717}
-        .acts .ok{background:#171717;color:#fff}
-        .acts .no{background:#fde4e4;color:var(--red)}
-        .acts button:disabled{opacity:.5}
-        .empty{text-align:center;color:var(--muted);padding:40px 0;font-size:14px}
-        .hide{display:none!important}
-        .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);background:#171717;color:#fff;padding:11px 20px;border-radius:24px;font-size:13px;opacity:0;pointer-events:none;transition:.25s;z-index:60}
-        .toast.show{opacity:1;transform:translateX(-50%)}
-        @media(max-width:700px){
-            .stats{grid-template-columns:1fr 1fr}
-            .tools{flex-direction:column}
-            .tools select, .tools input{width:100%}
-            .item{grid-template-columns:1fr}
-            .acts{justify-content:flex-start}
-            .nav-wrapper{flex-direction:column;height:auto;padding:10px 0;gap:10px}
-            .p-info{align-items:flex-start}
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>ELFA — Admin panel</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#f7f6f3;--text:#171717;--muted:#777;--line:#e8e6e1;--green:#18783b;--red:#c62828;--gold:#946200}
+body{font-family:Arial,sans-serif;background:var(--bg);color:var(--text)}
+button,input,select{font:inherit}
+button{cursor:pointer;border:0}
+header{background:#171717;color:white}
+.nav{width:min(1200px,94%);margin:auto;min-height:68px;display:flex;align-items:center;justify-content:space-between;gap:14px}
+.logo{font-size:23px;font-weight:800;letter-spacing:4px}
+.logo small{font-size:11px;letter-spacing:2px;color:#aaa;margin-left:8px}
+.nav-right{display:flex;align-items:center;gap:8px}
+.nav button{padding:10px 14px;border-radius:22px;background:#333;color:#fff}
+.wrap{width:min(1200px,94%);margin:28px auto 60px}
+.card{background:white;border:1px solid var(--line);border-radius:16px;padding:24px}
+.login{max-width:430px;margin:65px auto}
+h1{font-size:25px;margin-bottom:8px}
+h2{font-size:21px;margin-bottom:14px}
+.sub{font-size:13px;line-height:1.6;color:var(--muted);margin-bottom:18px}
+input,select{width:100%;min-height:43px;border:1px solid #ddd;border-radius:9px;padding:10px 12px;background:white;outline:none}
+input:focus,select:focus{border-color:#171717}
+.btn{padding:11px 16px;border-radius:22px;background:#171717;color:white;font-weight:700}
+.btn:disabled{opacity:.5;cursor:wait}
+.btn.light{background:#eee;color:#171717}
+.btn.green{background:#e3f6e8;color:#176a32}
+.btn.red{background:#fde4e4;color:#b42323}
+.btn.gold{background:#fff0ca;color:#785600}
+.btn.small{font-size:12px;padding:9px 12px}
+.login .btn{width:100%;margin-top:12px}
+.hide{display:none!important}
+.tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.tab{padding:12px 18px;border-radius:24px;background:#eae9e5;font-weight:700}
+.tab.active{background:#171717;color:white}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px}
+.stat{background:white;border:1px solid var(--line);border-radius:13px;padding:16px;text-align:left;cursor:pointer}
+.stat b{display:block;font-size:26px;margin-bottom:5px}
+.stat span{font-size:12px;color:var(--muted)}
+.stat.active{border:2px solid #171717;padding:15px}
+.tools{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px;margin-bottom:16px}
+.item{background:white;border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:18px}
+.info{min-width:0;flex:1}
+.item h3{font-size:16px;overflow-wrap:anywhere;margin-bottom:7px}
+.meta{font-size:12px;color:var(--muted);line-height:1.8;overflow-wrap:anywhere}
+.actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+.badge{display:inline-block;font-size:11px;padding:5px 9px;border-radius:20px;background:#eee}
+.badge.approved{background:#e3f6e8;color:#176a32}
+.badge.pending{background:#fff0ca;color:#785600}
+.badge.rejected{background:#fde4e4;color:#b42323}
+.pimg{width:72px;height:72px;object-fit:cover;border-radius:9px;border:1px solid var(--line);background:#f3f3f3;flex-shrink:0}
+.product-info{display:flex;gap:13px;align-items:center;min-width:0;flex:1}
+.empty{padding:45px 15px;text-align:center;color:var(--muted);background:white;border:1px solid var(--line);border-radius:14px}
+.note{padding:13px 15px;border-radius:10px;background:#fff0ca;color:#785600;font-size:13px;line-height:1.6;margin-bottom:16px}
+.toast{position:fixed;left:50%;bottom:25px;transform:translateX(-50%);background:#171717;color:white;padding:12px 18px;border-radius:25px;font-size:13px;z-index:10;max-width:90%;text-align:center}
+@media(max-width:750px){
+ .stats{grid-template-columns:1fr 1fr}
+ .tools{grid-template-columns:1fr}
+ .item{align-items:flex-start;flex-direction:column}
+ .actions{justify-content:flex-start;width:100%}
+ .nav{padding:12px 0;align-items:flex-start;flex-direction:column}
+ .nav-right{width:100%;justify-content:space-between}
+ .card{padding:19px}
+}
+</style>
 </head>
 <body>
-    <header>
-        <div class="nav-wrapper">
-            <div class="nav">
-                <div class="logo">ELFA<small>ADMIN</small></div>
-                <div class="nav-menu hide" id="navMenu">
-                    <a href="#" class="nav-link active" id="tabSellers">Mağazalar</a>
-                    <a href="#" class="nav-link" id="tabProducts">Məhsullar</a>
-                </div>
-            </div>
-            <button class="out hide" id="logout">Çıxış</button>
-        </div>
-    </header>
-    <main class="wrap">
-        <section class="card login" id="loginView">
-            <h2>Admin girişi</h2>
-            <p class="sub">Serverdə təyin etdiyin <b>ADMIN_TOKEN</b> dəyərini daxil et.</p>
-            <input id="tok" type="password" placeholder="Admin token" autocomplete="off">
-            <button class="btn" id="loginBtn">Daxil ol</button>
-        </section>
+<header>
+ <div class="nav">
+  <div class="logo">ELFA <small>ADMIN</small></div>
+  <div class="nav-right">
+   <span id="adminLabel" style="font-size:12px;color:#ccc">Admin panel</span>
+   <button id="refreshBtn" class="hide">Yenilə ↻</button>
+   <button id="logoutBtn" class="hide">Çıxış</button>
+  </div>
+ </div>
+</header>
 
-        <section id="dashView" class="hide">
-            <!-- Mağazalar üçün Panel -->
-            <div id="sellersSection">
-                <div class="stats">
-                    <div class="stat on" data-f=""><b id="nAll">0</b>Hamısı</div>
-                    <div class="stat" data-f="pending"><b id="nPending">0</b>Gözləyir</div>
-                    <div class="stat" data-f="approved"><b id="nApproved">0</b>Təsdiqlənib</div>
-                    <div class="stat" data-f="rejected"><b id="nRejected">0</b>Rədd edilib</div>
-                </div>
-                <div class="tools">
-                    <input id="search" placeholder="Mağaza, ad, e-poçt və ya telefon axtar...">
-                    <select id="filterCategory">
-                        <option value="">Bütün kateqoriyalar</option>
-                    </select>
-                    <select id="sort">
-                        <option value="new">Ən yenilər əvvəl</option>
-                        <option value="old">Ən köhnələr əvvəl</option>
-                        <option value="name">Mağaza adı (A-Z)</option>
-                    </select>
-                </div>
-                <div id="list" class="list-container"></div>
-            </div>
+<main class="wrap">
+ <section id="loginView" class="card login">
+  <h1>Admin girişi</h1>
+  <p class="sub">Serverdə təyin etdiyin ADMIN_TOKEN dəyərini daxil et.</p>
+  <form id="loginForm">
+   <input id="tokenInput" type="password" placeholder="Admin token" autocomplete="current-password" required>
+   <button class="btn" id="loginBtn">Daxil ol</button>
+  </form>
+  <p class="sub" style="margin-top:14px;margin-bottom:0">Token yalnız bu brauzer sessiyasında saxlanılır.</p>
+ </section>
 
-            <!-- Məhsullar üçün Panel -->
-            <div id="productsSection" class="hide">
-                <div class="tools">
-                    <input id="searchProduct" placeholder="Məhsul adı və ya marka axtar...">
-                    <select id="filterProductStore">
-                        <option value="">Bütün mağazalar</option>
-                    </select>
-                    <select id="sortProduct">
-                        <option value="new">Ən yenilər əvvəl</option>
-                        <option value="priceAsc">Qiymət: Ucuzdan bahaya</option>
-                        <option value="priceDesc">Qiymət: Bahadan ucuza</option>
-                    </select>
-                </div>
-                <div id="productList" class="list-container"></div>
-            </div>
-        </section>
-    </main>
-    <div class="toast" id="toast"></div>
+ <section id="dashboard" class="hide">
+  <div class="tabs">
+   <button class="tab active" data-tab="sellers">Mağazalar</button>
+   <button class="tab" data-tab="products">Məhsullar</button>
+  </div>
 
-    <script>
-        const $=s=>document.querySelector(s);
-        const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-        let tt;
-        function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2200)}
-        
-        const LABEL={pending:'Gözləyir',approved:'Təsdiqlənib',rejected:'Rədd edilib'};
-        let TOKEN=null, DATA=[], PRODUCTS=[], filter='', currentTab='sellers';
+  <section id="sellerPanel">
+   <div class="stats">
+    <button class="stat active" data-status=""><b id="countAll">0</b><span>Bütün mağazalar</span></button>
+    <button class="stat" data-status="pending"><b id="countPending">0</b><span>Gözləyir</span></button>
+    <button class="stat" data-status="approved"><b id="countApproved">0</b><span>Təsdiqlənib</span></button>
+    <button class="stat" data-status="rejected"><b id="countRejected">0</b><span>Rədd edilib</span></button>
+   </div>
+   <div class="tools">
+    <input id="sellerSearch" placeholder="Mağaza, sahib, telefon və ya e-poçt axtar">
+    <select id="categoryFilter"><option value="">Bütün kateqoriyalar</option></select>
+    <select id="sellerSort">
+     <option value="new">Ən yenilər əvvəl</option>
+     <option value="old">Ən köhnələr əvvəl</option>
+     <option value="name">Mağaza adı A–Z</option>
+    </select>
+   </div>
+   <div id="sellerList"></div>
+  </section>
 
-        try{TOKEN=sessionStorage.getItem('elfa_admin')}catch(e){}
+  <section id="productPanel" class="hide">
+   <div class="note">Burada məhsulları idarə etmək olar. İctimai saytda yalnız təsdiqlənmiş mağazaların məhsulları görünməlidir.</div>
+   <div class="tools">
+    <input id="productSearch" placeholder="Məhsul və ya mağaza axtar">
+    <select id="productStoreFilter"><option value="">Bütün mağazalar</option></select>
+    <select id="productSort">
+     <option value="new">Ən yenilər əvvəl</option>
+     <option value="cheap">Ucuzdan bahaya</option>
+     <option value="expensive">Bahadan ucuza</option>
+    </select>
+   </div>
+   <div id="productList"></div>
+  </section>
+ </section>
+</main>
 
-        async function api(path,opts){
-            const r=await fetch(path,Object.assign({},opts,{headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN}}));
-            let j=null;try{j=await r.json()}catch(e){}
-            if(!r.ok){const e=new Error((j&&j.error)||'Xəta baş verdi');e.status=r.status;throw e}
-            return j;
-        }
+<div id="toast" class="toast hide" role="status"></div>
 
-        function fmtDate(s){try{return new Date(s).toLocaleString('az-AZ')}catch(e){return s}}
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const state={token:'',sellers:[],products:[],status:'',tab:'sellers'};
+let toastTimer;
 
-        async function load(){
-            try{
-                DATA=await api('/api/admin/sellers');
-                try { PRODUCTS=await api('/api/admin/products'); } catch(e){ PRODUCTS=[]; } // Backend hələ hazır deyilsə xəta verməsin
-                
-                $('#loginView').classList.add('hide');
-                $('#dashView').classList.remove('hide');
-                $('#logout').classList.remove('hide');
-                $('#navMenu').classList.remove('hide');
-                
-                setupFilters();
-                render();
-            }catch(e){
-                if(e.status===401||e.status===403||e.status===503){
-                    TOKEN=null;try{sessionStorage.removeItem('elfa_admin')}catch(_){}
-                    $('#dashView').classList.add('hide');
-                    $('#logout').classList.add('hide');
-                    $('#navMenu').classList.add('hide');
-                    $('#loginView').classList.remove('hide');
-                }
-                toast(e.message==='Failed to fetch'?'Serverə qoşulmaq olmadı':e.message);
-            }
-        }
+function toast(message){
+ const el=$('#toast');
+ el.textContent=message;
+ el.classList.remove('hide');
+ clearTimeout(toastTimer);
+ toastTimer=setTimeout(()=>el.classList.add('hide'),3200);
+}
+function money(v){
+ const n=Number(v);
+ return Number.isFinite(n)?n.toFixed(2)+' AZN':'—';
+}
+function statusLabel(s){
+ return ({pending:'Gözləyir',approved:'Təsdiqlənib',rejected:'Rədd edilib'})[s]||s||'Naməlum';
+}
+function dateLabel(v){
+ if(!v)return '—';
+ const d=new Date(v);
+ return Number.isNaN(d.getTime())?String(v):d.toLocaleString('az-AZ');
+}
+function imageMarkup(url){
+ return url?'<img class="pimg" src="'+esc(url)+'" alt="" loading="lazy" onerror="this.style.display=\'none\'">':'<div class="pimg" style="display:grid;place-items:center;color:#999">Şəkil yoxdur</div>';
+}
 
-        function setupFilters() {
-            // Mağaza kateqoriya süzgəcini doldur
-            const cats=[...new Set(DATA.map(x=>x.category).filter(Boolean))];
+async function api(path,options={}){
+ const headers={...(options.headers||{}),'Authorization':'Bearer '+state.token};
+ if(options.body)headers['Content-Type']='application/json';
+ const response=await fetch(path,{...options,headers});
+ let data=null;
+ try{data=await response.json()}catch(_){}
+ if(!response.ok){
+  const message=data?.detail||data?.error||data?.message||('Server xətası: '+response.status);
+  const err=new Error(typeof message==='string'?message:JSON.stringify(message));
+  err.status=response.status;
+  throw err;
+ }
+ return data;
+}
+
+function showLogin(){
+ $('#loginView').classList.remove('hide');
+ $('#dashboard').classList.add('hide');
+ $('#logoutBtn').classList.add('hide');
+ $('#refreshBtn').classList.add('hide');
+}
+function showDashboard(){
+ $('#loginView').classList.add('hide');
+ $('#dashboard').classList.remove('hide');
+ $('#logoutBtn').classList.remove('hide');
+ $('#refreshBtn').classList.remove('hide');
+}
+
+async function login(){
+ const token=$('#tokenInput').value.trim();
+ if(!token){toast('Admin token daxil et.');return}
+ state.token=token;
+ $('#loginBtn').disabled=true;
+ $('#loginBtn').textContent='Yoxlanılır...';
+ try{
+  await loadAll();
+  showDashboard();
+  toast('Admin giriş uğurludur.');
+ }catch(e){
+  state.token='';
+  showLogin();
+  toast(e.message==='Failed to fetch'?'Serverə qoşulmaq olmadı.':e.message);
+ }finally{
+  $('#loginBtn').disabled=false;
+  $('#loginBtn').textContent='Daxil ol';
+ }
+}
+
+async function loadAll(){
+ const sellers=await api('/api/admin/sellers');
+ if(!Array.isArray(sellers))throw new Error('Mağaza siyahısının formatı düzgün deyil.');
+ state.sellers=sellers;
+
+ try{
+  const products=await api('/api/admin/products');
+  state.products=Array.isArray(products)?products:[];
+  $('#productPanel .note').textContent='Məhsullar serverdən yüklənir. İctimai saytda yalnız təsdiqlənmiş mağazaların məhsulları görünməlidir.';
+ }catch(e){
+  state.products=[];
+  $('#productPanel .note').textContent='Məhsullar siyahısı hələ serverdə hazır deyil. Məhsul bölməsini aktiv etmək üçün main.py faylına admin məhsul API-ləri əlavə edilməlidir.';
+ }
+ setupFilters();
+ renderSellers();
+ renderProducts();
+}
+
+function setupFilters(){
+ const oldCat=$('#categoryFilter').value;
+ const cats=[...new Set(state.sellers.map(s=>s.category).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'az'));
+ $('#categoryFilter').innerHTML='<option value="">Bütün kateqoriyalar</option>'+cats.map(c=>'<option value="'+esc(c)+'">'+esc(c)+'</option>').join('');
+ if(cats.includes(oldCat))$('#categoryFilter').value=oldCat;
+
+ const oldStore=$('#productStoreFilter').value;
+ const stores=[...new Map(state.sellers.map(s=>[String(s.id),s])).values()];
+ $('#productStoreFilter').innerHTML='<option value="">Bütün mağazalar</option>'+stores.map(s=>'<option value="'+esc(s.id)+'">'+esc(s.store_name||('Mağaza #'+s.id))+'</option>').join('');
+ if(stores.some(s=>String(s.id)===oldStore))$('#productStoreFilter').value=oldStore;
+
+ $('#countAll').textContent=state.sellers.length;
+ $('#countPending').textContent=state.sellers.filter(s=>s.status==='pending').length;
+ $('#countApproved').textContent=state.sellers.filter(s=>s.status==='approved').length;
+ $('#countRejected').textContent=state.sellers.filter(s=>s.status==='rejected').length;
+}
+
+function renderSellers(){
+ const term=$('#sellerSearch').value.trim().toLocaleLowerCase('az');
+ const category=$('#categoryFilter').value;
+ let rows=state.sellers.filter(s=>{
+  const hay=[s.store_name,s.owner_name,s.phone,s.email,s.city,s.category].join(' ').toLocaleLowerCase('az');
+  return (!state.status||s.status===state.status)&&(!category||s.category===category)&&(!term||hay.includes(term));
+ });
+ const sort=$('#sellerSort').value;
+ if(sort==='name')rows.sort((a,b)=>(a.store_name||'').localeCompare(b.store_name||'','az'));
+ else if(sort==='old')rows.sort((a,b)=>new Date(a.created_at||0)-new Date(b.created_at||0));
+ else rows.sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0));
+
+ document.querySelectorAll('[data-status]').forEach(b=>b.classList.toggle('active',b.dataset.status===state.status));
+ if(!rows.length){
+  $('#sellerList').innerHTML='<div class="empty">Bu seçimlərə uyğun mağaza tapılmadı.</div>';
+  return;
+ }
+ $('#sellerList').innerHTML=rows.map(s=>{
+  const status=s.status||'pending';
+  const about=s.about?'<p class="meta">'+esc(s.about)+'</p>':'';
+  const buttons=[];
+  if(status!=='approved')buttons.push('<button class="btn green small" data-action="approved" data-id="'+esc(s.id)+'">Təsdiqlə</button>');
+  if(status!=='rejected')buttons.push('<button class="btn red small" data-action="rejected" data-id="'+esc(s.id)+'">Rədd et</button>');
+  if(status!=='pending')buttons.push('<button class="btn light small" data-action="pending" data-id="'+esc(s.id)+'">Gözləməyə qaytar</button>');
+  return '<article class="item"><div class="info"><h3>'+esc(s.store_name||'Adsız mağaza')+' <span class="badge '+esc(status)+'">'+esc(statusLabel(status))+'</span></h3><div class="meta">Sahib: '+esc(s.owner_name||'—')+'<br>Telefon: '+esc(s.phone||'—')+'<br>E-poçt: '+esc(s.email||'—')+'<br>Kateqoriya: '+esc(s.category||'—')+'<br>Şəhər: '+esc(s.city||'—')+'<br>Qeydiyyat: '+esc(dateLabel(s.created_at))+'</div>'+about+'</div><div class="actions">'+buttons.join('')+'</div></article>';
+ }).join('');
+}
+
+async function changeStatus(id,status){
+ const s=state.sellers.find(x=>String(x.id)===String(id));
+ if(!s)return;
+ const action=status==='approved'?'təsdiqləmək':status==='rejected'?'rədd etmək':'gözləməyə qaytarmaq';
+ if(!confirm((s.store_name||'Bu mağazanı')+' '+action+' istəyirsən?'))return;
+ try{
+  await api('/api/admin/sellers/'+encodeURIComponent(id)+'/status',{method:'POST',body:JSON.stringify({status})});
+  toast('Mağazanın statusu dəyişdirildi.');
+  await loadAll();
+ }catch(e){toast('Status dəyişdirilmədi: '+e.message)}
+}
+
+function renderProducts(){
+ const term=$('#productSearch').value.trim().toLocaleLowerCase('az');
+ const store=$('#productStoreFilter').value;
+ let rows=state.products.filter(p=>{
+  const hay=[p.name,p.brand,p.store_name,p.description].join(' ').toLocaleLowerCase('az');
+  return (!term||hay.includes(term))&&(!store||String(p.seller_id)===store);
+ });
+ const sort=$('#productSort').value;
+ if(sort==='cheap')rows.sort((a,b)=>Number(a.price||0)-Number(b.price||0));
+ else if(sort==='expensive')rows.sort((a,b)=>Number(b.price||0)-Number(a.price||0));
+ else rows.sort((a,b)=>Number(b.id||0)-Number(a.id||0));
+
+ if(!rows.length){
+  $('#productList').innerHTML='<div class="empty">'+(state.products.length?'Bu axtarışa uyğun məhsul tapılmadı.':'Məhsul siyahısı boşdur və ya serverdə admin məhsul API-si hələ əlavə edilməyib.')+'</div>';
+  return;
+ }
+ $('#productList').innerHTML=rows.map(p=>{
+  const sid=p.seller_id;
+  const storeName=p.store_name||state.sellers.find(s=>String(s.id)===String(sid))?.store_name||'Mağaza';
+  return '<article class="item"><div class="product-info">'+imageMarkup(p.image_url)+'<div class="info"><h3>'+esc(p.name||'Adsız məhsul')+'</h3><div class="meta">Mağaza: '+esc(storeName)+'<br>Qiymət: <b>'+esc(money(p.price))+'</b><br>Stok: '+esc(p.stock??'—')+'<br>Məhsul ID: '+esc(p.id)+'</div></div></div><div class="actions"><button class="btn red small" data-delete-product="'+esc(p.id)+'">Məhsulu sil</button></div></article>';
+ }).join('');
+}
+
+async function deleteProduct(id){
+ const p=state.products.find(x=>String(x.id)===String(id));
+ if(!p)return;
+ if(!confirm('"'+(p.name||'Bu məhsul')+'" məhsulunu silmək istəyirsən? Bu əməliyyat geri qaytarılmaya bilər.'))return;
+ try{
+  await api('/api/admin/products/'+encodeURIComponent(id),{method:'DELETE'});
+  toast('Məhsul silindi.');
+  await loadAll();
+ }catch(e){toast('Məhsul silinmədi: '+e.message)}
+}
+
+$('#loginForm').addEventListener('submit',e=>{e.preventDefault();login()});
+$('#logoutBtn').addEventListener('click',()=>{
+ state.token='';
+ state.sellers=[];
+ state.products=[];
+ $('#tokenInput').value='';
+ showLogin();
+ toast('Admin hesabından çıxış edildi.');
+});
+$('#refreshBtn').addEventListener('click',async()=>{
+ try{await loadAll();toast('Məlumatlar yeniləndi.')}
+ catch(e){toast('Yeniləmək mümkün olmadı: '+e.message)}
+});
+document.querySelectorAll('[data-status]').forEach(b=>b.addEventListener('click',()=>{
+ state.status=b.dataset.status;
+ renderSellers();
+}));
+document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>{
+ state.tab=b.dataset.tab;
+ document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x===b));
+ $('#sellerPanel').classList.toggle('hide',state.tab!=='sellers');
+ $('#productPanel').classList.toggle('hide',state.tab!=='products');
+}));
+['sellerSearch','categoryFilter','sellerSort'].forEach(id=>$('#'+id).addEventListener(id==='sellerSearch'?'input':'change',renderSellers));
+['productSearch','productStoreFilter','productSort'].forEach(id=>$('#'+id).addEventListener(id==='productSearch'?'input':'change',renderProducts));
+$('#sellerList').addEventListener('click',e=>{
+ const b=e.target.closest('[data-action]');
+ if(b)changeStatus(b.dataset.id,b.dataset.action);
+});
+$('#productList').addEventListener('click',e=>{
+ const b=e.target.closest('[data-delete-product]');
+ if(b)deleteProduct(b.dataset.deleteProduct);
+});
+</script>
+</body>
+</html>
