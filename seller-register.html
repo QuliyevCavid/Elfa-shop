@@ -163,6 +163,7 @@ footer{background:#171717;color:#aaa;padding:30px 0;text-align:center;font-size:
         <div class="stat"><b id="sStock">0</b>Ümumi stok</div>
         <div class="stat"><b id="sValue">0.00 AZN</b>Stok dəyəri</div>
       </div>
+      <p class="sub" id="homeInfo" style="margin-bottom:14px"></p>
       <div class="note hide" id="pendingNote">Mağazanız hələ təsdiqlənməyib. Təsdiqdən sonra məhsullarınız ana səhifədə görünəcək.</div>
 
       <h2 style="font-size:19px;margin:6px 0 14px">Yeni məhsul əlavə et</h2>
@@ -383,6 +384,7 @@ async function openDash() {
     });
 
     st = res.status || st;
+    setHomeInfo(res);
 
     LS.s('elfa_seller_session', {
       ...s,
@@ -410,6 +412,22 @@ async function openDash() {
   await renderProducts();
 }
 
+function setHomeInfo(res){
+  const used=res.home_used||0,slots=res.home_slots||0;
+  $('#homeInfo').textContent=slots
+    ? 'Ana səhifə: '+used+' / '+slots+' məhsul seçilib. Məhsulun yanındakı düymə ilə ana səhifəyə qoya və ya çıxara bilərsiniz.'
+    : 'Ana səhifədə məhsul göstərmək üçün ELFA ilə əlaqə saxlayın. Hələ sizə ana səhifə yeri verilməyib.';
+}
+async function toggleHome(id,on){
+  const s=session();if(!s) return;
+  try{
+    const r=await api('/api/seller/products/'+encodeURIComponent(id)+'/home',{method:'PUT',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(s.token||'')},body:JSON.stringify({on_home:on})});
+    setHomeInfo(r);
+    toast(on?'Məhsul ana səhifəyə qoyuldu ✓':'Məhsul ana səhifədən çıxarıldı');
+    await renderProducts();
+  }catch(err){toast(err.message||'Xəta baş verdi')}
+}
+
 async function renderProducts(){
   const list=await myProducts();
   $('#sCount').textContent=list.length;
@@ -419,9 +437,13 @@ async function renderProducts(){
     <div class="pi">
       <div class="im">${p.image_url?`<img src="${esc(p.image_url)}" alt="">`:'ELFA'}</div>
       <div class="mid"><b>${esc(p.name)}</b><small>${money(p.price)} · Stok: ${esc(p.stock)}</small></div>
-      <button class="del" data-del="${esc(p.id)}">Sil</button>
+      <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+        <button class="del" style="color:#1a7a35" data-home="${esc(p.id)}" data-on="${p.on_home?'1':'0'}">${p.on_home?'Ana səhifədən çıxar':'Ana səhifəyə qoy'}</button>
+        <button class="del" data-del="${esc(p.id)}">Sil</button>
+      </div>
     </div>`).join(''):'<p class="sub">Hələ məhsul əlavə etməmisiniz.</p>';
   document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>delProduct(b.dataset.del));
+  document.querySelectorAll('[data-home]').forEach(b=>b.onclick=()=>toggleHome(b.dataset.home,b.dataset.on!=='1'));
 }
 $('#addP').onclick=async()=>{
   const s=session();if(!s) return;
