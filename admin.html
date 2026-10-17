@@ -271,8 +271,42 @@ function renderSellers(){
   if(status!=='approved')buttons.push('<button class="btn green small" data-action="approved" data-id="'+esc(s.id)+'">Təsdiqlə</button>');
   if(status!=='rejected')buttons.push('<button class="btn red small" data-action="rejected" data-id="'+esc(s.id)+'">Rədd et</button>');
   if(status!=='pending')buttons.push('<button class="btn light small" data-action="pending" data-id="'+esc(s.id)+'">Gözləməyə qaytar</button>');
-  return '<article class="item"><div class="info"><h3>'+esc(s.store_name||'Adsız mağaza')+' <span class="badge '+esc(status)+'">'+esc(statusLabel(status))+'</span></h3><div class="meta">Sahib: '+esc(s.owner_name||'—')+'<br>Telefon: '+esc(s.phone||'—')+'<br>E-poçt: '+esc(s.email||'—')+'<br>Kateqoriya: '+esc(s.category||'—')+'<br>Şəhər: '+esc(s.city||'—')+'<br>Qeydiyyat: '+esc(dateLabel(s.created_at))+'</div>'+about+'</div><div class="actions">'+buttons.join('')+'</div></article>';
+  buttons.push('<button class="btn gold small" data-slots="'+esc(s.id)+'">Ana səhifə yeri: '+esc(s.home_used||0)+'/'+esc(s.home_slots||0)+'</button>');
+  buttons.push('<button class="btn light small" data-homeall="'+esc(s.id)+'">'+(s.home_all?'Bütün məhsulları ana səhifədən çıxar':'Bütün məhsulları ana səhifəyə qoy')+'</button>');
+  return '<article class="item"><div class="info"><h3>'+esc(s.store_name||'Adsız mağaza')+' <span class="badge '+esc(status)+'">'+esc(statusLabel(status))+'</span></h3><div class="meta">Sahib: '+esc(s.owner_name||'—')+'<br>Telefon: '+esc(s.phone||'—')+'<br>E-poçt: '+esc(s.email||'—')+'<br>Kateqoriya: '+esc(s.category||'—')+'<br>Şəhər: '+esc(s.city||'—')+'<br>Qeydiyyat: '+esc(dateLabel(s.created_at))+'<br>Ana səhifə: '+(s.home_all?'<b>bütün məhsullar göstərilir</b>':'satıcı '+esc(s.home_used||0)+' / '+esc(s.home_slots||0)+' məhsul seçib')+'</div>'+about+'</div><div class="actions">'+buttons.join('')+'</div></article>';
  }).join('');
+}
+
+async function setSlots(id){
+ const s=state.sellers.find(x=>String(x.id)===String(id));
+ if(!s)return;
+ const v=prompt((s.store_name||'Mağaza')+': satıcı ana səhifəyə neçə məhsul qoya bilsin? (0 = heç biri)',String(s.home_slots||0));
+ if(v===null)return;
+ const n=parseInt(v,10);
+ if(!Number.isInteger(n)||n<0||n>1000){toast('0 ilə 1000 arasında rəqəm yazın.');return}
+ try{
+  await api('/api/admin/sellers/'+encodeURIComponent(id)+'/home',{method:'POST',body:JSON.stringify({slots:n})});
+  toast('Ana səhifə limiti yeniləndi.');
+  await loadAll();
+ }catch(e){toast('Dəyişdirilmədi: '+e.message)}
+}
+async function toggleHomeAll(id){
+ const s=state.sellers.find(x=>String(x.id)===String(id));
+ if(!s)return;
+ try{
+  await api('/api/admin/sellers/'+encodeURIComponent(id)+'/home',{method:'POST',body:JSON.stringify({all:!s.home_all})});
+  toast(s.home_all?'Mağaza ana səhifədən çıxarıldı.':'Mağazanın bütün məhsulları ana səhifəyə qoyuldu.');
+  await loadAll();
+ }catch(e){toast('Dəyişdirilmədi: '+e.message)}
+}
+async function toggleProductHome(id){
+ const p=state.products.find(x=>String(x.id)===String(id));
+ if(!p)return;
+ try{
+  await api('/api/admin/products/'+encodeURIComponent(id)+'/home',{method:'POST',body:JSON.stringify({on_home:!p.on_home})});
+  toast(p.on_home?'Məhsul ana səhifədən çıxarıldı.':'Məhsul ana səhifəyə qoyuldu.');
+  await loadAll();
+ }catch(e){toast('Dəyişdirilmədi: '+e.message)}
 }
 
 async function changeStatus(id,status){
@@ -306,7 +340,7 @@ function renderProducts(){
  $('#productList').innerHTML=rows.map(p=>{
   const sid=p.seller_id;
   const storeName=p.store_name||state.sellers.find(s=>String(s.id)===String(sid))?.store_name||'Mağaza';
-  return '<article class="item"><div class="product-info">'+imageMarkup(p.image_url)+'<div class="info"><h3>'+esc(p.name||'Adsız məhsul')+'</h3><div class="meta">Mağaza: '+esc(storeName)+'<br>Qiymət: <b>'+esc(money(p.price))+'</b><br>Stok: '+esc(p.stock??'—')+'<br>Məhsul ID: '+esc(p.id)+'</div></div></div><div class="actions"><button class="btn red small" data-delete-product="'+esc(p.id)+'">Məhsulu sil</button></div></article>';
+  return '<article class="item"><div class="product-info">'+imageMarkup(p.image_url)+'<div class="info"><h3>'+esc(p.name||'Adsız məhsul')+'</h3><div class="meta">Mağaza: '+esc(storeName)+'<br>Qiymət: <b>'+esc(money(p.price))+'</b><br>Stok: '+esc(p.stock??'—')+'<br>Məhsul ID: '+esc(p.id)+'<br>Ana səhifə: '+(p.on_home?'<b>bəli</b>':'xeyr')+'</div></div></div><div class="actions"><button class="btn gold small" data-home-product="'+esc(p.id)+'">'+(p.on_home?'Ana səhifədən çıxar':'Ana səhifəyə qoy')+'</button><button class="btn red small" data-delete-product="'+esc(p.id)+'">Məhsulu sil</button></div></article>';
  }).join('');
 }
 
@@ -347,10 +381,16 @@ document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()
 ['sellerSearch','categoryFilter','sellerSort'].forEach(id=>$('#'+id).addEventListener(id==='sellerSearch'?'input':'change',renderSellers));
 ['productSearch','productStoreFilter','productSort'].forEach(id=>$('#'+id).addEventListener(id==='productSearch'?'input':'change',renderProducts));
 $('#sellerList').addEventListener('click',e=>{
+ const sl=e.target.closest('[data-slots]');
+ if(sl)return setSlots(sl.dataset.slots);
+ const ha=e.target.closest('[data-homeall]');
+ if(ha)return toggleHomeAll(ha.dataset.homeall);
  const b=e.target.closest('[data-action]');
  if(b)changeStatus(b.dataset.id,b.dataset.action);
 });
 $('#productList').addEventListener('click',e=>{
+ const h=e.target.closest('[data-home-product]');
+ if(h)return toggleProductHome(h.dataset.homeProduct);
  const b=e.target.closest('[data-delete-product]');
  if(b)deleteProduct(b.dataset.deleteProduct);
 });
