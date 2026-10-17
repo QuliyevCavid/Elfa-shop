@@ -172,7 +172,13 @@ footer{background:#171717;color:#aaa;padding:30px 0;text-align:center;font-size:
         <div class="f"><label for="pPrice">Qiymət (AZN) *</label><input id="pPrice" type="number" min="0" step="0.01" inputmode="decimal" placeholder="49.90"></div>
         <div class="f"><label for="pStock">Stok sayı *</label><input id="pStock" type="number" min="0" step="1" inputmode="numeric" placeholder="10"></div>
       </div>
-      <div class="f"><label for="pImg">Şəkil linki</label><input id="pImg" type="url" placeholder="https://..."><div class="hint">Şəkil əlavə etməsəniz standart görünüş göstəriləcək.</div></div>
+      <div class="f">
+        <label for="pFile">Məhsul şəkli</label>
+        <input id="pFile" type="file" accept="image/*" style="height:auto;padding:10px">
+        <img id="pPrev" alt="" class="hide" style="width:110px;height:110px;object-fit:cover;border-radius:10px;border:1px solid var(--line);margin-top:8px">
+        <div class="hint">Kompüterdən və ya telefondan şəkil seçin. Şəkil avtomatik kiçildilir.</div>
+      </div>
+      <div class="f"><label for="pImg">və ya şəkil linki (ixtiyari)</label><input id="pImg" type="url" placeholder="https://..."><div class="hint">Şəkil əlavə etməsəniz standart görünüş göstəriləcək.</div></div>
       <div class="f"><label for="pDesc">Təsvir</label><textarea id="pDesc" maxlength="600" placeholder="Məhsul haqqında məlumat..."></textarea></div>
       <button class="btn" id="addP">Məhsulu əlavə et</button>
 
@@ -445,15 +451,58 @@ async function renderProducts(){
   document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>delProduct(b.dataset.del));
   document.querySelectorAll('[data-home]').forEach(b=>b.onclick=()=>toggleHome(b.dataset.home,b.dataset.on!=='1'));
 }
+/* Şəkil: seçilən faylı kiçildib (maks. 1200px, JPEG) serverə yükləyir */
+function loadImg(file){
+  return new Promise((resolve,reject)=>{
+    const u=URL.createObjectURL(file),i=new Image();
+    i.onload=()=>{URL.revokeObjectURL(u);resolve(i)};
+    i.onerror=()=>{URL.revokeObjectURL(u);reject(new Error('Şəkil oxunmadı. JPG və ya PNG seçin.'))};
+    i.src=u;
+  });
+}
+async function compressImage(file){
+  if(!/^image\//.test(file.type)) throw new Error('Yalnız şəkil faylı seçin');
+  const img=await loadImg(file);
+  const k=Math.min(1,1200/Math.max(img.width,img.height));
+  const w=Math.max(1,Math.round(img.width*k)),h=Math.max(1,Math.round(img.height*k));
+  const c=document.createElement('canvas');c.width=w;c.height=h;
+  const ctx=c.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);ctx.drawImage(img,0,0,w,h);
+  const blob=await new Promise(r=>c.toBlob(r,'image/jpeg',0.82));
+  if(!blob) throw new Error('Şəkil işlənmədi');
+  return blob;
+}
+async function uploadImage(file,token){
+  const blob=await compressImage(file);
+  let response;
+  try{
+    response=await fetch('/api/seller/upload',{method:'POST',headers:{'Content-Type':'image/jpeg','Authorization':'Bearer '+(token||'')},body:blob});
+  }catch(e){throw new Error('Serverə qoşulmaq mümkün olmadı.')}
+  let data=null;try{data=await response.json()}catch(_){}
+  if(!response.ok) throw new Error((data&&(data.error||data.detail))||('Şəkil yüklənmədi ('+response.status+')'));
+  if(!data||!data.url) throw new Error('Serverdən düzgün cavab alınmadı.');
+  return data.url;
+}
+$('#pFile').addEventListener('change',()=>{
+  const f=$('#pFile').files[0],prev=$('#pPrev');
+  if(!f){prev.classList.add('hide');prev.removeAttribute('src');return}
+  prev.src=URL.createObjectURL(f);prev.classList.remove('hide');
+});
+
 $('#addP').onclick=async()=>{
   const s=session();if(!s) return;
   if(currentStatus()!=='approved') return toast('Mağazanız hələ təsdiqlənməyib');
   const p={name:$('#pName').value.trim(),price:parseFloat($('#pPrice').value),stock:parseInt($('#pStock').value,10),image_url:$('#pImg').value.trim(),description:$('#pDesc').value.trim()};
   if(!p.name||isNaN(p.price)||isNaN(p.stock)) return toast('Ad, qiymət və stoku yazın');
   if(p.price<0||p.stock<0) return toast('Qiymət və stok mənfi ola bilməz');
-  if(p.image_url&&!/^https?:\/\//i.test(p.image_url)) return toast('Şəkil linki http(s) ilə başlamalıdır');
+  const file=$('#pFile').files[0];
+  if(!file&&p.image_url&&!/^https?:\/\//i.test(p.image_url)) return toast('Şəkil linki http(s) ilə başlamalıdır');
   const btn=$('#addP');btn.disabled=true;
   try{
+    if(file){
+      btn.textContent='Şəkil yüklənir...';
+      p.image_url=await uploadImage(file,s.token);
+    }
+    btn.textContent='Məhsulu əlavə et';
     let res=null;
     if(s.remote) res=await api('/api/seller/products',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(s.token||'')},body:JSON.stringify(p)});
     if(!res){
@@ -461,9 +510,11 @@ $('#addP').onclick=async()=>{
       all.push(Object.assign({id:'P'+Date.now(),seller:s.email,store_name:s.store_name},p));
       LS.s('elfa_seller_products',all);
     }
-    ['pName','pPrice','pStock','pImg','pDesc'].forEach(id=>$('#'+id).value='');
+    ['pName','pPrice','pStock','pImg','pDesc','pFile'].forEach(id=>$('#'+id).value='');
+    $('#pPrev').classList.add('hide');$('#pPrev').removeAttribute('src');
     toast('Məhsul əlavə olundu ✓');await renderProducts();
   }catch(err){toast(err.message||'Xəta baş verdi')}
+  btn.textContent='Məhsulu əlavə et';
   btn.disabled=false;
 };
 async function delProduct(id){
