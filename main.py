@@ -49,8 +49,13 @@ SELLER_NEW_COLUMNS = [
     ("instagram", "TEXT NOT NULL DEFAULT ''"),
     ("tiktok", "TEXT NOT NULL DEFAULT ''"),
     ("address", "TEXT NOT NULL DEFAULT ''"),
+    # Ana sehife: home_slots = satıcının seçə biləcəyi məhsul sayı (admin təyin edir),
+    # home_all = 1 olarsa, mağazanın bütün məhsulları ana səhifədə görünür (yalnız admin)
+    ("home_slots", "INTEGER NOT NULL DEFAULT 0"),
+    ("home_all", "INTEGER NOT NULL DEFAULT 0"),
 ]
 PRODUCT_NEW_COLUMNS = [
+    ("on_home", "INTEGER NOT NULL DEFAULT 0"),
     ("category", "TEXT NOT NULL DEFAULT ''"),
     ("brand", "TEXT NOT NULL DEFAULT ''"),
     ("gender", "TEXT NOT NULL DEFAULT ''"),
@@ -243,6 +248,15 @@ class ProfileIn(BaseModel):
 
 class StatusIn(BaseModel):
     status: str
+
+
+class HomeIn(BaseModel):
+    on_home: bool
+
+
+class SellerHomeIn(BaseModel):
+    slots: Optional[int] = Field(default=None, ge=0, le=1000)
+    all: Optional[bool] = None
 
 
 EMAIL_RE = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
@@ -458,9 +472,18 @@ def logout(
     return {"ok": True}
 
 
-def seller_private(s: sqlite3.Row) -> dict:
+def home_used(con, seller_id: int) -> int:
+    return con.execute(
+        "SELECT COUNT(*) FROM products WHERE seller_id = ? AND on_home = 1",
+        (seller_id,),
+    ).fetchone()[0]
+
+
+def seller_private(s: sqlite3.Row, used: int = 0) -> dict:
     """Saticinin oz paneli ucun melumatlar (e-poct daxil)."""
     return {
+        "home_slots": s["home_slots"],
+        "home_used": used,
         "store_name": s["store_name"],
         "owner_name": s["owner_name"],
         "email": s["email"],
@@ -479,7 +502,9 @@ def seller_private(s: sqlite3.Row) -> dict:
 
 @app.get("/api/seller/me")
 def me(s: sqlite3.Row = Depends(current_seller)):
-    return seller_private(s)
+    with db() as con:
+        used = home_used(con, s["id"])
+    return seller_private(s, used)
 
 
 @app.put("/api/seller/profile")
@@ -515,8 +540,9 @@ def update_profile(
         row = con.execute(
             "SELECT * FROM sellers WHERE id = ?", (s["id"],)
         ).fetchone()
+        used = home_used(con, s["id"])
 
-    return seller_private(row)
+    return seller_private(row, used)
 
 
 # Mehsullar
@@ -531,6 +557,7 @@ def product_dict(r: sqlite3.Row) -> dict:
         )
     }
     data["sizes"] = [x for x in (r["sizes"] or "").split(",") if x]
+    data["on_home"] = bool(r["on_home"])
 
     if "store_name" in keys:
         data["store_name"] = r["store_name"]
@@ -623,6 +650,44 @@ def add_product(
     return product_dict(row)
 
 
+@app.put("/api/seller/products/{pid}/home")
+def seller_set_home(
+    pid: int,
+    data: HomeIn,
+    s: sqlite3.Row = Depends(current_seller),
+):
+    """Satici oz mehsulunu ana sehifeye qoyur/cixarir. Limit: home_slots."""
+    with db() as con:
+        p = con.execute(
+            "SELECT id, on_home FROM products WHERE id = ? AND seller_id = ?",
+            (pid, s["id"]),
+        ).fetchone()
+
+        if not p:
+            raise HTTPException(404, "Mehsul tapilmadi")
+
+        if data.on_home and not p["on_home"]:
+            used = home_used(con, s["id"])
+            if used >= s["home_slots"]:
+                raise HTTPException(
+                    400,
+                    f"Ana səhifə limitiniz dolub ({used}/{s['home_slots']})",
+                )
+
+        con.execute(
+            "UPDATE products SET on_home = ? WHERE id = ?",
+            (1 if data.on_home else 0, pid),
+        )
+        used = home_used(con, s["id"])
+
+    return {
+        "ok": True,
+        "on_home": data.on_home,
+        "home_used": used,
+        "home_slots": s["home_slots"],
+    }
+
+
 @app.put("/api/seller/products/{pid}")
 def update_product(
     pid: int,
@@ -670,6 +735,7 @@ def delete_product(
 # Ictimai mehsullar (YALNIZ tesdiqlenmis magazalar)
 def approved_rows(con, store_id: Optional[int] = None):
     sql = """SELECT p.*, s.store_name,
+                    s.home_all AS store_home_all,
                     s.city AS store_city,
                     s.phone AS store_phone,
                     s.whatsapp AS store_whatsapp
@@ -744,6 +810,7 @@ def public_products(
     price_min: Optional[float] = None,
     price_max: Optional[float] = None,
     store_id: Optional[int] = None,
+    home: Optional[bool] = None,
     limit: int = Query(100, ge=1, le=200),
     offset: int = Query(0, ge=0),
 ):
@@ -754,6 +821,9 @@ def public_products(
     result = []
 
     for r in rows:
+        # Ana sehife: admin secdiyi magazalar + secilmis mehsullar
+        if home and not (r["on_home"] or r["store_home_all"]):
+            continue
         if category and fold(r["category"]) != fold(category):
             continue
         if brand and fold(r["brand"]) != fold(brand):
@@ -844,9 +914,11 @@ def admin_sellers(status: Optional[str] = None):
     query = """
         SELECT id, store_name, owner_name, category, phone,
                email, city, address, about, whatsapp, instagram,
-               tiktok, status, created_at,
+               tiktok, status, created_at, home_slots, home_all,
                (SELECT COUNT(*) FROM products p
-                WHERE p.seller_id = sellers.id) AS product_count
+                WHERE p.seller_id = sellers.id) AS product_count,
+               (SELECT COUNT(*) FROM products p
+                WHERE p.seller_id = sellers.id AND p.on_home = 1) AS home_used
         FROM sellers
     """
     args = ()
@@ -882,6 +954,63 @@ def admin_set_status(sid: int, data: StatusIn):
         raise HTTPException(404, "Satici tapilmadi")
 
     return {"ok": True, "status": data.status}
+
+
+# Admin: saticinin ana sehife limiti ve ya butun mehsullarinin ana sehifede gorunmesi
+@app.post(
+    "/api/admin/sellers/{sid}/home",
+    dependencies=[Depends(require_admin)],
+)
+def admin_seller_home(sid: int, data: SellerHomeIn):
+    with db() as con:
+        s = con.execute(
+            "SELECT id FROM sellers WHERE id = ?", (sid,)
+        ).fetchone()
+
+        if not s:
+            raise HTTPException(404, "Satici tapilmadi")
+
+        if data.slots is not None:
+            con.execute(
+                "UPDATE sellers SET home_slots = ? WHERE id = ?",
+                (data.slots, sid),
+            )
+
+        if data.all is not None:
+            con.execute(
+                "UPDATE sellers SET home_all = ? WHERE id = ?",
+                (1 if data.all else 0, sid),
+            )
+
+        row = con.execute(
+            "SELECT home_slots, home_all FROM sellers WHERE id = ?", (sid,)
+        ).fetchone()
+        used = home_used(con, sid)
+
+    return {
+        "ok": True,
+        "home_slots": row["home_slots"],
+        "home_all": bool(row["home_all"]),
+        "home_used": used,
+    }
+
+
+# Admin: tek mehsulu ana sehifeye qoy/cixar (limitsiz)
+@app.post(
+    "/api/admin/products/{pid}/home",
+    dependencies=[Depends(require_admin)],
+)
+def admin_product_home(pid: int, data: HomeIn):
+    with db() as con:
+        cur = con.execute(
+            "UPDATE products SET on_home = ? WHERE id = ?",
+            (1 if data.on_home else 0, pid),
+        )
+
+    if cur.rowcount == 0:
+        raise HTTPException(404, "Mehsul tapilmadi")
+
+    return {"ok": True, "on_home": data.on_home}
 
 
 # Sehifeler
@@ -948,4 +1077,3 @@ def admin_delete_product(pid: int):
         raise HTTPException(404, "Mehsul tapilmadi")
 
     return {"ok": True}
-
