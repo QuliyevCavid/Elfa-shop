@@ -126,6 +126,14 @@ def init_db():
 
             CREATE INDEX IF NOT EXISTS idx_products_seller
             ON products(seller_id);
+
+            CREATE TABLE IF NOT EXISTS images (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                seller_id INTEGER NOT NULL REFERENCES sellers(id) ON DELETE CASCADE,
+                mime TEXT NOT NULL,
+                data BLOB NOT NULL,
+                created_at TEXT NOT NULL
+            );
         """)
         ensure_columns(con, "sellers", SELLER_NEW_COLUMNS)
         ensure_columns(con, "products", PRODUCT_NEW_COLUMNS)
@@ -277,6 +285,17 @@ def clean_url(value: str, label: str) -> str:
     return v
 
 
+IMG_PATH_RE = re.compile(r"^/api/images/\d+$")
+
+
+def clean_image_url(value: str, label: str) -> str:
+    """Ya serverə yüklənmiş şəkil yolu (/api/images/12), ya da http(s) link."""
+    v = (value or "").strip()
+    if v and IMG_PATH_RE.match(v):
+        return v
+    return clean_url(v, label)
+
+
 def clean_social(value: str, domain: str, label: str) -> str:
     """Istifadeci ad (@ad) ve ya tam link qebul edir."""
     v = (value or "").strip()
@@ -356,7 +375,7 @@ def clean_product(data: ProductIn) -> dict:
         "name": name,
         "price": data.price,
         "stock": data.stock,
-        "image_url": clean_url(data.image_url, "Şəkil linki"),
+        "image_url": clean_image_url(data.image_url, "Şəkil linki"),
         "description": data.description.strip(),
         "category": category,
         "brand": data.brand.strip(),
@@ -520,7 +539,7 @@ def update_profile(
             continue
         value = value.strip()
         if key == "logo_url":
-            value = clean_url(value, "Loqo linki")
+            value = clean_image_url(value, "Loqo linki")
         elif key == "whatsapp":
             value = clean_whatsapp(value)
         elif key == "instagram":
@@ -543,6 +562,80 @@ def update_profile(
         used = home_used(con, s["id"])
 
     return seller_private(row, used)
+
+
+# Sekil yukleme (kompüterdən və ya telefondan)
+MAX_IMAGE_BYTES = 3 * 1024 * 1024
+MAX_IMAGES_PER_SELLER = 300
+
+
+def sniff_image(b: bytes) -> Optional[str]:
+    """Faylın real növünü içindən müəyyən edir (adına və ya başlığına inanmır)."""
+    if b.startswith(b"\xff\xd8\xff"):
+        return "image/jpeg"
+    if b.startswith(b"\x89PNG\r\n\x1a\n"):
+        return "image/png"
+    if b[:4] == b"RIFF" and b[8:12] == b"WEBP":
+        return "image/webp"
+    return None
+
+
+@app.post("/api/seller/upload")
+async def upload_image(
+    request: Request,
+    s: sqlite3.Row = Depends(current_seller),
+):
+    """Şəkli xam bayt kimi qəbul edir (Content-Type: image/jpeg). Cavab: {url}."""
+    declared = request.headers.get("content-length")
+    if declared and declared.isdigit() and int(declared) > MAX_IMAGE_BYTES:
+        raise HTTPException(413, "Şəkil çox böyükdür (maksimum 3 MB)")
+
+    body = await request.body()
+
+    if not body:
+        raise HTTPException(400, "Şəkil boşdur")
+    if len(body) > MAX_IMAGE_BYTES:
+        raise HTTPException(413, "Şəkil çox böyükdür (maksimum 3 MB)")
+
+    mime = sniff_image(body)
+    if not mime:
+        raise HTTPException(400, "Yalnız JPG, PNG və ya WEBP şəkil yüklənə bilər")
+
+    with db() as con:
+        n = con.execute(
+            "SELECT COUNT(*) FROM images WHERE seller_id = ?", (s["id"],)
+        ).fetchone()[0]
+
+        if n >= MAX_IMAGES_PER_SELLER:
+            raise HTTPException(400, "Şəkil limiti doldu")
+
+        cur = con.execute(
+            """INSERT INTO images (seller_id, mime, data, created_at)
+               VALUES (?, ?, ?, ?)""",
+            (s["id"], mime, body, now().isoformat()),
+        )
+
+    return {"url": f"/api/images/{cur.lastrowid}"}
+
+
+@app.get("/api/images/{iid}")
+def get_image(iid: int):
+    with db() as con:
+        row = con.execute(
+            "SELECT mime, data FROM images WHERE id = ?", (iid,)
+        ).fetchone()
+
+    if not row:
+        raise HTTPException(404, "Şəkil tapılmadı")
+
+    return Response(
+        content=bytes(row["data"]),
+        media_type=row["mime"],
+        headers={
+            "Cache-Control": "public, max-age=31536000, immutable",
+            "X-Content-Type-Options": "nosniff",
+        },
+    )
 
 
 # Mehsullar
