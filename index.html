@@ -176,16 +176,16 @@ footer{margin-top:70px;background:#171717;color:#fff;padding:45px 0}
 <nav class="categories">
  
 <div class="cat-inner" id="cats">
-  <a href="#" data-home="true" class="active">Ana səhifə</a>
-  <a href="#" data-c="Geyim">Geyim</a>
-  <a href="#" data-c="Ayaqqabı">Ayaqqabı</a>
-  <a href="#" data-c="Çanta">Çanta</a>
+  <a href="#" data-home="true" class="active">☰ Bütün məhsullar</a>
+  <a href="#" data-c="Yeni">Yeni</a>
+  <a href="#" data-c="Qadın">Qadın</a>
+  <a href="#" data-c="Kişi">Kişi</a>
+  <a href="#" data-c="Ana & Uşaq">Ana & Uşaq</a>
+  <a href="#" data-c="Ev & Yaşayış">Ev & Yaşayış</a>
   <a href="#" data-c="Kosmetika">Kosmetika</a>
-  <a href="#" data-c="Ətir">Ətir</a>
-  <a href="#" data-c="Aksesuar">Aksesuar</a>
-  <a href="#" data-c="Saat">Saat</a>
-  <a href="#" data-c="Eynək">Eynək</a>
-  <a href="#" data-c="Digər">Digər</a>
+  <a href="#" data-c="Elektronika">Elektronika</a>
+  <a href="#" data-c="Qaynar Məhsullar">Qaynar Məhsullar <span>Yeni</span></a>
+  <a href="#" data-c="Çox Satılanlar">Çox Satılanlar <span>Yeni</span></a>
 </div>
 
 </nav>
@@ -442,13 +442,38 @@ async function clearAll(){
 $('#clearF').onclick=clearAll;
 $('#pageBack').onclick=clearAll;
 $('#fToggle').onclick=()=>$('#filters').classList.toggle('open');
-$('#cats').addEventListener('click',async e=>{
-  const a=e.target.closest('a');if(!a)return;
-  F.category=a.dataset.c;$('#fCategory').value=F.category;
-  syncFilterUI();await loadBrandMaterial();
+
+$('#cats').addEventListener('click', async e => {
+  const a = e.target.closest('a');
+  if (!a) return;
+
+  e.preventDefault();
+
+  if (a.dataset.home === 'true') {
+    await clearAll();
+    $('#cats').querySelectorAll('a').forEach(link => {
+      link.classList.remove('active');
+    });
+    a.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    return;
+  }
+
+  F.category = a.dataset.c || '';
+  $('#fCategory').value = F.category;
+
+  $('#cats').querySelectorAll('a').forEach(link => {
+    link.classList.remove('active');
+  });
+  a.classList.add('active');
+
+  syncFilterUI();
+  await loadBrandMaterial();
   loadProducts(true);
-  $('#prodSec').scrollIntoView({behavior:'smooth'});
+
+  $('#prodSec').scrollIntoView({ behavior: 'smooth' });
 });
+
 
 /* axtarış */
 let st;
