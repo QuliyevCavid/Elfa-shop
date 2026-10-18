@@ -59,15 +59,6 @@ input:focus,select:focus,textarea:focus{border-color:#171717}
 .badge{display:inline-block;border-radius:12px;padding:3px 10px;font-size:12px;background:#eee}
 .badge.green{background:#e3f6e8;color:#1a7a35}
 .badge.wait{background:#fff3d6;color:#8a6200}
-.badge.red{background:#fde4e4;color:#b42323}
-.bar{height:8px;border-radius:6px;background:#eee;overflow:hidden;margin-top:8px}
-.bar i{display:block;height:100%;width:0;background:#171717;transition:width .15s}
-.chips{display:flex;flex-wrap:wrap;gap:8px}
-.chips label{display:flex;align-items:center;gap:6px;border:1px solid #ddd;border-radius:18px;padding:6px 12px;font-size:12px;font-weight:700;margin:0;cursor:pointer}
-.chips input{width:auto;height:auto}
-details.box{border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:18px}
-details.box summary{font-weight:700;font-size:15px;cursor:pointer}
-details.box[open] summary{margin-bottom:14px}
 .plist{display:grid;gap:10px;margin-top:6px}
 .pi{display:flex;gap:12px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:10px}
 .pi .im{width:60px;height:60px;border-radius:10px;background:#ece9e4;flex:none;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:11px;color:#888}
@@ -89,11 +80,10 @@ footer{background:#171717;color:#aaa;padding:30px 0;text-align:center;font-size:
 <div class="topbar">ELFA-DA SATICI OL · MƏHSULLARINI MİNLƏRLƏ ALICIYA GÖSTƏR</div>
 <header>
   <div class="nav">
-    <a class="logo" href="/elfa.html">ELFA</a>
+    <a class="logo" href="[/elfa.html](https://elfa-shop.onrender.com/elfa.html)">ELFA</a>
     <button class="back" id="backBtn">← Geri</button>
   </div>
 </header>
-
 <main class="wrap">
   <aside class="intro">
     <div class="eyebrow">ELFA · SATICI PROQRAMI</div>
@@ -102,32 +92,21 @@ footer{background:#171717;color:#aaa;padding:30px 0;text-align:center;font-size:
     <ul>
       <li><b>1</b><span>Qeydiyyatdan keç və mağaza məlumatlarını doldur.</span></li>
       <li><b>2</b><span>ELFA komandası müraciətini yoxlayıb təsdiqləyir.</span></li>
-      <li><b>3</b><span>Təsdiqdən sonra məhsullarını əlavə et. Alıcılar sənə WhatsApp və ya zəng ilə birbaşa yazacaq.</span></li>
+      <li><b>3</b><span>Təsdiqdən sonra məhsullarını əlavə et və sifarişləri idarə et.</span></li>
     </ul>
   </aside>
-
   <section class="panel">
     <div class="tabs">
       <button class="tab on" id="tabReg">Qeydiyyat</button>
       <button class="tab" id="tabLogin">Satıcı paneli</button>
     </div>
-
     <!-- QEYDİYYAT -->
     <div id="regView">
       <h2>Satıcı qeydiyyatı</h2>
       <p class="sub">Məlumatlar yoxlanıldıqdan sonra mağazan aktiv olacaq.</p>
       <form id="regForm" novalidate>
         <div class="f"><label for="storeName">Mağaza adı *</label><input id="storeName" maxlength="40" placeholder="Məs: ELFA STORE"></div>
-        <div class="two">
-          <div class="f"><label for="ownerName">Ad və soyad *</label><input id="ownerName" placeholder="Ad Soyad" autocomplete="name"></div>
-          <div class="f"><label for="category">Əsas kateqoriya *</label>
-            <select id="category">
-              <option value="">Seçin</option>
-              <option>Qadın</option><option>Kişi</option><option>Ana &amp; Uşaq</option>
-              <option>Ev &amp; Yaşayış</option><option>Kosmetika</option><option>Elektronika</option><option>Digər</option>
-            </select>
-          </div>
-        </div>
+        <div class="f"><label for="ownerName">Ad və soyad *</label><input id="ownerName" placeholder="Ad Soyad" autocomplete="name"></div>
         <div class="f"><label for="phone">Telefon *</label>
           <div class="phone-box"><span>+994</span><input id="phone" type="tel" inputmode="numeric" maxlength="12" placeholder="50 123 45 67" autocomplete="tel-national"></div>
         </div>
@@ -142,7 +121,6 @@ footer{background:#171717;color:#aaa;padding:30px 0;text-align:center;font-size:
         <button class="btn" id="regBtn" type="submit">Müraciət göndər</button>
       </form>
     </div>
-
     <!-- UĞUR -->
     <div id="doneView" class="hide ok">
       <div class="big">🎉</div>
@@ -151,7 +129,6 @@ footer{background:#171717;color:#aaa;padding:30px 0;text-align:center;font-size:
       <button class="btn" id="goLogin">Satıcı panelinə keç</button>
       <button class="btn alt" id="goHome">Ana səhifəyə qayıt</button>
     </div>
-
     <!-- GİRİŞ -->
     <div id="loginView" class="hide">
       <h2>Satıcı girişi</h2>
@@ -160,7 +137,6 @@ footer{background:#171717;color:#aaa;padding:30px 0;text-align:center;font-size:
       <div class="f"><label for="lpw">Şifrə</label><input id="lpw" type="password" placeholder="Şifrə" autocomplete="current-password"></div>
       <button class="btn" id="loginBtn">Daxil ol</button>
     </div>
-
     <!-- PANEL -->
     <div id="dashView" class="hide">
       <div class="row">
@@ -174,88 +150,43 @@ footer{background:#171717;color:#aaa;padding:30px 0;text-align:center;font-size:
       </div>
       <p class="sub" id="homeInfo" style="margin-bottom:14px"></p>
       <div class="note hide" id="pendingNote">Mağazanız hələ təsdiqlənməyib. Təsdiqdən sonra məhsullarınız ana səhifədə görünəcək.</div>
-
-      <details class="box" id="profBox">
-        <summary>Mağaza profili (loqo, WhatsApp, sosial şəbəkələr)</summary>
-        <div class="f"><label for="lgFile">Mağaza loqosu</label>
-          <input id="lgFile" type="file" accept="image/*" style="height:auto;padding:10px">
-          <img id="lgPrev" alt="" class="hide" style="width:84px;height:84px;object-fit:cover;border-radius:50%;border:1px solid var(--line);margin-top:8px">
-        </div>
-        <div class="two">
-          <div class="f"><label for="prWa">WhatsApp nömrəsi</label><input id="prWa" type="tel" placeholder="050 123 45 67"></div>
-          <div class="f"><label for="prCity">Şəhər</label><input id="prCity" maxlength="60" placeholder="Bakı"></div>
-        </div>
-        <div class="two">
-          <div class="f"><label for="prIg">Instagram</label><input id="prIg" placeholder="@ad və ya link"></div>
-          <div class="f"><label for="prTk">TikTok</label><input id="prTk" placeholder="@ad və ya link"></div>
-        </div>
-        <div class="f"><label for="prAddr">Ünvan</label><input id="prAddr" maxlength="200" placeholder="Küçə, nömrə"></div>
-        <div class="f"><label for="prAbout">Mağaza haqqında</label><textarea id="prAbout" maxlength="500"></textarea></div>
-        <button class="btn" id="saveProf">Profili yadda saxla</button>
-      </details>
-
+      <div id="productCreateSection" class="hide">
       <h2 style="font-size:19px;margin:6px 0 14px">Yeni məhsul əlavə et</h2>
       <div class="f"><label for="pName">Məhsul adı *</label><input id="pName" maxlength="80" placeholder="Məs: Premium Parfum"></div>
+      <div class="f"><label for="pCategory">Əsas kateqoriya *</label><select id="pCategory" required><option value="">Kateqoriya seçin</option><option value="Qadın geyimi">Qadın geyimi</option><option value="Kişi geyimi">Kişi geyimi</option><option value="Parfüm və kosmetika">Parfüm və kosmetika</option><option value="Ayaqqabı">Ayaqqabı</option><option value="Çanta və aksesuarlar">Çanta və aksesuarlar</option><option value="Ana və uşaq">Ana və uşaq</option><option value="Ev və yaşayış">Ev və yaşayış</option><option value="Elektronika">Elektronika</option><option value="İdman və istirahət">İdman və istirahət</option><option value="Ərzaq və içkilər">Ərzaq və içkilər</option><option value="Digər">Digər</option></select><div class="hint">Kateqoriya mağazaya deyil, bu məhsula aid olacaq. Hər yeni məhsul üçün ayrıca seçin.</div></div>
       <div class="two">
         <div class="f"><label for="pPrice">Qiymət (AZN) *</label><input id="pPrice" type="number" min="0" step="0.01" inputmode="decimal" placeholder="49.90"></div>
         <div class="f"><label for="pStock">Stok sayı *</label><input id="pStock" type="number" min="0" step="1" inputmode="numeric" placeholder="10"></div>
       </div>
-      <div class="two">
-        <div class="f"><label for="pCat">Kateqoriya</label><select id="pCat"><option value="">Seçin</option></select></div>
-        <div class="f"><label for="pBrand">Marka</label><input id="pBrand" maxlength="60" placeholder="Məs: Nike"></div>
-      </div>
-      <div class="two">
-        <div class="f"><label for="pGender">Cinsiyyət</label><select id="pGender"><option value="">Seçin</option></select></div>
-        <div class="f hide" id="ageWrap"><label for="pAge">Yaş aralığı</label><select id="pAge"><option value="">Seçin</option></select></div>
-      </div>
-      <div class="f" id="sizeWrap"><label>Ölçülər</label><div class="chips" id="pSizes"></div></div>
-      <div class="two">
-        <div class="f"><label for="pColor">Rəng</label><select id="pColor"><option value="">Seçin</option></select></div>
-        <div class="f"><label for="pSizeClass">Boyut</label><select id="pSizeClass"><option value="">Seçin</option></select></div>
-      </div>
-      <div class="two">
-        <div class="f"><label for="pDim">Ölçülər (sm)</label><input id="pDim" maxlength="60" placeholder="Məs: 20 × 30 sm"></div>
-        <div class="f"><label for="pMat">Material</label><input id="pMat" maxlength="60" placeholder="Məs: Pambıq"></div>
-      </div>
       <div class="f">
-        <label for="pFile">Məhsul şəkli</label>
-        <input id="pFile" type="file" accept="image/*" style="height:auto;padding:10px">
-        <img id="pPrev" alt="" class="hide" style="width:110px;height:110px;object-fit:cover;border-radius:10px;border:1px solid var(--line);margin-top:8px">
-        <div class="hint">Kompüterdən və ya telefondan şəkil seçin. Şəkil sürətli açılsın deyə avtomatik optimallaşdırılır.</div>
+        <label for="pFile">Məhsul şəkilləri (maksimum 5)</label>
+        <input id="pFile" type="file" accept="image/*" multiple style="height:auto;padding:10px">
+        <div id="pPrevList" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px"></div>
+        <div class="hint">Kompüterdən və ya telefondan 1–5 şəkil seçin. Şəkillər avtomatik kiçildilir.</div>
       </div>
-      <div class="f" id="videoField">
-        <label for="vFile">Məhsul videosu</label>
-        <input id="vFile" type="file" accept="video/mp4,video/quicktime,video/webm,video/x-m4v,.mp4,.mov,.webm,.m4v" style="height:auto;padding:10px">
-        <div class="hint" id="vHint">MP4, MOV və ya WEBM. Ölçü və müddət limiti yoxdur, böyük video yüklənməsi bir az çəkə bilər.</div>
-        <div class="bar hide" id="vBar"><i></i></div>
-      </div>
-      <div class="f"><label for="pImg">və ya şəkil linki (ixtiyari)</label><input id="pImg" type="url" placeholder="https://..."><div class="hint">Şəkil əlavə etməsəniz standart görünüş göstəriləcək.</div></div>
+      <div class="f"><label for="pVideo">Məhsul videosu (1 video)</label><input id="pVideo" type="file" accept="video/mp4,video/webm,video/quicktime" style="height:auto;padding:10px"><div id="pVideoPreview" class="hint">MP4, WebM və ya MOV formatı.</div></div>
+      <div class="f"><label for="pImg">və ya əsas şəkil linki (ixtiyari)</label><input id="pImg" type="url" placeholder="https://..."><div class="hint">Fayl seçməsəniz, şəkil linkindən istifadə oluna bilər.</div></div></div>
       <div class="f"><label for="pDesc">Təsvir</label><textarea id="pDesc" maxlength="600" placeholder="Məhsul haqqında məlumat..."></textarea></div>
       <button class="btn" id="addP">Məhsulu əlavə et</button>
-
-      <h2 style="font-size:19px;margin:28px 0 12px">Məhsullarım</h2>
+      </div>
       <div class="plist" id="plist"></div>
     </div>
   </section>
 </main>
-
 <footer>© ELFA — Alış-verişin yeni üzü.</footer>
 <div class="toast" id="toast"></div>
-
 <script>
 const LS={g(k,d){try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}},s(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 function session() {
   return LS.g('elfa_seller_session', null);
 }
 const $=s=>document.querySelector(s);
-const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&','<':'<','>':'>','"':'"'}[c]));
 const money=n=>(+n||0).toFixed(2)+' AZN';
 let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2200)}
-
 /* Geri */
 $('#backBtn').onclick=()=>{ if(history.length>1) history.back(); else location.href='/elfa.html'; };
 $('#goHome').onclick=()=>location.href='/elfa.html';
-
 /* Tablar */
 function show(v){
   ['regView','doneView','loginView','dashView'].forEach(id=>$('#'+id).classList.toggle('hide',id!==v));
@@ -265,25 +196,19 @@ function show(v){
 $('#tabReg').onclick=()=>show('regView');
 $('#tabLogin').onclick=()=>show(session()?'dashView':'loginView');
 $('#goLogin').onclick=()=>show('loginView');
-
 /* Telefon: 9 rəqəm, 50 123 45 67 */
 $('#phone').addEventListener('input',e=>{
   const d=e.target.value.replace(/\D/g,'').replace(/^0+/,'').slice(0,9);
   e.target.value=d.replace(/^(\d{2})(\d{0,3})(\d{0,2})(\d{0,2}).*/,(m,a,b,c,f)=>[a,b,c,f].filter(Boolean).join(' '));
 });
-
 /* Şifrə hash (demo üçün; real layihədə server tərəfdə bcrypt/argon2 istifadə edin) */
 async function hash(s){
   try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
   catch(e){return btoa(unescape(encodeURIComponent(s)))}
 }
-
-
 /* API — yalnız serverlə işləyir */
-
 async function api(path, opts = {}) {
   let response;
-
   try {
     response = await fetch(path, {
       ...opts,
@@ -297,42 +222,34 @@ async function api(path, opts = {}) {
       'Serverə qoşulmaq mümkün olmadı. Backend-i yoxlayın.'
     );
   }
-
   let data;
-
   try {
     data = await response.json();
   } catch {
     throw new Error('Serverdən düzgün cavab alınmadı.');
   }
-
   if (!response.ok) {
     throw new Error(
       data.detail || data.error || `Server xətası (${response.status})`
     );
   }
-
   return data;
 }
-
-
-
 /* Qeydiyyat */
 $('#regForm').addEventListener('submit',async e=>{
   e.preventDefault();
   const v={
-    store_name:$('#storeName').value.trim(),owner_name:$('#ownerName').value.trim(),category:$('#category').value,
+    store_name:$('#storeName').value.trim(),owner_name:$('#ownerName').value.trim(),
     phone:$('#phone').value.replace(/\s/g,''),email:$('#email').value.trim().toLowerCase(),
     city:$('#city').value.trim(),about:$('#about').value.trim()
   };
   const pw=$('#pw').value,pw2=$('#pw2').value;
-  if(!v.store_name||!v.owner_name||!v.category||!v.phone||!v.email||!pw) return toast('Ulduzlu sahələri doldurun');
+  if(!v.store_name||!v.owner_name||!v.phone||!v.email||!pw) return toast('Ulduzlu sahələri doldurun');
   if(v.phone.length!==9) return toast('Telefon nömrəsi 9 rəqəm olmalıdır');
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email)) return toast('E-poçt düzgün deyil');
   if(pw.length<6) return toast('Şifrə ən azı 6 simvol olmalıdır');
   if(pw!==pw2) return toast('Şifrələr üst-üstə düşmür');
   if(!$('#agree').checked) return toast('Qaydalarla razılaşmalısınız');
-
   const btn=$('#regBtn');btn.disabled=true;btn.textContent='Göndərilir...';
   try{
     v.phone='+994'+v.phone;
@@ -343,31 +260,23 @@ $('#regForm').addEventListener('submit',async e=>{
         password: pw
       })
     });
-
     $('#regForm').reset();
     show('doneView');
-
   } catch (err) {
     toast(err.message || 'Xəta baş verdi');
   }
-
   btn.disabled = false;
   btn.textContent = 'Müraciət göndər';
 });
-
-
 /* Giriş */
 $('#loginBtn').onclick = async () => {
   const email = $('#lem').value.trim().toLowerCase();
   const pw = $('#lpw').value;
-
   if (!email || !pw) {
     return toast('E-poçt və şifrəni yazın');
   }
-
   const btn = $('#loginBtn');
   btn.disabled = true;
-
   try {
     const res = await api('/api/sellers/login', {
       method: 'POST',
@@ -376,11 +285,9 @@ $('#loginBtn').onclick = async () => {
         password: pw
       })
     });
-
     if (!res || !res.token) {
       throw new Error('Serverdən düzgün cavab alınmadı');
     }
-
     LS.s('elfa_seller_session', {
       email,
       store_name: res.store_name,
@@ -388,57 +295,49 @@ $('#loginBtn').onclick = async () => {
       token: res.token,
       remote: true
     });
-
     $('#lpw').value = '';
     openDash();
-
   } catch (err) {
     toast(err.message || 'Giriş zamanı xəta baş verdi');
   } finally {
     btn.disabled = false;
   }
 };
-
 $('#logout').onclick = () => {
   LS.s('elfa_seller_session', null);
   show('loginView');
   toast('Çıxış edildi');
 };
-
-
 /* Panel */
 async function myProducts(){
   const s=session();if(!s) return [];
-  return api('/api/seller/products',{headers:{'Authorization':'Bearer '+(s.token||'')}});
+  if(s.remote){
+    const r=await api('/api/seller/products',{headers:{'Content-Type':'application/json','Authorization':'Bearer '+(s.token||'')}});
+    if(r) return r;
+  }
+  return LS.g('elfa_seller_products',[]).filter(p=>p.seller===s.email);
 }
 function currentStatus(){
-  const s=session();
-  return (s&&s.status)||'pending';
+  const s=session();if(!s) return 'pending';
+  if(!s.remote){const x=sellers().find(v=>v.email===s.email);if(x) return x.status}
+  return s.status||'pending';
 }
-
 async function openDash() {
   const s = session();
-
   if (!s) {
     return show('loginView');
   }
-
   show('dashView');
   $('#dStore').textContent = s.store_name || 'Mağaza';
-
   let st = s.status || 'pending';
-
   try {
     const res = await api('/api/seller/me', {
       headers: {
         Authorization: `Bearer ${s.token}`
       }
     });
-
     st = res.status || st;
     setHomeInfo(res);
-    fillProfile(res);
-
     LS.s('elfa_seller_session', {
       ...s,
       status: st,
@@ -448,23 +347,19 @@ async function openDash() {
   } catch (err) {
     toast(err.message || 'Satıcı məlumatları yenilənmədi');
   }
-
   const ok = st === 'approved';
   const b = $('#dStatus');
-
   b.textContent = ok
     ? 'Təsdiqlənib'
     : st === 'rejected'
       ? 'Rədd edilib'
       : 'Yoxlanılır';
-
-  b.className = 'badge ' + (ok ? 'green' : st === 'rejected' ? 'red' : 'wait');
+  b.className = 'badge ' + (ok ? 'green' : 'wait');
   $('#pendingNote').classList.toggle('hide', ok);
   $('#addP').disabled = !ok;
-
+  $('#productCreateSection').classList.toggle('hide', !ok);
   await renderProducts();
 }
-
 function setHomeInfo(res){
   const used=res.home_used||0,slots=res.home_slots||0;
   $('#homeInfo').textContent=slots
@@ -480,7 +375,6 @@ async function toggleHome(id,on){
     await renderProducts();
   }catch(err){toast(err.message||'Xəta baş verdi')}
 }
-
 async function renderProducts(){
   const list=await myProducts();
   $('#sCount').textContent=list.length;
@@ -489,7 +383,7 @@ async function renderProducts(){
   $('#plist').innerHTML=list.length?list.map(p=>`
     <div class="pi">
       <div class="im">${p.image_url?`<img src="${esc(p.image_url)}" alt="">`:'ELFA'}</div>
-      <div class="mid"><b>${esc(p.name)}</b><small>${money(p.price)} · Stok: ${esc(p.stock)}</small></div>
+      <div class="mid"><b>${esc(p.name)}</b><small>${esc(p.category||'Kateqoriya seçilməyib')} · ${money(p.price)} · Stok: ${esc(p.stock)}</small></div>
       <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
         <button class="del" style="color:#1a7a35" data-home="${esc(p.id)}" data-on="${p.on_home?'1':'0'}">${p.on_home?'Ana səhifədən çıxar':'Ana səhifəyə qoy'}</button>
         <button class="del" data-del="${esc(p.id)}">Sil</button>
@@ -498,55 +392,28 @@ async function renderProducts(){
   document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>delProduct(b.dataset.del));
   document.querySelectorAll('[data-home]').forEach(b=>b.onclick=()=>toggleHome(b.dataset.home,b.dataset.on!=='1'));
 }
-/* ---------- Seçimlər (kateqoriya, ölçü, rəng...) və yükləmə rejimi ---------- */
-let OPT={categories:[],genders:[],age_groups:[],clothing_sizes:[],shoe_sizes:[],colors:[],size_classes:[],storage_enabled:false};
-function fillSel(id,vals){$('#'+id).innerHTML='<option value="">Seçin</option>'+vals.map(v=>'<option>'+esc(v)+'</option>').join('')}
-function renderSizeChips(){
-  const cat=$('#pCat').value;
-  const vals=cat==='Ayaqqabı'?OPT.shoe_sizes:cat==='Geyim'?OPT.clothing_sizes:[...OPT.clothing_sizes,...OPT.shoe_sizes];
-  const keep=[...document.querySelectorAll('#pSizes input:checked')].map(i=>i.value);
-  $('#pSizes').innerHTML=vals.map(v=>'<label><input type="checkbox" value="'+esc(v)+'"'+(keep.includes(v)?' checked':'')+'>'+esc(v)+'</label>').join('');
-}
-function syncKid(){
-  const kid=$('#pGender').value==='Qız'||$('#pGender').value==='Oğlan';
-  $('#ageWrap').classList.toggle('hide',!kid);
-  $('#sizeWrap').classList.toggle('hide',kid);
-}
-$('#pCat').addEventListener('change',renderSizeChips);
-$('#pGender').addEventListener('change',syncKid);
-async function loadOptions(){
-  try{
-    const r=await fetch('/api/options');OPT=Object.assign(OPT,await r.json());
-  }catch(e){}
-  fillSel('pCat',OPT.categories);fillSel('pGender',OPT.genders);fillSel('pAge',OPT.age_groups);
-  fillSel('pColor',OPT.colors);fillSel('pSizeClass',OPT.size_classes);
-  renderSizeChips();syncKid();
-  $('#videoField').classList.toggle('hide',!OPT.storage_enabled);
-}
-loadOptions();
-
-/* ---------- Şəkil və video yükləmə ---------- */
+/* Şəkil: seçilən faylı kiçildib (maks. 1200px, JPEG) serverə yükləyir */
 function loadImg(file){
   return new Promise((resolve,reject)=>{
     const u=URL.createObjectURL(file),i=new Image();
     i.onload=()=>{URL.revokeObjectURL(u);resolve(i)};
-    i.onerror=()=>{URL.revokeObjectURL(u);reject(new Error('Şəkil oxunmadı. JPG, PNG və ya WEBP seçin.'))};
+    i.onerror=()=>{URL.revokeObjectURL(u);reject(new Error('Şəkil oxunmadı. JPG və ya PNG seçin.'))};
     i.src=u;
   });
 }
-async function compressImage(file,max,q){
+async function compressImage(file){
   if(!/^image\//.test(file.type)) throw new Error('Yalnız şəkil faylı seçin');
   const img=await loadImg(file);
-  const k=Math.min(1,max/Math.max(img.width,img.height));
+  const k=Math.min(1,1200/Math.max(img.width,img.height));
   const w=Math.max(1,Math.round(img.width*k)),h=Math.max(1,Math.round(img.height*k));
   const c=document.createElement('canvas');c.width=w;c.height=h;
   const ctx=c.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);ctx.drawImage(img,0,0,w,h);
-  const blob=await new Promise(r=>c.toBlob(r,'image/jpeg',q));
+  const blob=await new Promise(r=>c.toBlob(r,'image/jpeg',0.82));
   if(!blob) throw new Error('Şəkil işlənmədi');
   return blob;
 }
-/* Köhnə qayda (R2 qoşulmayıbsa): şəkil bazada saxlanılır */
-async function dbUploadImage(blob,token){
+async function uploadImage(file,token){
+  const blob=await compressImage(file);
   let response;
   try{
     response=await fetch('/api/seller/upload',{method:'POST',headers:{'Content-Type':'image/jpeg','Authorization':'Bearer '+(token||'')},body:blob});
@@ -556,147 +423,64 @@ async function dbUploadImage(blob,token){
   if(!data||!data.url) throw new Error('Serverdən düzgün cavab alınmadı.');
   return data.url;
 }
-/* R2: server imzalı link verir, brauzer faylı birbaşa saxlama yerinə göndərir */
-async function getUploadUrl(kind,type,token){
-  let response;
-  try{
-    response=await fetch('/api/seller/upload-url',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(token||'')},body:JSON.stringify({kind,content_type:type})});
-  }catch(e){throw new Error('Serverə qoşulmaq mümkün olmadı.')}
-  let data=null;try{data=await response.json()}catch(_){}
-  if(!response.ok) throw new Error((data&&(data.error||data.detail))||('Yükləmə linki alınmadı ('+response.status+')'));
-  return data;
-}
-function putFile(url,blob,type,onProgress){
-  return new Promise((resolve,reject)=>{
-    const x=new XMLHttpRequest();
-    x.open('PUT',url);x.setRequestHeader('Content-Type',type);
-    x.upload.onprogress=e=>{if(e.lengthComputable&&onProgress)onProgress(Math.round(e.loaded/e.total*100))};
-    x.onload=()=>x.status>=200&&x.status<300?resolve():reject(new Error('Yükləmə alınmadı ('+x.status+')'));
-    x.onerror=()=>reject(new Error('Yükləmə zamanı şəbəkə xətası baş verdi.'));
-    x.send(blob);
-  });
-}
-async function storageUpload(kind,blob,type,token,onProgress){
-  const u=await getUploadUrl(kind,type,token);
-  await putFile(u.upload_url,blob,type,onProgress);
-  return u.public_url;
-}
-async function uploadImageSmart(file,token){
-  if(OPT.storage_enabled){
-    const blob=await compressImage(file,2000,0.86);
-    return storageUpload('image',blob,'image/jpeg',token);
-  }
-  return dbUploadImage(await compressImage(file,1200,0.82),token);
-}
-const VIDEO_TYPES={mp4:'video/mp4',mov:'video/quicktime',webm:'video/webm',m4v:'video/x-m4v'};
-function videoType(f){
-  if(Object.values(VIDEO_TYPES).includes(f.type)) return f.type;
-  const ext=(f.name.split('.').pop()||'').toLowerCase();
-  return VIDEO_TYPES[ext]||'';
-}
-function showBar(pct){
-  const bar=$('#vBar');bar.classList.remove('hide');bar.firstElementChild.style.width=pct+'%';
-}
 $('#pFile').addEventListener('change',()=>{
-  const f=$('#pFile').files[0],prev=$('#pPrev');
-  if(!f){prev.classList.add('hide');prev.removeAttribute('src');return}
-  prev.src=URL.createObjectURL(f);prev.classList.remove('hide');
+  const input=$('#pFile'),files=Array.from(input.files||[]).slice(0,5),wrap=$('#pPrevList');
+  if(input.files.length>5) toast('Maksimum 5 şəkil seçə bilərsiniz');
+  wrap.innerHTML='';
+  files.forEach(file=>{const img=document.createElement('img');img.alt='Məhsul şəkli';img.src=URL.createObjectURL(file);img.style.cssText='width:76px;height:76px;object-fit:cover;border-radius:9px;border:1px solid var(--line)';wrap.appendChild(img)});
 });
-$('#vFile').addEventListener('change',()=>{
-  const f=$('#vFile').files[0];
-  if(!f){$('#vHint').textContent='MP4, MOV və ya WEBM. Ölçü və müddət limiti yoxdur, böyük video yüklənməsi bir az çəkə bilər.';return}
-  $('#vHint').textContent=f.name+' · '+(f.size/1048576).toFixed(1)+' MB';
-  if(!videoType(f)) toast('Dəstəklənən formatlar: MP4, MOV, WEBM');
+$('#pVideo').addEventListener('change',()=>{
+  const f=$('#pVideo').files[0];
+  $('#pVideoPreview').textContent=f?`${f.name} · ${(f.size/1024/1024).toFixed(1)} MB`:'MP4, WebM və ya MOV formatı.';
 });
-
-/* ---------- Məhsul əlavə et ---------- */
+async function uploadVideo(file,token){
+  if(!/^video\/(mp4|webm|quicktime)$/.test(file.type)) throw new Error('MP4, WebM və ya MOV video seçin');
+  let response;
+  try{response=await fetch('/api/seller/upload',{method:'POST',headers:{'Content-Type':file.type,'Authorization':'Bearer '+(token||'')},body:file});}
+  catch(e){throw new Error('Video yüklənərkən serverə qoşulmaq mümkün olmadı.')}
+  let data=null;try{data=await response.json()}catch(_){}
+  if(!response.ok) throw new Error((data&&(data.error||data.detail))||('Video yüklənmədi ('+response.status+'). Backend video fayllarını dəstəkləməlidir.'));
+  if(!data||!data.url) throw new Error('Video üçün serverdən düzgün link alınmadı.');
+  return data.url;
+}
 $('#addP').onclick=async()=>{
   const s=session();if(!s) return;
   if(currentStatus()!=='approved') return toast('Mağazanız hələ təsdiqlənməyib');
-  const kid=$('#pGender').value==='Qız'||$('#pGender').value==='Oğlan';
-  const p={
-    name:$('#pName').value.trim(),price:parseFloat($('#pPrice').value),stock:parseInt($('#pStock').value,10),
-    image_url:$('#pImg').value.trim(),description:$('#pDesc').value.trim(),
-    category:$('#pCat').value,brand:$('#pBrand').value.trim(),gender:$('#pGender').value,
-    age_group:kid?$('#pAge').value:'',
-    sizes:kid?[]:[...document.querySelectorAll('#pSizes input:checked')].map(i=>i.value),
-    color:$('#pColor').value,size_class:$('#pSizeClass').value,
-    dimensions:$('#pDim').value.trim(),material:$('#pMat').value.trim()
-  };
-  if(!p.name||isNaN(p.price)||isNaN(p.stock)) return toast('Ad, qiymət və stoku yazın');
+  const files=Array.from($('#pFile').files||[]).slice(0,5),videoFile=$('#pVideo').files[0];
+  const p={name:$('#pName').value.trim(),category:$('#pCategory').value,price:parseFloat($('#pPrice').value),stock:parseInt($('#pStock').value,10),image_url:$('#pImg').value.trim(),images:[],video_url:'',description:$('#pDesc').value.trim()};
+  if(!p.name||!p.category||isNaN(p.price)||isNaN(p.stock)) return toast('Məhsulun adını, əsas kateqoriyasını, qiymətini və stokunu daxil edin');
   if(p.price<0||p.stock<0) return toast('Qiymət və stok mənfi ola bilməz');
-  const file=$('#pFile').files[0],vfile=OPT.storage_enabled?$('#vFile').files[0]:null;
-  if(!file&&p.image_url&&!/^https?:\/\//i.test(p.image_url)) return toast('Şəkil linki http(s) ilə başlamalıdır');
-  if(vfile&&!videoType(vfile)) return toast('Video formatı dəstəklənmir (MP4, MOV, WEBM)');
+  if(!files.length&&p.image_url&&!/^https?:\/\//i.test(p.image_url)) return toast('Şəkil linki http(s) ilə başlamalıdır');
   const btn=$('#addP');btn.disabled=true;
   try{
-    if(file){
-      btn.textContent='Şəkil yüklənir...';
-      p.image_url=await uploadImageSmart(file,s.token);
-    }
-    if(vfile){
-      btn.textContent='Video yüklənir... 0%';
-      showBar(0);
-      p.video_url=await storageUpload('video',vfile,videoType(vfile),s.token,pct=>{btn.textContent='Video yüklənir... '+pct+'%';showBar(pct)});
-    }
-    btn.textContent='Məhsul əlavə edilir...';
-    await api('/api/seller/products',{method:'POST',headers:{'Authorization':'Bearer '+(s.token||'')},body:JSON.stringify(p)});
-    ['pName','pPrice','pStock','pImg','pDesc','pFile','vFile','pBrand','pDim','pMat','pCat','pGender','pAge','pColor','pSizeClass'].forEach(id=>$('#'+id).value='');
-    $('#pPrev').classList.add('hide');$('#pPrev').removeAttribute('src');
-    $('#vBar').classList.add('hide');$('#vHint').textContent='MP4, MOV və ya WEBM. Ölçü və müddət limiti yoxdur, böyük video yüklənməsi bir az çəkə bilər.';
-    renderSizeChips();syncKid();
+    if(files.length){
+      for(let i=0;i<files.length;i++){
+        btn.textContent=`Şəkil yüklənir... (${i+1}/${files.length})`;
+        p.images.push(await uploadImage(files[i],s.token));
+      }
+      p.image_url=p.images[0];
+    } else if(p.image_url){p.images=[p.image_url]}
+    if(videoFile){btn.textContent='Video yüklənir...';p.video_url=await uploadVideo(videoFile,s.token)}
+    btn.textContent='Məhsul əlavə olunur...';
+    let res=null;
+    if(s.remote) res=await api('/api/seller/products',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(s.token||'')},body:JSON.stringify(p)});
+    if(!res){const all=LS.g('elfa_seller_products',[]);all.push(Object.assign({id:'P'+Date.now(),seller:s.email,store_name:s.store_name},p));LS.s('elfa_seller_products',all)}
+    ['pName','pCategory','pPrice','pStock','pImg','pDesc','pFile','pVideo'].forEach(id=>$('#'+id).value='');
+    $('#pPrevList').innerHTML='';$('#pVideoPreview').textContent='MP4, WebM və ya MOV formatı.';
     toast('Məhsul əlavə olundu ✓');await renderProducts();
   }catch(err){toast(err.message||'Xəta baş verdi')}
-  btn.textContent='Məhsulu əlavə et';
-  btn.disabled=false;
+  btn.textContent='Məhsulu əlavə et';btn.disabled=false;
 };
 async function delProduct(id){
   if(!confirm('Bu məhsulu silmək istəyirsiniz?')) return;
   const s=session();
   try{
-    await api('/api/seller/products/'+encodeURIComponent(id),{method:'DELETE',headers:{'Authorization':'Bearer '+(s.token||'')}});
+    let res=null;
+    if(s.remote) res=await api('/api/seller/products/'+encodeURIComponent(id),{method:'DELETE',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(s.token||'')}});
+    if(!res){LS.s('elfa_seller_products',LS.g('elfa_seller_products',[]).filter(p=>p.id!==id))}
     toast('Məhsul silindi');await renderProducts();
   }catch(err){toast(err.message||'Xəta baş verdi')}
 }
-
-/* ---------- Mağaza profili ---------- */
-let logoUrl='';
-function fillProfile(r){
-  logoUrl=r.logo_url||'';
-  const prev=$('#lgPrev');
-  if(logoUrl){prev.src=logoUrl;prev.classList.remove('hide')}else{prev.classList.add('hide');prev.removeAttribute('src')}
-  $('#prWa').value=r.whatsapp||'';$('#prCity').value=r.city||'';
-  $('#prIg').value=r.instagram||'';$('#prTk').value=r.tiktok||'';
-  $('#prAddr').value=r.address||'';$('#prAbout').value=r.about||'';
-}
-$('#lgFile').addEventListener('change',()=>{
-  const f=$('#lgFile').files[0],prev=$('#lgPrev');
-  if(!f)return;
-  prev.src=URL.createObjectURL(f);prev.classList.remove('hide');
-});
-$('#saveProf').onclick=async()=>{
-  const s=session();if(!s) return;
-  const btn=$('#saveProf');btn.disabled=true;
-  try{
-    const body={
-      whatsapp:$('#prWa').value.trim(),city:$('#prCity').value.trim(),
-      instagram:$('#prIg').value.trim(),tiktok:$('#prTk').value.trim(),
-      address:$('#prAddr').value.trim(),about:$('#prAbout').value.trim()
-    };
-    const f=$('#lgFile').files[0];
-    if(f){
-      btn.textContent='Loqo yüklənir...';
-      body.logo_url=await uploadImageSmart(f,s.token);
-    }
-    btn.textContent='Yadda saxlanılır...';
-    const r=await api('/api/seller/profile',{method:'PUT',headers:{'Authorization':'Bearer '+(s.token||'')},body:JSON.stringify(body)});
-    $('#lgFile').value='';
-    fillProfile(r);
-    toast('Profil yadda saxlanıldı ✓');
-  }catch(err){toast(err.message||'Xəta baş verdi')}
-  btn.textContent='Profili yadda saxla';btn.disabled=false;
-};
-
 /* Başlanğıc */
 if(session()) openDash();
 </script>
