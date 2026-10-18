@@ -201,12 +201,26 @@ async def http_exc(_: Request, exc: HTTPException):
     )
 
 
+
 @app.exception_handler(RequestValidationError)
 async def validation_exc(_: Request, exc: RequestValidationError):
     return JSONResponse(
-        {"error": "Gonderilen melumatlar duzgun deyil"},
+        {
+            "error": "Göndərilən məlumatlar düzgün deyil",
+            "detail": [
+                {
+                    "field": ".".join(
+                        str(part) for part in item["loc"]
+                    ),
+                    "message": item["msg"],
+                    "type": item["type"],
+                }
+                for item in exc.errors()
+            ],
+        },
         status_code=422,
     )
+
 
 
 # Melumat modelleri
