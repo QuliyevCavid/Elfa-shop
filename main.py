@@ -4,10 +4,12 @@ import os
 import re
 import secrets
 import sqlite3
+import time
 from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import List, Optional
+from urllib.parse import quote
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request, Response
 from fastapi.exceptions import RequestValidationError
@@ -17,6 +19,17 @@ from pydantic import BaseModel, Field
 BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = os.environ.get("ELFA_DB", str(BASE_DIR / "elfa.db"))
 ADMIN_TOKEN = os.environ.get("ADMIN_TOKEN", "")
+# Şəkil/video saxlama: Cloudflare R2 (S3 uyğun). Hamısı təyin edilməyibsə video yükləmə söndürülür,
+# şəkillər isə köhnə qaydada bazada saxlanılır.
+R2_ACCOUNT_ID = os.environ.get("R2_ACCOUNT_ID", "").strip()
+R2_ACCESS_KEY_ID = os.environ.get("R2_ACCESS_KEY_ID", "").strip()
+R2_SECRET_ACCESS_KEY = os.environ.get("R2_SECRET_ACCESS_KEY", "").strip()
+R2_BUCKET = os.environ.get("R2_BUCKET", "").strip()
+R2_PUBLIC_URL = os.environ.get("R2_PUBLIC_URL", "").strip().rstrip("/")
+STORAGE_ENABLED = bool(
+    R2_ACCOUNT_ID and R2_ACCESS_KEY_ID and R2_SECRET_ACCESS_KEY
+    and R2_BUCKET and R2_PUBLIC_URL
+)
 SESSION_DAYS = 14
 
 app = FastAPI(title="ELFA API")
@@ -56,6 +69,7 @@ SELLER_NEW_COLUMNS = [
 ]
 PRODUCT_NEW_COLUMNS = [
     ("on_home", "INTEGER NOT NULL DEFAULT 0"),
+    ("video_url", "TEXT NOT NULL DEFAULT ''"),
     ("category", "TEXT NOT NULL DEFAULT ''"),
     ("brand", "TEXT NOT NULL DEFAULT ''"),
     ("gender", "TEXT NOT NULL DEFAULT ''"),
@@ -201,26 +215,12 @@ async def http_exc(_: Request, exc: HTTPException):
     )
 
 
-
 @app.exception_handler(RequestValidationError)
 async def validation_exc(_: Request, exc: RequestValidationError):
     return JSONResponse(
-        {
-            "error": "Göndərilən məlumatlar düzgün deyil",
-            "detail": [
-                {
-                    "field": ".".join(
-                        str(part) for part in item["loc"]
-                    ),
-                    "message": item["msg"],
-                    "type": item["type"],
-                }
-                for item in exc.errors()
-            ],
-        },
+        {"error": "Gonderilen melumatlar duzgun deyil"},
         status_code=422,
     )
-
 
 
 # Melumat modelleri
@@ -256,6 +256,7 @@ class ProductIn(BaseModel):
     size_class: str = Field(default="", max_length=20)
     dimensions: str = Field(default="", max_length=60)
     material: str = Field(default="", max_length=60)
+    video_url: str = Field(default="", max_length=500)
 
 
 class ProfileIn(BaseModel):
@@ -400,14 +401,25 @@ def clean_product(data: ProductIn) -> dict:
         "size_class": size_class,
         "dimensions": data.dimensions.strip(),
         "material": data.material.strip(),
+        "video_url": clean_video_url(data.video_url),
     }
 
 
 PRODUCT_FIELDS = (
     "name", "price", "stock", "image_url", "description", "category",
     "brand", "gender", "age_group", "sizes", "color", "size_class",
-    "dimensions", "material",
+    "dimensions", "material", "video_url",
 )
+
+
+def clean_video_url(value: str) -> str:
+    """Yalnız bizim R2 saxlama ünvanına yüklənmiş video qəbul olunur."""
+    v = (value or "").strip()
+    if not v:
+        return ""
+    if not STORAGE_ENABLED or not v.startswith(R2_PUBLIC_URL + "/"):
+        raise HTTPException(400, "Video linki düzgün deyil")
+    return v
 
 
 # Satici qeydiyyati
@@ -632,6 +644,87 @@ async def upload_image(
     return {"url": f"/api/images/{cur.lastrowid}"}
 
 
+def sigv4_presign(
+    method: str, host: str, path: str, access_key: str, secret: str,
+    region: str, service: str, when: datetime, expires: int,
+) -> str:
+    """AWS Signature V4 ilə imzalanmış qısa müddətli link (yalnız 'host' başlığı imzalanır)."""
+    amz_date = when.strftime("%Y%m%dT%H%M%SZ")
+    day = when.strftime("%Y%m%d")
+    scope = f"{day}/{region}/{service}/aws4_request"
+    enc = lambda x: quote(x, safe="-_.~")
+
+    params = {
+        "X-Amz-Algorithm": "AWS4-HMAC-SHA256",
+        "X-Amz-Credential": f"{access_key}/{scope}",
+        "X-Amz-Date": amz_date,
+        "X-Amz-Expires": str(expires),
+        "X-Amz-SignedHeaders": "host",
+    }
+    canonical_qs = "&".join(f"{enc(k)}={enc(v)}" for k, v in sorted(params.items()))
+    canonical_request = "\n".join([
+        method, path, canonical_qs, f"host:{host}\n", "host", "UNSIGNED-PAYLOAD",
+    ])
+    string_to_sign = "\n".join([
+        "AWS4-HMAC-SHA256", amz_date, scope,
+        hashlib.sha256(canonical_request.encode()).hexdigest(),
+    ])
+
+    def h(key: bytes, msg: str) -> bytes:
+        return hmac.new(key, msg.encode(), hashlib.sha256).digest()
+
+    k = h(("AWS4" + secret).encode(), day)
+    k = h(k, region)
+    k = h(k, service)
+    k = h(k, "aws4_request")
+    signature = hmac.new(k, string_to_sign.encode(), hashlib.sha256).hexdigest()
+
+    return f"https://{host}{path}?{canonical_qs}&X-Amz-Signature={signature}"
+
+
+UPLOAD_TYPES = {
+    "image": {
+        "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp",
+    },
+    "video": {
+        "video/mp4": "mp4", "video/quicktime": "mov",
+        "video/webm": "webm", "video/x-m4v": "m4v",
+    },
+}
+
+
+class UploadUrlIn(BaseModel):
+    kind: str
+    content_type: str
+
+
+@app.post("/api/seller/upload-url")
+def upload_url(data: UploadUrlIn, s: sqlite3.Row = Depends(current_seller)):
+    """Brauzer faylı birbaşa R2-yə yükləyir (ölçü və müddət limiti qoyulmur).
+    Gizli açar serverdə qalır, brauzerə yalnız 1 saatlıq imzalı link verilir."""
+    if not STORAGE_ENABLED:
+        raise HTTPException(503, "Fayl yükləmə hələ aktiv edilməyib")
+
+    # Xərc qorunması: yalnız təsdiqlənmiş mağazalar yükləyə bilər
+    if s["status"] != "approved":
+        raise HTTPException(403, "Mağazanız təsdiqlənəndən sonra yükləmək olar")
+
+    exts = UPLOAD_TYPES.get(data.kind)
+    ext = exts.get(data.content_type.strip().lower()) if exts else None
+    if not ext:
+        raise HTTPException(400, "Bu fayl növü dəstəklənmir")
+
+    key = f"seller_{s['id']}/{int(time.time())}_{secrets.token_hex(6)}.{ext}"
+    host = f"{R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
+    path = f"/{R2_BUCKET}/{quote(key, safe='/-_.~')}"
+
+    url = sigv4_presign(
+        "PUT", host, path, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY,
+        "auto", "s3", now(), 3600,
+    )
+    return {"upload_url": url, "public_url": f"{R2_PUBLIC_URL}/{key}"}
+
+
 @app.get("/api/images/{iid}")
 def get_image(iid: int):
     with db() as con:
@@ -660,7 +753,7 @@ def product_dict(r: sqlite3.Row) -> dict:
         for k in (
             "id", "name", "price", "stock", "image_url", "description",
             "category", "brand", "gender", "age_group", "color",
-            "size_class", "dimensions", "material",
+            "size_class", "dimensions", "material", "video_url",
         )
     }
     data["sizes"] = [x for x in (r["sizes"] or "").split(",") if x]
@@ -693,6 +786,7 @@ def public_product_dict(r: sqlite3.Row) -> dict:
     data = product_dict(r)
     data["store_id"] = r["seller_id"]
     data["store_city"] = r["store_city"]
+    data["store_category"] = r["store_category"]
     data["store_phone"] = r["store_phone"]
     data["store_whatsapp_url"] = wa_url(r["store_whatsapp"])
     return data
@@ -843,6 +937,7 @@ def delete_product(
 def approved_rows(con, store_id: Optional[int] = None):
     sql = """SELECT p.*, s.store_name,
                     s.home_all AS store_home_all,
+                    s.category AS store_category,
                     s.city AS store_city,
                     s.phone AS store_phone,
                     s.whatsapp AS store_whatsapp
@@ -870,6 +965,7 @@ def options():
         "shoe_sizes": SHOE_SIZES,
         "colors": COLORS,
         "size_classes": SIZE_CLASSES,
+        "storage_enabled": STORAGE_ENABLED,
     }
 
 
@@ -917,6 +1013,7 @@ def public_products(
     price_min: Optional[float] = None,
     price_max: Optional[float] = None,
     store_id: Optional[int] = None,
+    store_category: Optional[str] = None,
     home: Optional[bool] = None,
     limit: int = Query(100, ge=1, le=200),
     offset: int = Query(0, ge=0),
@@ -932,6 +1029,8 @@ def public_products(
         if home and not (r["on_home"] or r["store_home_all"]):
             continue
         if category and fold(r["category"]) != fold(category):
+            continue
+        if store_category and fold(r["store_category"]) != fold(store_category):
             continue
         if brand and fold(r["brand"]) != fold(brand):
             continue
@@ -989,9 +1088,21 @@ def public_stores():
                 "SELECT seller_id, COUNT(*) AS n FROM products GROUP BY seller_id"
             )
         }
+        # Mağaza kartının fon şəkli: ən son şəkilli məhsul
+        covers = {}
+        for r in con.execute(
+            """SELECT seller_id, image_url FROM products
+               WHERE image_url != '' ORDER BY id DESC"""
+        ):
+            covers.setdefault(r["seller_id"], r["image_url"])
 
     stores = sorted(stores, key=lambda s: fold(s["store_name"]))
-    return [public_store_dict(s, counts.get(s["id"], 0)) for s in stores]
+    out = []
+    for s in stores:
+        d = public_store_dict(s, counts.get(s["id"], 0))
+        d["cover_url"] = covers.get(s["id"], "")
+        out.append(d)
+    return out
 
 
 @app.get("/api/stores/{sid}")
