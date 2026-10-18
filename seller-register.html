@@ -206,7 +206,8 @@ function session() {
 const $=s=>document.querySelector(s);
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&','<':'<','>':'>','"':'"'}[c]));
 const money=n=>(+n||0).toFixed(2)+' AZN';
-let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2200)}
+let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),4500)}
+function tellMissing(label,selector){toast(label+' daxil edilməyib. Zəhmət olmasa bu sahəni doldurun.');const el=selector?$(selector):null;if(el){el.focus({preventScroll:false});el.scrollIntoView({behavior:'smooth',block:'center'});}}
 /* Geri */
 $('#backBtn').onclick=()=>{ if(history.length>1) history.back(); else location.href='/elfa.html'; };
 $('#goHome').onclick=()=>location.href='/elfa.html';
@@ -248,7 +249,7 @@ $('#storeLogo').addEventListener('change',()=>{
 $('#saveStoreProfile').onclick=async()=>{
   const s=session();if(!s)return;
   const phone=$('#storeWhatsapp').value;
-  if(phone && phone.length!==9)return toast('WhatsApp nömrəsi 9 rəqəm olmalıdır');
+  if(phone && phone.length!==9)return (toast('WhatsApp nömrəsi natamamdır: +994-dən sonra 9 rəqəm daxil edin.'),$('#storeWhatsapp').focus());
   const links=['storeInstagram','storeTikTok','storeFacebook'];
   for(const id of links){const v=$('#'+id).value.trim();if(v&&!/^https?:\/\//i.test(v))return toast('Sosial şəbəkə linkləri http:// və ya https:// ilə başlamalıdır')}
   const b=$('#saveStoreProfile');b.disabled=true;b.textContent='Yadda saxlanılır...';
@@ -303,13 +304,18 @@ $('#regForm').addEventListener('submit',async e=>{
     city:$('#city').value.trim(),about:$('#about').value.trim()
   };
   const pw=$('#pw').value,pw2=$('#pw2').value;
-  if(!v.store_name||!v.owner_name||!v.phone||!v.email||!pw) return toast('Ulduzlu sahələri doldurun');
-  if(v.phone.length!==9) return toast('Telefon nömrəsi 9 rəqəm olmalıdır');
+  if(!v.store_name) return tellMissing('Mağaza adı','#storeName');
+  if(!v.owner_name) return tellMissing('Ad və soyad','#ownerName');
+  if(!v.phone) return tellMissing('Telefon nömrəsi','#phone');
+  if(!v.email) return tellMissing('E-poçt ünvanı','#email');
+  if(!pw) return tellMissing('Şifrə','#pw');
+  if(v.phone.replace(/\D/g,'').length!==9) return (toast('Telefon nömrəsi natamamdır: +994-dən sonra 9 rəqəm yazın.'),$('#phone').focus());
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email)) return toast('E-poçt düzgün deyil');
-  if(pw.length<8) return toast('Şifrə ən azı 8 simvol olmalıdır');
-  if(!/[A-ZƏÖÜĞİÇŞ]/.test(pw)||!/[a-zəöüğişç]/.test(pw)||!/[^A-Za-zƏÖÜĞİÇŞəöüğişç0-9]/.test(pw)) return toast('Şifrədə ən azı 1 böyük hərf, 1 kiçik hərf və 1 simvol olmalıdır');
-  if(pw!==pw2) return toast('Şifrələr üst-üstə düşmür');
-  if(!$('#agree').checked) return toast('Qaydalarla razılaşmalısınız');
+  if(pw.length<8) return (toast('Şifrə tələbi tamamlanmayıb: ən azı 8 simvol daxil edin.'),$('#pw').focus());
+  if(!/[A-ZƏÖÜĞİÇŞ]/.test(pw)||!/[a-zəöüğişç]/.test(pw)||!/[^A-Za-zƏÖÜĞİÇŞəöüğişç0-9]/.test(pw)) return (toast('Şifrə tələbləri tamamlanmayıb: 1 böyük hərf, 1 kiçik hərf və 1 xüsusi simvol daxil edin.'),$('#pw').focus());
+  if(!pw2) return tellMissing('Şifrənin təkrarı','#pw2');
+  if(pw!==pw2) return (toast('Şifrənin təkrarı düzgün deyil. Hər iki şifrə eyni olmalıdır.'),$('#pw2').focus());
+  if(!$('#agree').checked) return (toast('Qeydiyyatı tamamlamaq üçün ELFA satıcı qaydaları ilə razılaşma qutusunu işarələyin.'),$('#agree').focus());
   const btn=$('#regBtn');btn.disabled=true;btn.textContent='Göndərilir...';
   try{
     v.phone='+994'+v.phone;
@@ -332,9 +338,9 @@ $('#regForm').addEventListener('submit',async e=>{
 $('#loginBtn').onclick = async () => {
   const email = $('#lem').value.trim().toLowerCase();
   const pw = $('#lpw').value;
-  if (!email || !pw) {
-    return toast('E-poçt və şifrəni yazın');
-  }
+  if (!email) return tellMissing('E-poçt ünvanı','#lem');
+  if (!pw) return tellMissing('Şifrə','#lpw');
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return (toast('E-poçt ünvanı düzgün formatda deyil.'),$('#lem').focus());
   const btn = $('#loginBtn');
   btn.disabled = true;
   try {
@@ -528,7 +534,14 @@ $('#addP').onclick=async()=>{
   const files=Array.from($('#pFile').files||[]),videoFile=$('#pVideo').files[0];
   const categoryValue=$('#pCategory').value==='__custom__'?$('#pCategoryCustom').value.trim():$('#pCategory').value;
   const priceRaw=$('#pPrice').value,stockRaw=$('#pStock').value;
-  if(!$('#pName').value.trim()||priceRaw===''||stockRaw===''||!categoryValue||!$('#pGender').value||files.length===0)return toast('Məhsul adı, qiymət, stok, kateqoriya, cinsiyyət və ən azı 1 şəkil mütləqdir');
+  if(!$('#pName').value.trim())return tellMissing('Məhsul adı','#pName');
+  if(priceRaw==='')return tellMissing('Qiymət (AZN)','#pPrice');
+  if(stockRaw==='')return tellMissing('Stok sayı','#pStock');
+  if(!$('#pCategory').value)return tellMissing('Kateqoriya','#pCategory');
+  if($('#pCategory').value==='__custom__'&&!categoryValue)return tellMissing('Öz kateqoriyanızın adı','#pCategoryCustom');
+  if(!$('#pGender').value)return tellMissing('Cinsiyyət','#pGender');
+  if(files.length===0)return tellMissing('Məhsul şəkli','#pFile');
+  if(files.length>5)return (toast('Maksimum 5 məhsul şəkli seçə bilərsiniz.'),$('#pFile').focus());
   const p={name:$('#pName').value.trim(),category:categoryValue,gender:$('#pGender').value,price:parseFloat(priceRaw),stock:parseInt(stockRaw,10),images:[],video_url:'',description:$('#pDesc').value.trim()};
   if(!Number.isFinite(p.price)||!Number.isFinite(p.stock)||p.price<0||p.stock<0||!Number.isInteger(p.stock))return toast('Qiymət və stok sayını düzgün daxil edin');
   const btn=$('#addP');btn.disabled=true;
