@@ -14,13 +14,13 @@ from urllib.parse import quote
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request, Response
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 BASE_DIR = Path(__file__).resolve().parent
+# DİQQƏT: hostinqdə ELFA_DB daimi diskə (volume) yönəlməlidir, əks halda hər deploy-da məlumat silinir.
 DB_PATH = os.environ.get("ELFA_DB", str(BASE_DIR / "elfa.db"))
 ADMIN_TOKEN = os.environ.get("ADMIN_TOKEN", "")
-# Şəkil/video saxlama: Cloudflare R2 (S3 uyğun). Hamısı təyin edilməyibsə video yükləmə söndürülür,
-# şəkillər isə köhnə qaydada bazada saxlanılır.
 R2_ACCOUNT_ID = os.environ.get("R2_ACCOUNT_ID", "").strip()
 R2_ACCESS_KEY_ID = os.environ.get("R2_ACCESS_KEY_ID", "").strip()
 R2_SECRET_ACCESS_KEY = os.environ.get("R2_SECRET_ACCESS_KEY", "").strip()
@@ -34,17 +34,14 @@ SESSION_DAYS = 14
 
 app = FastAPI(title="ELFA API")
 
-
 # ---------------------------------------------------------------
-# Sabit siyahilar (texniki tapshiriqdaki secimler)
+# Sabit siyahılar
 # ---------------------------------------------------------------
-# Elektronika, Ev ve Yashayish, Ana ve Ushaq kateqoriyalari ataraq daxil edilmeyib.
 CATEGORIES = [
     "Geyim", "Ayaqqabı", "Çanta", "Kosmetika",
     "Ətir", "Aksesuar", "Saat", "Eynək", "Digər",
 ]
 GENDERS = ["Qadın", "Kişi", "Uniseks", "Qız", "Oğlan"]
-ADULT_GENDERS = ("Qadın", "Kişi", "Uniseks")
 KID_GENDERS = ("Qız", "Oğlan")
 AGE_GROUPS = ["0-1", "1-3", "4-6", "7-9", "10-12", "13-15", "16-17"]
 CLOTHING_SIZES = ["XS", "S", "M", "L", "XL", "XXL"]
@@ -54,16 +51,17 @@ COLORS = [
     "Çəhrayı", "Boz", "Qəhvəyi", "Bej", "Digər",
 ]
 SIZE_CLASSES = ["Kiçik", "Orta", "Böyük"]
+SELLER_CATEGORIES = [
+    "Qadın", "Kişi", "Ana & Uşaq", "Ev & Yaşayış",
+    "Kosmetika", "Elektronika", "Digər",
+]
 
-# Bazaya sonradan elave olunan sutunlar (kohne melumatlar silinmir)
 SELLER_NEW_COLUMNS = [
     ("logo_url", "TEXT NOT NULL DEFAULT ''"),
     ("whatsapp", "TEXT NOT NULL DEFAULT ''"),
     ("instagram", "TEXT NOT NULL DEFAULT ''"),
     ("tiktok", "TEXT NOT NULL DEFAULT ''"),
     ("address", "TEXT NOT NULL DEFAULT ''"),
-    # Ana sehife: home_slots = satıcının seçə biləcəyi məhsul sayı (admin təyin edir),
-    # home_all = 1 olarsa, mağazanın bütün məhsulları ana səhifədə görünür (yalnız admin)
     ("home_slots", "INTEGER NOT NULL DEFAULT 0"),
     ("home_all", "INTEGER NOT NULL DEFAULT 0"),
 ]
@@ -82,12 +80,15 @@ PRODUCT_NEW_COLUMNS = [
 ]
 
 
-# Verilenler bazasi
+# ---------------------------------------------------------------
+# Verilənlər bazası
+# ---------------------------------------------------------------
 @contextmanager
 def db():
-    con = sqlite3.connect(DB_PATH)
+    con = sqlite3.connect(DB_PATH, timeout=15)
     con.row_factory = sqlite3.Row
     con.execute("PRAGMA foreign_keys = ON")
+    con.execute("PRAGMA journal_mode = WAL")
     try:
         yield con
         con.commit()
@@ -96,7 +97,6 @@ def db():
 
 
 def ensure_columns(con, table: str, columns):
-    """Cedvelde olmayan sutunlari elave edir. Movcud setirler olduğu kimi qalir."""
     existing = {r["name"] for r in con.execute(f"PRAGMA table_info({table})")}
     for name, ddl in columns:
         if name not in existing:
@@ -120,13 +120,11 @@ def init_db():
                 status TEXT NOT NULL DEFAULT 'pending',
                 created_at TEXT NOT NULL
             );
-
             CREATE TABLE IF NOT EXISTS sessions (
                 token_hash TEXT PRIMARY KEY,
                 seller_id INTEGER NOT NULL REFERENCES sellers(id) ON DELETE CASCADE,
                 expires_at TEXT NOT NULL
             );
-
             CREATE TABLE IF NOT EXISTS products (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 seller_id INTEGER NOT NULL REFERENCES sellers(id) ON DELETE CASCADE,
@@ -137,10 +135,7 @@ def init_db():
                 description TEXT DEFAULT '',
                 created_at TEXT NOT NULL
             );
-
-            CREATE INDEX IF NOT EXISTS idx_products_seller
-            ON products(seller_id);
-
+            CREATE INDEX IF NOT EXISTS idx_products_seller ON products(seller_id);
             CREATE TABLE IF NOT EXISTS images (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 seller_id INTEGER NOT NULL REFERENCES sellers(id) ON DELETE CASCADE,
@@ -156,16 +151,16 @@ def init_db():
 init_db()
 
 
-# Komekci funksiyalar
+# ---------------------------------------------------------------
+# Köməkçi funksiyalar
+# ---------------------------------------------------------------
 def now() -> datetime:
     return datetime.now(timezone.utc)
 
 
 def hash_password(password: str, salt: Optional[str] = None):
     salt = salt or secrets.token_hex(16)
-    h = hashlib.pbkdf2_hmac(
-        "sha256", password.encode(), bytes.fromhex(salt), 200_000
-    )
+    h = hashlib.pbkdf2_hmac("sha256", password.encode(), bytes.fromhex(salt), 200_000)
     return salt, h.hex()
 
 
@@ -175,8 +170,37 @@ def sha(token: str) -> str:
 
 def bearer(authorization: Optional[str]) -> str:
     if not authorization or not authorization.lower().startswith("bearer "):
-        raise HTTPException(401, "Giris teleb olunur")
+        raise HTTPException(401, "Giriş tələb olunur")
     return authorization[7:].strip()
+
+
+# Sadə sorğu limiti (şifrə təxmin hücumuna qarşı). Bir proses üçün işləyir.
+_FAILS: dict = {}
+MAX_FAILS = 10
+FAIL_WINDOW = 300
+
+
+def _recent(key: str) -> list:
+    t = time.time()
+    lst = [x for x in _FAILS.get(key, []) if t - x < FAIL_WINDOW]
+    _FAILS[key] = lst
+    return lst
+
+
+def check_blocked(key: str):
+    if len(_recent(key)) >= MAX_FAILS:
+        raise HTTPException(429, "Çox sayda uğursuz cəhd. 5 dəqiqə sonra yenidən yoxlayın")
+
+
+def add_fail(key: str):
+    _recent(key).append(time.time())
+
+
+def client_ip(request: Request) -> str:
+    fwd = request.headers.get("x-forwarded-for")
+    if fwd:
+        return fwd.split(",")[0].strip()
+    return request.client.host if request.client else "?"
 
 
 def current_seller(authorization: Optional[str] = Header(None)) -> sqlite3.Row:
@@ -184,51 +208,68 @@ def current_seller(authorization: Optional[str] = Header(None)) -> sqlite3.Row:
     with db() as con:
         row = con.execute(
             """SELECT s.*, se.expires_at
-               FROM sessions se
-               JOIN sellers s ON s.id = se.seller_id
+               FROM sessions se JOIN sellers s ON s.id = se.seller_id
                WHERE se.token_hash = ?""",
             (sha(token),),
         ).fetchone()
-
-    if not row:
-        raise HTTPException(401, "Sessiya bitib, yeniden daxil olun")
-
-    if datetime.fromisoformat(row["expires_at"]) < now():
-        raise HTTPException(401, "Sessiya bitib, yeniden daxil olun")
-
+    if not row or datetime.fromisoformat(row["expires_at"]) < now():
+        raise HTTPException(401, "Sessiya bitib, yenidən daxil olun")
     return row
 
 
-def require_admin(authorization: Optional[str] = Header(None)):
+def require_admin(request: Request, authorization: Optional[str] = Header(None)):
     if not ADMIN_TOKEN:
-        raise HTTPException(
-            503, "Admin girisi sondurulub: ADMIN_TOKEN teyin edilmeyib"
-        )
+        raise HTTPException(503, "Admin girişi söndürülüb: ADMIN_TOKEN təyin edilməyib")
+    key = "admin:" + client_ip(request)
+    check_blocked(key)
     if not hmac.compare_digest(bearer(authorization), ADMIN_TOKEN):
-        raise HTTPException(403, "Icaze yoxdur")
+        add_fail(key)
+        raise HTTPException(403, "İcazə yoxdur")
 
 
 @app.exception_handler(HTTPException)
 async def http_exc(_: Request, exc: HTTPException):
-    return JSONResponse(
-        {"error": exc.detail}, status_code=exc.status_code
-    )
+    return JSONResponse({"error": exc.detail}, status_code=exc.status_code)
+
+
+FIELD_LABELS = {
+    "store_name": "Mağaza adı", "owner_name": "Ad və soyad", "category": "Kateqoriya",
+    "phone": "Telefon", "email": "E-poçt", "password": "Şifrə", "city": "Şəhər",
+    "about": "Haqqında", "name": "Məhsulun adı", "price": "Qiymət", "stock": "Stok",
+    "image_url": "Şəkil linki", "description": "Təsvir", "brand": "Marka",
+    "dimensions": "Ölçülər", "material": "Material", "address": "Ünvan",
+    "whatsapp": "WhatsApp", "instagram": "Instagram", "tiktok": "TikTok",
+}
 
 
 @app.exception_handler(RequestValidationError)
 async def validation_exc(_: Request, exc: RequestValidationError):
-    return JSONResponse(
-        {"error": "Gonderilen melumatlar duzgun deyil"},
-        status_code=422,
-    )
+    errs = exc.errors()
+    if not errs:
+        return JSONResponse({"error": "Göndərilən məlumatlar düzgün deyil"}, status_code=422)
+    e = errs[0]
+    field = str(e["loc"][-1]) if e.get("loc") else ""
+    label = FIELD_LABELS.get(field, field or "Sahə")
+    kind = e.get("type", "")
+    if kind == "missing":
+        msg = f"“{label}” sahəsi boş ola bilməz"
+    elif "too_short" in kind or "min_length" in kind:
+        msg = f"“{label}” çox qısadır"
+    elif "too_long" in kind or "max_length" in kind:
+        msg = f"“{label}” çox uzundur"
+    else:
+        msg = f"“{label}” sahəsi düzgün deyil"
+    return JSONResponse({"error": msg}, status_code=422)
 
 
-# Melumat modelleri
+# ---------------------------------------------------------------
+# Modellər
+# ---------------------------------------------------------------
 class RegisterIn(BaseModel):
     store_name: str = Field(min_length=2, max_length=40)
     owner_name: str = Field(min_length=2, max_length=80)
     category: str = Field(min_length=1, max_length=40)
-    phone: str
+    phone: str = Field(max_length=30)
     email: str = Field(max_length=120)
     password: str = Field(min_length=6, max_length=100)
     city: str = Field(default="", max_length=60)
@@ -236,8 +277,8 @@ class RegisterIn(BaseModel):
 
 
 class LoginIn(BaseModel):
-    email: str
-    password: str
+    email: str = Field(max_length=120)
+    password: str = Field(max_length=100)
 
 
 class ProductIn(BaseModel):
@@ -246,7 +287,6 @@ class ProductIn(BaseModel):
     stock: int = Field(default=0, ge=0, le=1_000_000)
     image_url: str = Field(default="", max_length=500)
     description: str = Field(default="", max_length=600)
-    # Yeni sahələr: hamısı ixtiyaridir, köhnə satıcı paneli bunlar olmadan da işləyir
     category: str = Field(default="", max_length=40)
     brand: str = Field(default="", max_length=60)
     gender: str = Field(default="", max_length=20)
@@ -283,16 +323,25 @@ class SellerHomeIn(BaseModel):
 
 
 EMAIL_RE = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
-PHONE_RE = re.compile(r"^\+994\d{9}$")
 HTTP_RE = re.compile(r"^https?://", re.I)
 HANDLE_RE = re.compile(r"^[A-Za-z0-9._]{1,60}$")
+IMG_PATH_RE = re.compile(r"^/api/images/(\d+)$")
+
+# Azərbaycan hərflərini və diakritikləri sadələşdirir: "İpək", "ipek", "IPEK" eyni sayılır
+_AZ = str.maketrans({
+    "İ": "i", "I": "i", "ı": "i",
+    "Ə": "e", "ə": "e", "Ö": "o", "ö": "o", "Ü": "u", "ü": "u",
+    "Ş": "s", "ş": "s", "Ç": "c", "ç": "c", "Ğ": "g", "ğ": "g",
+})
 
 
 def fold(s) -> str:
-    return (s or "").strip().casefold()
+    return (s or "").strip().translate(_AZ).casefold()
 
 
-# Yoxlama funksiyalari
+# ---------------------------------------------------------------
+# Yoxlama funksiyaları
+# ---------------------------------------------------------------
 def clean_url(value: str, label: str) -> str:
     v = (value or "").strip()
     if v and not HTTP_RE.match(v):
@@ -300,11 +349,7 @@ def clean_url(value: str, label: str) -> str:
     return v
 
 
-IMG_PATH_RE = re.compile(r"^/api/images/\d+$")
-
-
 def clean_image_url(value: str, label: str) -> str:
-    """Ya serverə yüklənmiş şəkil yolu (/api/images/12), ya da http(s) link."""
     v = (value or "").strip()
     if v and IMG_PATH_RE.match(v):
         return v
@@ -312,14 +357,11 @@ def clean_image_url(value: str, label: str) -> str:
 
 
 def clean_social(value: str, domain: str, label: str) -> str:
-    """Istifadeci ad (@ad) ve ya tam link qebul edir."""
     v = (value or "").strip()
     if not v:
         return ""
     if HTTP_RE.match(v):
-        if not re.match(
-            r"^https?://([\w-]+\.)*" + re.escape(domain) + r"(/|$)", v, re.I
-        ):
+        if not re.match(r"^https?://([\w-]+\.)*" + re.escape(domain) + r"(/|$)", v, re.I):
             raise HTTPException(400, f"{label} linki {domain} ünvanı olmalıdır")
         return v
     v = v.lstrip("@")
@@ -328,22 +370,49 @@ def clean_social(value: str, domain: str, label: str) -> str:
     return v
 
 
+def normalize_az_number(value: str) -> Optional[str]:
+    """050 123 45 67 / 0501234567 / 501234567 / +994501234567 -> 994501234567"""
+    digits = re.sub(r"\D", "", value or "")
+    if len(digits) == 9:
+        digits = "994" + digits
+    elif len(digits) == 10 and digits.startswith("0"):
+        digits = "994" + digits[1:]
+    return digits if re.fullmatch(r"994\d{9}", digits) else None
+
+
+def clean_phone(value: str) -> str:
+    d = normalize_az_number(value)
+    if not d:
+        raise HTTPException(400, "Telefon nömrəsi düzgün deyil (məs: 050 123 45 67)")
+    return "+" + d
+
+
 def clean_whatsapp(value: str) -> str:
     v = (value or "").strip()
     if not v:
         return ""
     digits = re.sub(r"\D", "", v)
-    if len(digits) == 9:                       # 501234567
+    if len(digits) == 9:
         digits = "994" + digits
-    elif len(digits) == 10 and digits.startswith("0"):   # 0501234567
+    elif len(digits) == 10 and digits.startswith("0"):
         digits = "994" + digits[1:]
     if not 11 <= len(digits) <= 15:
         raise HTTPException(400, "WhatsApp nömrəsi düzgün deyil")
     return "+" + digits
 
 
-def clean_product(data: ProductIn) -> dict:
-    """Mehsul melumatlarini yoxlayir ve baza ucun hazirlayir."""
+def clean_video_url(value: str, seller_id: int) -> str:
+    """Yalnız bu satıcının öz R2 qovluğuna yüklənmiş video qəbul olunur."""
+    v = (value or "").strip()
+    if not v:
+        return ""
+    prefix = f"{R2_PUBLIC_URL}/seller_{seller_id}/"
+    if not STORAGE_ENABLED or not v.startswith(prefix):
+        raise HTTPException(400, "Video linki düzgün deyil")
+    return v
+
+
+def clean_product(data: ProductIn, seller_id: int) -> dict:
     name = data.name.strip()
     if not name:
         raise HTTPException(400, "Məhsulun adı boş ola bilməz")
@@ -360,7 +429,6 @@ def clean_product(data: ProductIn) -> dict:
     if age_group and age_group not in AGE_GROUPS:
         raise HTTPException(400, "Yaş aralığı düzgün deyil")
 
-    # Qiz/Oglan -> yas var, beden yoxdur. Qadin/Kishi/Uniseks -> beden var, yas yoxdur.
     sizes = []
     for x in data.sizes:
         x = x.strip().upper()
@@ -372,7 +440,7 @@ def clean_product(data: ProductIn) -> dict:
         age_group = ""
         for x in sizes:
             if x not in CLOTHING_SIZES and x not in SHOE_SIZES:
-                raise HTTPException(400, "Beden düzgün deyil")
+                raise HTTPException(400, "Bədən ölçüsü düzgün deyil")
             if category == "Ayaqqabı" and x not in SHOE_SIZES:
                 raise HTTPException(400, "Ayaqqabı üçün 36–45 ölçüləri seçilməlidir")
             if category == "Geyim" and x not in CLOTHING_SIZES:
@@ -401,7 +469,7 @@ def clean_product(data: ProductIn) -> dict:
         "size_class": size_class,
         "dimensions": data.dimensions.strip(),
         "material": data.material.strip(),
-        "video_url": clean_video_url(data.video_url),
+        "video_url": clean_video_url(data.video_url, seller_id),
     }
 
 
@@ -412,31 +480,41 @@ PRODUCT_FIELDS = (
 )
 
 
-def clean_video_url(value: str) -> str:
-    """Yalnız bizim R2 saxlama ünvanına yüklənmiş video qəbul olunur."""
-    v = (value or "").strip()
-    if not v:
-        return ""
-    if not STORAGE_ENABLED or not v.startswith(R2_PUBLIC_URL + "/"):
-        raise HTTPException(400, "Video linki düzgün deyil")
-    return v
+def drop_image(con, seller_id: int, url: str):
+    """Serverdə saxlanmış şəkil artıq istifadə olunmursa bazadan silir (limit dolmasın)."""
+    m = IMG_PATH_RE.match(url or "")
+    if not m:
+        return
+    iid = int(m.group(1))
+    used = con.execute(
+        """SELECT (SELECT COUNT(*) FROM products WHERE image_url = ?)
+                + (SELECT COUNT(*) FROM sellers WHERE logo_url = ?)""",
+        (url, url),
+    ).fetchone()[0]
+    if used == 0:
+        con.execute("DELETE FROM images WHERE id = ? AND seller_id = ?", (iid, seller_id))
 
 
-# Satici qeydiyyati
+# ---------------------------------------------------------------
+# Satıcı qeydiyyatı və girişi
+# ---------------------------------------------------------------
 @app.post("/api/sellers/register")
 def register(data: RegisterIn):
     email = data.email.strip().lower()
-
     if not EMAIL_RE.match(email):
-        raise HTTPException(400, "E-poct duzgun deyil")
+        raise HTTPException(400, "E-poçt düzgün deyil")
 
-    phone = data.phone.replace(" ", "")
-
-    if not PHONE_RE.match(phone):
-        raise HTTPException(400, "Telefon nomresi duzgun deyil")
+    phone = clean_phone(data.phone)
+    store_name = data.store_name.strip()
+    owner_name = data.owner_name.strip()
+    if len(store_name) < 2:
+        raise HTTPException(400, "Mağaza adı ən azı 2 hərf olmalıdır")
+    if len(owner_name) < 2:
+        raise HTTPException(400, "Ad və soyad ən azı 2 hərf olmalıdır")
+    if data.category not in SELLER_CATEGORIES:
+        raise HTTPException(400, "Kateqoriya düzgün deyil")
 
     salt, pw = hash_password(data.password)
-
     try:
         with db() as con:
             con.execute(
@@ -444,64 +522,38 @@ def register(data: RegisterIn):
                    (store_name, owner_name, category, phone, email,
                     city, about, pw_salt, pw_hash, status, created_at)
                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?)""",
-                (
-                    data.store_name.strip(),
-                    data.owner_name.strip(),
-                    data.category,
-                    phone,
-                    email,
-                    data.city.strip(),
-                    data.about.strip(),
-                    salt,
-                    pw,
-                    now().isoformat(),
-                ),
+                (store_name, owner_name, data.category, phone, email,
+                 data.city.strip(), data.about.strip(), salt, pw, now().isoformat()),
             )
     except sqlite3.IntegrityError:
-        raise HTTPException(409, "Bu e-poct artiq qeydiyyatdan kecib")
-
+        raise HTTPException(409, "Bu e-poçt artıq qeydiyyatdan keçib")
     return {"ok": True, "status": "pending"}
 
 
-# Satici girisi
 @app.post("/api/sellers/login")
-def login(data: LoginIn):
+def login(data: LoginIn, request: Request):
     email = data.email.strip().lower()
+    key = f"login:{client_ip(request)}:{email}"
+    check_blocked(key)
 
     with db() as con:
-        s = con.execute(
-            "SELECT * FROM sellers WHERE email = ?", (email,)
-        ).fetchone()
-
+        s = con.execute("SELECT * FROM sellers WHERE email = ?", (email,)).fetchone()
         salt = s["pw_salt"] if s else "00" * 16
         _, hashed = hash_password(data.password, salt)
 
         if not s or not hmac.compare_digest(hashed, s["pw_hash"]):
-            raise HTTPException(401, "E-poct ve ya sifre yanlisdir")
+            add_fail(key)
+            raise HTTPException(401, "E-poçt və ya şifrə yanlışdır")
 
         token = secrets.token_urlsafe(32)
-
         con.execute(
-            """INSERT INTO sessions
-               (token_hash, seller_id, expires_at)
-               VALUES (?, ?, ?)""",
-            (
-                sha(token),
-                s["id"],
-                (now() + timedelta(days=SESSION_DAYS)).isoformat(),
-            ),
+            "INSERT INTO sessions (token_hash, seller_id, expires_at) VALUES (?, ?, ?)",
+            (sha(token), s["id"], (now() + timedelta(days=SESSION_DAYS)).isoformat()),
         )
+        con.execute("DELETE FROM sessions WHERE expires_at < ?", (now().isoformat(),))
 
-        con.execute(
-            "DELETE FROM sessions WHERE expires_at < ?",
-            (now().isoformat(),),
-        )
-
-    return {
-        "token": token,
-        "store_name": s["store_name"],
-        "status": s["status"],
-    }
+    _FAILS.pop(key, None)
+    return {"token": token, "store_name": s["store_name"], "status": s["status"]}
 
 
 @app.post("/api/seller/logout")
@@ -510,10 +562,7 @@ def logout(
     s: sqlite3.Row = Depends(current_seller),
 ):
     with db() as con:
-        con.execute(
-            "DELETE FROM sessions WHERE token_hash = ?",
-            (sha(bearer(authorization)),),
-        )
+        con.execute("DELETE FROM sessions WHERE token_hash = ?", (sha(bearer(authorization)),))
     return {"ok": True}
 
 
@@ -525,7 +574,6 @@ def home_used(con, seller_id: int) -> int:
 
 
 def seller_private(s: sqlite3.Row, used: int = 0) -> dict:
-    """Saticinin oz paneli ucun melumatlar (e-poct daxil)."""
     return {
         "home_slots": s["home_slots"],
         "home_used": used,
@@ -553,13 +601,9 @@ def me(s: sqlite3.Row = Depends(current_seller)):
 
 
 @app.put("/api/seller/profile")
-def update_profile(
-    data: ProfileIn,
-    s: sqlite3.Row = Depends(current_seller),
-):
+def update_profile(data: ProfileIn, s: sqlite3.Row = Depends(current_seller)):
     raw = data.model_dump(exclude_unset=True)
     upd = {}
-
     for key, value in raw.items():
         if value is None:
             continue
@@ -575,28 +619,25 @@ def update_profile(
         upd[key] = value
 
     with db() as con:
+        old_logo = s["logo_url"]
         if upd:
-            # Acarlar yalniz ProfileIn modelinden gelir, istifadeci yazisi deyil
-            sets = ", ".join(f"{k} = ?" for k in upd)
-            con.execute(
-                f"UPDATE sellers SET {sets} WHERE id = ?",
-                (*upd.values(), s["id"]),
-            )
-        row = con.execute(
-            "SELECT * FROM sellers WHERE id = ?", (s["id"],)
-        ).fetchone()
+            sets = ", ".join(f"{k} = ?" for k in upd)  # açarlar yalnız ProfileIn-dən gəlir
+            con.execute(f"UPDATE sellers SET {sets} WHERE id = ?", (*upd.values(), s["id"]))
+            if "logo_url" in upd and upd["logo_url"] != old_logo:
+                drop_image(con, s["id"], old_logo)
+        row = con.execute("SELECT * FROM sellers WHERE id = ?", (s["id"],)).fetchone()
         used = home_used(con, s["id"])
-
     return seller_private(row, used)
 
 
-# Sekil yukleme (kompüterdən və ya telefondan)
+# ---------------------------------------------------------------
+# Şəkil yükləmə
+# ---------------------------------------------------------------
 MAX_IMAGE_BYTES = 3 * 1024 * 1024
 MAX_IMAGES_PER_SELLER = 300
 
 
 def sniff_image(b: bytes) -> Optional[str]:
-    """Faylın real növünü içindən müəyyən edir (adına və ya başlığına inanmır)."""
     if b.startswith(b"\xff\xd8\xff"):
         return "image/jpeg"
     if b.startswith(b"\x89PNG\r\n\x1a\n"):
@@ -607,17 +648,12 @@ def sniff_image(b: bytes) -> Optional[str]:
 
 
 @app.post("/api/seller/upload")
-async def upload_image(
-    request: Request,
-    s: sqlite3.Row = Depends(current_seller),
-):
-    """Şəkli xam bayt kimi qəbul edir (Content-Type: image/jpeg). Cavab: {url}."""
+async def upload_image(request: Request, s: sqlite3.Row = Depends(current_seller)):
     declared = request.headers.get("content-length")
     if declared and declared.isdigit() and int(declared) > MAX_IMAGE_BYTES:
         raise HTTPException(413, "Şəkil çox böyükdür (maksimum 3 MB)")
 
     body = await request.body()
-
     if not body:
         raise HTTPException(400, "Şəkil boşdur")
     if len(body) > MAX_IMAGE_BYTES:
@@ -628,27 +664,21 @@ async def upload_image(
         raise HTTPException(400, "Yalnız JPG, PNG və ya WEBP şəkil yüklənə bilər")
 
     with db() as con:
-        n = con.execute(
-            "SELECT COUNT(*) FROM images WHERE seller_id = ?", (s["id"],)
-        ).fetchone()[0]
-
+        n = con.execute("SELECT COUNT(*) FROM images WHERE seller_id = ?", (s["id"],)).fetchone()[0]
         if n >= MAX_IMAGES_PER_SELLER:
-            raise HTTPException(400, "Şəkil limiti doldu")
-
+            raise HTTPException(400, "Şəkil limiti doldu. Lazımsız məhsulları silin")
         cur = con.execute(
-            """INSERT INTO images (seller_id, mime, data, created_at)
-               VALUES (?, ?, ?, ?)""",
+            "INSERT INTO images (seller_id, mime, data, created_at) VALUES (?, ?, ?, ?)",
             (s["id"], mime, body, now().isoformat()),
         )
-
     return {"url": f"/api/images/{cur.lastrowid}"}
 
 
 def sigv4_presign(
     method: str, host: str, path: str, access_key: str, secret: str,
-    region: str, service: str, when: datetime, expires: int,
+    region: str, service: str, when: datetime, expires: int, content_type: str,
 ) -> str:
-    """AWS Signature V4 ilə imzalanmış qısa müddətli link (yalnız 'host' başlığı imzalanır)."""
+    """AWS SigV4 ilə imzalanmış link. 'content-type' və 'host' başlıqları imzalanır."""
     amz_date = when.strftime("%Y%m%dT%H%M%SZ")
     day = when.strftime("%Y%m%d")
     scope = f"{day}/{region}/{service}/aws4_request"
@@ -659,11 +689,13 @@ def sigv4_presign(
         "X-Amz-Credential": f"{access_key}/{scope}",
         "X-Amz-Date": amz_date,
         "X-Amz-Expires": str(expires),
-        "X-Amz-SignedHeaders": "host",
+        "X-Amz-SignedHeaders": "content-type;host",
     }
     canonical_qs = "&".join(f"{enc(k)}={enc(v)}" for k, v in sorted(params.items()))
     canonical_request = "\n".join([
-        method, path, canonical_qs, f"host:{host}\n", "host", "UNSIGNED-PAYLOAD",
+        method, path, canonical_qs,
+        f"content-type:{content_type}\nhost:{host}\n",
+        "content-type;host", "UNSIGNED-PAYLOAD",
     ])
     string_to_sign = "\n".join([
         "AWS4-HMAC-SHA256", amz_date, scope,
@@ -678,14 +710,11 @@ def sigv4_presign(
     k = h(k, service)
     k = h(k, "aws4_request")
     signature = hmac.new(k, string_to_sign.encode(), hashlib.sha256).hexdigest()
-
     return f"https://{host}{path}?{canonical_qs}&X-Amz-Signature={signature}"
 
 
 UPLOAD_TYPES = {
-    "image": {
-        "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp",
-    },
+    "image": {"image/jpeg": "jpg", "image/png": "png", "image/webp": "webp"},
     "video": {
         "video/mp4": "mp4", "video/quicktime": "mov",
         "video/webm": "webm", "video/x-m4v": "m4v",
@@ -700,27 +729,23 @@ class UploadUrlIn(BaseModel):
 
 @app.post("/api/seller/upload-url")
 def upload_url(data: UploadUrlIn, s: sqlite3.Row = Depends(current_seller)):
-    """Brauzer faylı birbaşa R2-yə yükləyir (ölçü və müddət limiti qoyulmur).
-    Gizli açar serverdə qalır, brauzerə yalnız 1 saatlıq imzalı link verilir."""
     if not STORAGE_ENABLED:
         raise HTTPException(503, "Fayl yükləmə hələ aktiv edilməyib")
-
-    # Xərc qorunması: yalnız təsdiqlənmiş mağazalar yükləyə bilər
     if s["status"] != "approved":
         raise HTTPException(403, "Mağazanız təsdiqlənəndən sonra yükləmək olar")
 
+    ctype = data.content_type.strip().lower()
     exts = UPLOAD_TYPES.get(data.kind)
-    ext = exts.get(data.content_type.strip().lower()) if exts else None
+    ext = exts.get(ctype) if exts else None
     if not ext:
         raise HTTPException(400, "Bu fayl növü dəstəklənmir")
 
     key = f"seller_{s['id']}/{int(time.time())}_{secrets.token_hex(6)}.{ext}"
     host = f"{R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
     path = f"/{R2_BUCKET}/{quote(key, safe='/-_.~')}"
-
     url = sigv4_presign(
         "PUT", host, path, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY,
-        "auto", "s3", now(), 3600,
+        "auto", "s3", now(), 3600, ctype,
     )
     return {"upload_url": url, "public_url": f"{R2_PUBLIC_URL}/{key}"}
 
@@ -728,13 +753,9 @@ def upload_url(data: UploadUrlIn, s: sqlite3.Row = Depends(current_seller)):
 @app.get("/api/images/{iid}")
 def get_image(iid: int):
     with db() as con:
-        row = con.execute(
-            "SELECT mime, data FROM images WHERE id = ?", (iid,)
-        ).fetchone()
-
+        row = con.execute("SELECT mime, data FROM images WHERE id = ?", (iid,)).fetchone()
     if not row:
         raise HTTPException(404, "Şəkil tapılmadı")
-
     return Response(
         content=bytes(row["data"]),
         media_type=row["mime"],
@@ -745,7 +766,9 @@ def get_image(iid: int):
     )
 
 
-# Mehsullar
+# ---------------------------------------------------------------
+# Məhsullar
+# ---------------------------------------------------------------
 def product_dict(r: sqlite3.Row) -> dict:
     keys = r.keys()
     data = {
@@ -758,10 +781,8 @@ def product_dict(r: sqlite3.Row) -> dict:
     }
     data["sizes"] = [x for x in (r["sizes"] or "").split(",") if x]
     data["on_home"] = bool(r["on_home"])
-
     if "store_name" in keys:
         data["store_name"] = r["store_name"]
-
     return data
 
 
@@ -788,12 +809,12 @@ def public_product_dict(r: sqlite3.Row) -> dict:
     data["store_city"] = r["store_city"]
     data["store_category"] = r["store_category"]
     data["store_phone"] = r["store_phone"]
-    data["store_whatsapp_url"] = wa_url(r["store_whatsapp"])
+    # Mağazanın WhatsApp nömrəsi yoxdursa, telefon nömrəsi ilə WhatsApp linki düzəlir
+    data["store_whatsapp_url"] = wa_url(r["store_whatsapp"] or r["store_phone"])
     return data
 
 
 def public_store_dict(s: sqlite3.Row, product_count: Optional[int] = None) -> dict:
-    # E-poct, sahibkarin adi ve sifre melumatlari ictimaiyyete verilmir
     data = {
         "id": s["id"],
         "store_name": s["store_name"],
@@ -804,7 +825,7 @@ def public_store_dict(s: sqlite3.Row, product_count: Optional[int] = None) -> di
         "logo_url": s["logo_url"],
         "phone": s["phone"],
         "whatsapp": s["whatsapp"],
-        "whatsapp_url": wa_url(s["whatsapp"]),
+        "whatsapp_url": wa_url(s["whatsapp"] or s["phone"]),
         "instagram_url": instagram_url(s["instagram"]),
         "tiktok_url": tiktok_url(s["tiktok"]),
     }
@@ -817,24 +838,17 @@ def public_store_dict(s: sqlite3.Row, product_count: Optional[int] = None) -> di
 def my_products(s: sqlite3.Row = Depends(current_seller)):
     with db() as con:
         rows = con.execute(
-            """SELECT * FROM products
-               WHERE seller_id = ?
-               ORDER BY id DESC""",
-            (s["id"],),
+            "SELECT * FROM products WHERE seller_id = ? ORDER BY id DESC", (s["id"],)
         ).fetchall()
-
     return [product_dict(r) for r in rows]
 
 
 @app.post("/api/seller/products")
-def add_product(
-    data: ProductIn,
-    s: sqlite3.Row = Depends(current_seller),
-):
-    f = clean_product(data)
-
-    # Mağaza təsdiq gözləyəndə də məhsul əlavə etmək olar.
-    # Məhsul yalnız mağaza təsdiqlənəndən sonra ictimai görünür.
+def add_product(data: ProductIn, s: sqlite3.Row = Depends(current_seller)):
+    if s["status"] == "rejected":
+        raise HTTPException(403, "Mağazanız rədd edilib, məhsul əlavə etmək olmaz")
+    f = clean_product(data, s["id"])
+    # Təsdiq gözləyən mağaza da məhsul əlavə edə bilər; məhsul yalnız təsdiqdən sonra ictimai görünür.
     with db() as con:
         cur = con.execute(
             f"""INSERT INTO products
@@ -842,99 +856,71 @@ def add_product(
                 VALUES (?, {", ".join("?" for _ in PRODUCT_FIELDS)}, ?)""",
             (s["id"], *[f[k] for k in PRODUCT_FIELDS], now().isoformat()),
         )
-
-        row = con.execute(
-            "SELECT * FROM products WHERE id = ?",
-            (cur.lastrowid,),
-        ).fetchone()
-
+        row = con.execute("SELECT * FROM products WHERE id = ?", (cur.lastrowid,)).fetchone()
     return product_dict(row)
 
 
 @app.put("/api/seller/products/{pid}/home")
-def seller_set_home(
-    pid: int,
-    data: HomeIn,
-    s: sqlite3.Row = Depends(current_seller),
-):
-    """Satici oz mehsulunu ana sehifeye qoyur/cixarir. Limit: home_slots."""
+def seller_set_home(pid: int, data: HomeIn, s: sqlite3.Row = Depends(current_seller)):
     with db() as con:
         p = con.execute(
             "SELECT id, on_home FROM products WHERE id = ? AND seller_id = ?",
             (pid, s["id"]),
         ).fetchone()
-
         if not p:
-            raise HTTPException(404, "Mehsul tapilmadi")
+            raise HTTPException(404, "Məhsul tapılmadı")
 
         if data.on_home and not p["on_home"]:
             used = home_used(con, s["id"])
             if used >= s["home_slots"]:
-                raise HTTPException(
-                    400,
-                    f"Ana səhifə limitiniz dolub ({used}/{s['home_slots']})",
-                )
+                raise HTTPException(400, f"Ana səhifə limitiniz dolub ({used}/{s['home_slots']})")
 
-        con.execute(
-            "UPDATE products SET on_home = ? WHERE id = ?",
-            (1 if data.on_home else 0, pid),
-        )
+        con.execute("UPDATE products SET on_home = ? WHERE id = ?", (1 if data.on_home else 0, pid))
         used = home_used(con, s["id"])
-
-    return {
-        "ok": True,
-        "on_home": data.on_home,
-        "home_used": used,
-        "home_slots": s["home_slots"],
-    }
+    return {"ok": True, "on_home": data.on_home, "home_used": used, "home_slots": s["home_slots"]}
 
 
 @app.put("/api/seller/products/{pid}")
-def update_product(
-    pid: int,
-    data: ProductIn,
-    s: sqlite3.Row = Depends(current_seller),
-):
-    """Mehsulu tam yenileyir. Gonderilmeyen sahe boshaldilir, ona gore butun sahəleri gonderin."""
-    f = clean_product(data)
-
+def update_product(pid: int, data: ProductIn, s: sqlite3.Row = Depends(current_seller)):
+    """Məhsulu tam yeniləyir. Göndərilməyən sahə boşaldılır, ona görə bütün sahələri göndərin.
+    'on_home' bu sorğu ilə dəyişmir."""
+    if s["status"] == "rejected":
+        raise HTTPException(403, "Mağazanız rədd edilib")
+    f = clean_product(data, s["id"])
     with db() as con:
-        cur = con.execute(
-            f"""UPDATE products
-                SET {", ".join(k + " = ?" for k in PRODUCT_FIELDS)}
+        old = con.execute(
+            "SELECT image_url FROM products WHERE id = ? AND seller_id = ?", (pid, s["id"])
+        ).fetchone()
+        if not old:
+            raise HTTPException(404, "Məhsul tapılmadı")
+        con.execute(
+            f"""UPDATE products SET {", ".join(k + " = ?" for k in PRODUCT_FIELDS)}
                 WHERE id = ? AND seller_id = ?""",
             (*[f[k] for k in PRODUCT_FIELDS], pid, s["id"]),
         )
-
-        if cur.rowcount == 0:
-            raise HTTPException(404, "Mehsul tapilmadi")
-
-        row = con.execute(
-            "SELECT * FROM products WHERE id = ?", (pid,)
-        ).fetchone()
-
+        if old["image_url"] != f["image_url"]:
+            drop_image(con, s["id"], old["image_url"])
+        row = con.execute("SELECT * FROM products WHERE id = ?", (pid,)).fetchone()
     return product_dict(row)
 
 
 @app.delete("/api/seller/products/{pid}")
-def delete_product(
-    pid: int,
-    s: sqlite3.Row = Depends(current_seller),
-):
+def delete_product(pid: int, s: sqlite3.Row = Depends(current_seller)):
     with db() as con:
-        cur = con.execute(
-            "DELETE FROM products WHERE id = ? AND seller_id = ?",
-            (pid, s["id"]),
-        )
-
-    if cur.rowcount == 0:
-        raise HTTPException(404, "Mehsul tapilmadi")
-
+        old = con.execute(
+            "SELECT image_url FROM products WHERE id = ? AND seller_id = ?", (pid, s["id"])
+        ).fetchone()
+        if not old:
+            raise HTTPException(404, "Məhsul tapılmadı")
+        con.execute("DELETE FROM products WHERE id = ? AND seller_id = ?", (pid, s["id"]))
+        drop_image(con, s["id"], old["image_url"])
     return {"ok": True}
 
 
-# Ictimai mehsullar (YALNIZ tesdiqlenmis magazalar)
-def approved_rows(con, store_id: Optional[int] = None):
+# ---------------------------------------------------------------
+# İctimai məhsullar (yalnız təsdiqlənmiş mağazalar)
+# ---------------------------------------------------------------
+def approved_rows(con, store_id: Optional[int] = None, product_id: Optional[int] = None):
     sql = """SELECT p.*, s.store_name,
                     s.home_all AS store_home_all,
                     s.category AS store_category,
@@ -945,18 +931,18 @@ def approved_rows(con, store_id: Optional[int] = None):
              JOIN sellers s ON s.id = p.seller_id
              WHERE s.status = 'approved'"""
     args = []
-
     if store_id is not None:
         sql += " AND s.id = ?"
         args.append(store_id)
-
+    if product_id is not None:
+        sql += " AND p.id = ?"
+        args.append(product_id)
     sql += " ORDER BY p.id DESC"
     return con.execute(sql, args).fetchall()
 
 
 @app.get("/api/options")
 def options():
-    """Satici formasi ve filtr paneli ucun sabit secim siyahilari."""
     return {
         "categories": CATEGORIES,
         "genders": GENDERS,
@@ -971,10 +957,8 @@ def options():
 
 @app.get("/api/filters")
 def filters(category: Optional[str] = None):
-    """Marka, material ve qiymet aralığı real mehsullardan yaranir."""
     with db() as con:
         rows = approved_rows(con)
-
     if category:
         rows = [r for r in rows if fold(r["category"]) == fold(category)]
 
@@ -987,7 +971,6 @@ def filters(category: Optional[str] = None):
         return sorted(seen.values(), key=fold)
 
     prices = [r["price"] for r in rows]
-
     return {
         "brands": distinct("brand"),
         "materials": distinct("material"),
@@ -1023,9 +1006,7 @@ def public_products(
 
     words = fold(q).split() if q else []
     result = []
-
     for r in rows:
-        # Ana sehife: admin secdiyi magazalar + secilmis mehsullar
         if home and not (r["on_home"] or r["store_home_all"]):
             continue
         if category and fold(r["category"]) != fold(category):
@@ -1036,7 +1017,6 @@ def public_products(
             continue
         if gender and fold(r["gender"]) != fold(gender):
             continue
-        # Yas melumati olmayan mehsul yas filtrinde cixmir
         if age and (r["age_group"] or "") != age.strip():
             continue
         if size and size.strip().upper() not in (r["sizes"] or "").split(","):
@@ -1053,48 +1033,48 @@ def public_products(
             continue
         if words:
             text = fold(" ".join([
-                r["name"], r["brand"], r["store_name"],
-                r["category"], r["description"],
+                r["name"], r["brand"], r["store_name"], r["category"],
+                r["description"], r["material"], r["color"], r["gender"],
             ]))
             if not all(w in text for w in words):
                 continue
         result.append(r)
 
+    # Stokda olanlar əvvəl, qalanlar sonda (sıra yenə də ən yenidən köhnəyə)
+    result.sort(key=lambda r: 0 if r["stock"] > 0 else 1)
     response.headers["X-Total-Count"] = str(len(result))
+    response.headers["Access-Control-Expose-Headers"] = "X-Total-Count"
     return [public_product_dict(r) for r in result[offset:offset + limit]]
 
 
 @app.get("/api/products/{pid}")
 def public_product(pid: int):
     with db() as con:
-        row = next((r for r in approved_rows(con) if r["id"] == pid), None)
-
-    if not row:
+        rows = approved_rows(con, product_id=pid)
+    if not rows:
         raise HTTPException(404, "Məhsul tapılmadı")
+    return public_product_dict(rows[0])
 
-    return public_product_dict(row)
 
-
-# Ictimai magazalar (YALNIZ tesdiqlenmis)
+# ---------------------------------------------------------------
+# İctimai mağazalar
+# ---------------------------------------------------------------
 @app.get("/api/stores")
 def public_stores():
     with db() as con:
-        stores = con.execute(
-            "SELECT * FROM sellers WHERE status = 'approved'"
-        ).fetchall()
+        stores = con.execute("SELECT * FROM sellers WHERE status = 'approved'").fetchall()
         counts = {
             r["seller_id"]: r["n"]
+            for r in con.execute("SELECT seller_id, COUNT(*) AS n FROM products GROUP BY seller_id")
+        }
+        covers = {
+            r["seller_id"]: r["image_url"]
             for r in con.execute(
-                "SELECT seller_id, COUNT(*) AS n FROM products GROUP BY seller_id"
+                """SELECT seller_id, image_url FROM products
+                   WHERE id IN (SELECT MAX(id) FROM products
+                                WHERE image_url != '' GROUP BY seller_id)"""
             )
         }
-        # Mağaza kartının fon şəkli: ən son şəkilli məhsul
-        covers = {}
-        for r in con.execute(
-            """SELECT seller_id, image_url FROM products
-               WHERE image_url != '' ORDER BY id DESC"""
-        ):
-            covers.setdefault(r["seller_id"], r["image_url"])
 
     stores = sorted(stores, key=lambda s: fold(s["store_name"]))
     out = []
@@ -1109,13 +1089,10 @@ def public_stores():
 def public_store(sid: int):
     with db() as con:
         s = con.execute(
-            "SELECT * FROM sellers WHERE id = ? AND status = 'approved'",
-            (sid,),
+            "SELECT * FROM sellers WHERE id = ? AND status = 'approved'", (sid,)
         ).fetchone()
-
         if not s:
             raise HTTPException(404, "Mağaza tapılmadı")
-
         rows = approved_rows(con, sid)
 
     data = public_store_dict(s, len(rows))
@@ -1123,88 +1100,56 @@ def public_store(sid: int):
     return data
 
 
-# Admin: saticilarin siyahisi
-@app.get(
-    "/api/admin/sellers",
-    dependencies=[Depends(require_admin)],
-)
+# ---------------------------------------------------------------
+# Admin
+# ---------------------------------------------------------------
+@app.get("/api/admin/sellers", dependencies=[Depends(require_admin)])
 def admin_sellers(status: Optional[str] = None):
     query = """
         SELECT id, store_name, owner_name, category, phone,
                email, city, address, about, whatsapp, instagram,
                tiktok, status, created_at, home_slots, home_all,
-               (SELECT COUNT(*) FROM products p
-                WHERE p.seller_id = sellers.id) AS product_count,
+               (SELECT COUNT(*) FROM products p WHERE p.seller_id = sellers.id) AS product_count,
                (SELECT COUNT(*) FROM products p
                 WHERE p.seller_id = sellers.id AND p.on_home = 1) AS home_used
         FROM sellers
     """
     args = ()
-
     if status:
         query += " WHERE status = ?"
         args = (status,)
-
     query += " ORDER BY id DESC"
-
     with db() as con:
         rows = con.execute(query, args).fetchall()
-
     return [dict(r) for r in rows]
 
 
-# Admin: satici statusu
-@app.post(
-    "/api/admin/sellers/{sid}/status",
-    dependencies=[Depends(require_admin)],
-)
+@app.post("/api/admin/sellers/{sid}/status", dependencies=[Depends(require_admin)])
 def admin_set_status(sid: int, data: StatusIn):
     if data.status not in ("pending", "approved", "rejected"):
-        raise HTTPException(400, "Status yanlisdir")
-
+        raise HTTPException(400, "Status yanlışdır")
     with db() as con:
-        cur = con.execute(
-            "UPDATE sellers SET status = ? WHERE id = ?",
-            (data.status, sid),
-        )
-
+        cur = con.execute("UPDATE sellers SET status = ? WHERE id = ?", (data.status, sid))
+        if data.status == "rejected":
+            # Rədd edilən satıcının açıq sessiyaları bağlanır
+            con.execute("DELETE FROM sessions WHERE seller_id = ?", (sid,))
     if cur.rowcount == 0:
-        raise HTTPException(404, "Satici tapilmadi")
-
+        raise HTTPException(404, "Satıcı tapılmadı")
     return {"ok": True, "status": data.status}
 
 
-# Admin: saticinin ana sehife limiti ve ya butun mehsullarinin ana sehifede gorunmesi
-@app.post(
-    "/api/admin/sellers/{sid}/home",
-    dependencies=[Depends(require_admin)],
-)
+@app.post("/api/admin/sellers/{sid}/home", dependencies=[Depends(require_admin)])
 def admin_seller_home(sid: int, data: SellerHomeIn):
     with db() as con:
-        s = con.execute(
-            "SELECT id FROM sellers WHERE id = ?", (sid,)
-        ).fetchone()
-
+        s = con.execute("SELECT id FROM sellers WHERE id = ?", (sid,)).fetchone()
         if not s:
-            raise HTTPException(404, "Satici tapilmadi")
-
+            raise HTTPException(404, "Satıcı tapılmadı")
         if data.slots is not None:
-            con.execute(
-                "UPDATE sellers SET home_slots = ? WHERE id = ?",
-                (data.slots, sid),
-            )
-
+            con.execute("UPDATE sellers SET home_slots = ? WHERE id = ?", (data.slots, sid))
         if data.all is not None:
-            con.execute(
-                "UPDATE sellers SET home_all = ? WHERE id = ?",
-                (1 if data.all else 0, sid),
-            )
-
-        row = con.execute(
-            "SELECT home_slots, home_all FROM sellers WHERE id = ?", (sid,)
-        ).fetchone()
+            con.execute("UPDATE sellers SET home_all = ? WHERE id = ?", (1 if data.all else 0, sid))
+        row = con.execute("SELECT home_slots, home_all FROM sellers WHERE id = ?", (sid,)).fetchone()
         used = home_used(con, sid)
-
     return {
         "ok": True,
         "home_slots": row["home_slots"],
@@ -1213,31 +1158,55 @@ def admin_seller_home(sid: int, data: SellerHomeIn):
     }
 
 
-# Admin: tek mehsulu ana sehifeye qoy/cixar (limitsiz)
-@app.post(
-    "/api/admin/products/{pid}/home",
-    dependencies=[Depends(require_admin)],
-)
+@app.post("/api/admin/products/{pid}/home", dependencies=[Depends(require_admin)])
 def admin_product_home(pid: int, data: HomeIn):
     with db() as con:
-        cur = con.execute(
-            "UPDATE products SET on_home = ? WHERE id = ?",
-            (1 if data.on_home else 0, pid),
-        )
-
+        cur = con.execute("UPDATE products SET on_home = ? WHERE id = ?", (1 if data.on_home else 0, pid))
     if cur.rowcount == 0:
-        raise HTTPException(404, "Mehsul tapilmadi")
-
+        raise HTTPException(404, "Məhsul tapılmadı")
     return {"ok": True, "on_home": data.on_home}
 
 
-# Sehifeler
+@app.get("/api/admin/products", dependencies=[Depends(require_admin)])
+def admin_products():
+    with db() as con:
+        rows = con.execute(
+            """SELECT p.*, s.store_name, s.status AS store_status,
+                      s.home_all AS store_home_all
+               FROM products p JOIN sellers s ON s.id = p.seller_id
+               ORDER BY p.id DESC"""
+        ).fetchall()
+    result = []
+    for r in rows:
+        item = product_dict(r)
+        item["seller_id"] = r["seller_id"]
+        item["created_at"] = r["created_at"]
+        item["store_status"] = r["store_status"]
+        item["store_home_all"] = bool(r["store_home_all"])
+        result.append(item)
+    return result
+
+
+@app.delete("/api/admin/products/{pid}", dependencies=[Depends(require_admin)])
+def admin_delete_product(pid: int):
+    with db() as con:
+        old = con.execute(
+            "SELECT seller_id, image_url FROM products WHERE id = ?", (pid,)
+        ).fetchone()
+        if not old:
+            raise HTTPException(404, "Məhsul tapılmadı")
+        con.execute("DELETE FROM products WHERE id = ?", (pid,))
+        drop_image(con, old["seller_id"], old["image_url"])
+    return {"ok": True}
+
+
+# ---------------------------------------------------------------
+# Səhifələr və statik fayllar
+# ---------------------------------------------------------------
 def page(name: str):
     file_path = BASE_DIR / name
-
     if not file_path.is_file():
-        raise HTTPException(404, "Sehife tapilmadi")
-
+        raise HTTPException(404, "Səhifə tapılmadı")
     return FileResponse(file_path)
 
 
@@ -1246,52 +1215,17 @@ def page(name: str):
 def home():
     return page("index.html")
 
+
 @app.get("/admin")
 def admin_page():
     return page("admin.html")
+
 
 @app.get("/seller-register.html")
 def seller_page():
     return page("seller-register.html")
 
-# Admin: butun magazalarin mehsullarini goster
-@app.get(
-    "/api/admin/products",
-    dependencies=[Depends(require_admin)],
-)
-def admin_products():
-    with db() as con:
-        rows = con.execute(
-            """SELECT p.*, s.store_name, s.status AS store_status
-               FROM products p
-               JOIN sellers s ON s.id = p.seller_id
-               ORDER BY p.id DESC"""
-        ).fetchall()
 
-    result = []
-    for r in rows:
-        item = product_dict(r)
-        item["seller_id"] = r["seller_id"]
-        item["created_at"] = r["created_at"]
-        item["store_status"] = r["store_status"]
-        result.append(item)
-
-    return result
-
-
-# Admin: mehsulu sil
-@app.delete(
-    "/api/admin/products/{pid}",
-    dependencies=[Depends(require_admin)],
-)
-def admin_delete_product(pid: int):
-    with db() as con:
-        cur = con.execute(
-            "DELETE FROM products WHERE id = ?",
-            (pid,),
-        )
-
-    if cur.rowcount == 0:
-        raise HTTPException(404, "Mehsul tapilmadi")
-
-    return {"ok": True}
+# Şəkil, CSS və s. üçün: layihə qovluğunda "static" qovluğu yaradın (məs. static/hero.jpg -> /static/hero.jpg)
+if (BASE_DIR / "static").is_dir():
+    app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
