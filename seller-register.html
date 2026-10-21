@@ -6,15 +6,15 @@
 <title>ELFA — Satıcı ol</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#f7f6f3;--text:#171717;--muted:#777;--line:#e8e6e1;--red:#d22}
+:root{--bg:#f7f6f3;--text:#171717;--muted:#777;--line:#e8e6e1;--red:#d22;--sand:#f3ece3}
 body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
 button,input,select,textarea{font:inherit}
 button{cursor:pointer;border:0}
 a{text-decoration:none;color:inherit;cursor:pointer}
 .topbar{background:#171717;color:#fff;text-align:center;padding:9px 20px;font-size:12px;letter-spacing:.4px}
 header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
-.nav{width:min(1100px,94%);height:70px;margin:auto;display:flex;align-items:center;justify-content:space-between}
-.logo{font-size:26px;font-weight:800;letter-spacing:5px}
+.nav{width:min(1240px,94%);height:70px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.logo{font-size:26px;font-weight:400;letter-spacing:8px}
 .back{display:inline-flex;align-items:center;gap:8px;font-size:14px;background:none;color:#171717}
 .back:hover{color:#777}
 .wrap{width:min(1100px,94%);margin:34px auto 60px;display:grid;grid-template-columns:1fr 1.2fr;gap:28px;align-items:start}
@@ -38,6 +38,7 @@ input,select{height:46px}
 textarea{min-height:100px;resize:vertical}
 input:focus,select:focus,textarea:focus{border-color:#171717}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
 .phone-box{display:flex;align-items:center;border:1px solid #ddd;border-radius:10px;background:#fff;overflow:hidden}
 .phone-box:focus-within{border-color:#171717}
 .phone-box span{padding:0 12px;height:44px;display:flex;align-items:center;background:#f3f3f3;border-right:1px solid #ddd;font-size:14px;color:#444}
@@ -47,6 +48,7 @@ input:focus,select:focus,textarea:focus{border-color:#171717}
 .btn{width:100%;margin-top:16px;background:#171717;color:#fff;padding:14px;border-radius:24px;font-weight:700;font-size:14px}
 .btn:hover{background:#333}
 .btn.alt{background:#eee;color:#171717}
+.btn.fit{width:auto;margin-top:0;padding:12px 22px}
 .btn:disabled{opacity:.6;cursor:not-allowed}
 .hint{font-size:11px;color:#888;margin-top:5px;line-height:1.5}
 .note{background:#fdf0e6;color:#8a4b12;border-radius:12px;padding:12px 14px;font-size:13px;line-height:1.5;margin-bottom:16px}
@@ -54,9 +56,6 @@ input:focus,select:focus,textarea:focus{border-color:#171717}
 .ok{text-align:center;padding:20px 6px}
 .ok .big{font-size:46px;margin-bottom:10px}
 .hide{display:none!important}
-.stats{display:flex;gap:10px;margin-bottom:18px}
-.stat{flex:1;background:#f7f6f3;border-radius:12px;padding:12px;text-align:center;font-size:12px;color:#777}
-.stat b{display:block;font-size:18px;color:#171717}
 .badge{display:inline-block;border-radius:12px;padding:3px 10px;font-size:12px;background:#eee}
 .badge.green{background:#e3f6e8;color:#1a7a35}
 .badge.wait{background:#fff3d6;color:#8a6200}
@@ -65,28 +64,65 @@ input:focus,select:focus,textarea:focus{border-color:#171717}
 .bar i{display:block;height:100%;width:0;background:#171717;transition:width .15s}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chips label{display:flex;align-items:center;gap:6px;border:1px solid #ddd;border-radius:18px;padding:6px 12px;font-size:12px;font-weight:700;margin:0;cursor:pointer}
-.chips input{width:auto;height:auto}
-details.box{border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:18px}
-details.box summary{font-weight:700;font-size:15px;cursor:pointer}
-details.box[open] summary{margin-bottom:14px}
-.plist{display:grid;gap:10px;margin-top:6px}
-.pi{display:flex;gap:12px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:10px}
+.chips label:has(input:checked){background:#171717;color:#fff;border-color:#171717}
+.chips input{position:absolute;opacity:0;width:0;height:0}
+.pi{display:flex;gap:12px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:10px;background:#fff}
 .pi .im{width:60px;height:60px;border-radius:10px;background:#ece9e4;flex:none;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:11px;color:#888}
 .pi .im img{width:100%;height:100%;object-fit:cover}
 .pi .mid{flex:1;min-width:0}
 .pi .mid b{display:block;font-size:14px;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pi .mid small{color:#888;font-size:12px}
-.pact{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.pact{display:flex;gap:14px;align-items:center}
 .del{background:none;color:var(--red);font-size:12px;text-decoration:underline}
-.del.g{color:#1a7a35}
-.del.b{color:#1a3d8a}
-.row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}
-.row .link{background:none;font-size:13px;text-decoration:underline;color:#444}
-.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);background:#171717;color:#fff;padding:11px 20px;border-radius:24px;font-size:13px;opacity:0;pointer-events:none;transition:.25s;z-index:60;max-width:90%;text-align:center}
+.del.g{color:#1a7a35}.del.b{color:#1a3d8a}
+.plist{display:grid;gap:10px}
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);background:#171717;color:#fff;padding:11px 20px;border-radius:24px;font-size:13px;opacity:0;pointer-events:none;transition:.25s;z-index:80;max-width:90%;text-align:center}
 .toast.show{opacity:1;transform:translateX(-50%)}
 footer{background:#171717;color:#aaa;padding:30px 0;text-align:center;font-size:12px}
-@media(max-width:860px){.wrap{grid-template-columns:1fr}.intro{position:static;padding:30px}.intro h1{font-size:32px}}
-@media(max-width:560px){.two{grid-template-columns:1fr}.panel{padding:20px}.stats{flex-direction:column}}
+
+/* ---- Satıcı paneli (giriş sonrası) ---- */
+body.dash .topbar,body.dash .intro,body.dash .tabs{display:none}
+body.dash .wrap{display:block;width:min(1240px,94%);margin:24px auto 50px}
+body.dash .panel{background:none;border:0;padding:0;border-radius:0}
+.dg{display:grid;grid-template-columns:240px 1fr;gap:28px;align-items:start}
+.side{position:sticky;top:92px;display:grid;gap:18px}
+.scard{display:flex;gap:12px;align-items:center}
+.av{width:52px;height:52px;border-radius:50%;background:#e4dfd7 center/cover;flex:none;display:flex;align-items:center;justify-content:center;font-weight:700;color:#6b6358}
+.scard h3{font-size:16px;margin-bottom:4px;word-break:break-word}
+.menu{display:grid;gap:4px}
+.menu button{display:flex;align-items:center;gap:12px;background:none;text-align:left;padding:12px 14px;border-radius:12px;font-size:14px;color:#333}
+.menu button.on{background:var(--sand);font-weight:700}
+.menu button:hover{background:#efebe4}
+.menu svg{width:20px;height:20px;flex:none;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.side .out{background:none;text-align:left;padding:10px 14px;font-size:13px;color:#777;text-decoration:underline}
+.sec{background:#fff;border:1px solid var(--line);border-radius:18px;padding:24px;margin-bottom:20px;scroll-margin-top:90px}
+.sec h2{font-size:20px;margin:0}
+.shead{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
+.stat{display:flex;gap:14px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;font-size:12px;color:#777}
+.stat i{width:44px;height:44px;border-radius:12px;background:var(--sand);display:flex;align-items:center;justify-content:center;flex:none}
+.stat i svg{width:22px;height:22px;stroke:#171717;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.stat b{display:block;font-size:22px;color:#171717;margin-top:2px}
+.drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;border:1.5px dashed #cfc9bf;border-radius:14px;background:#faf9f6;padding:18px 12px;cursor:pointer;font-size:13px;font-weight:700;color:#333;position:relative;margin:0}
+.drop small{font-weight:400;color:#888;font-size:11px;line-height:1.4}
+.drop input{position:absolute;inset:0;opacity:0;cursor:pointer;height:100%;padding:0}
+.drop svg{width:26px;height:26px;stroke:#555;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.logoRow{display:grid;grid-template-columns:200px 1fr;gap:20px;align-items:start}
+.ov{position:fixed;inset:0;background:rgba(23,23,23,.5);z-index:50;display:flex;align-items:flex-start;justify-content:center;padding:max(16px,4vh) 16px;overflow:auto}
+.md{background:#fff;border-radius:22px;width:min(1020px,100%);padding:26px;position:relative}
+.mh{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:18px}
+.mh h2{font-size:22px;margin:0 0 4px}
+.mx{background:#f3f2ee;width:36px;height:36px;border-radius:50%;font-size:18px;flex:none}
+.mb{display:grid;grid-template-columns:320px 1fr;gap:24px;align-items:start}
+.gal{background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:14px;display:grid;gap:12px}
+.main-img{aspect-ratio:1;border-radius:12px;background:#ece9e4;display:flex;align-items:center;justify-content:center;color:#999;font-size:13px;overflow:hidden;position:relative}
+.main-img img{width:100%;height:100%;object-fit:cover}
+.main-img span{position:absolute;left:10px;top:10px;background:rgba(23,23,23,.75);color:#fff;font-size:11px;padding:4px 9px;border-radius:12px}
+.chips.sz label{padding:6px 11px}
+@media(max-width:860px){.wrap{grid-template-columns:1fr}.intro{position:static;padding:30px}.intro h1{font-size:32px}
+.dg{grid-template-columns:1fr}.side{position:static}.menu{grid-auto-flow:column;overflow-x:auto}.menu button{white-space:nowrap}
+.mb{grid-template-columns:1fr}.stats{grid-template-columns:1fr}.logoRow{grid-template-columns:1fr}}
+@media(max-width:560px){.two,.three{grid-template-columns:1fr}.panel{padding:20px}.md{padding:18px}.sec{padding:18px}.pi{flex-wrap:wrap}}
 </style>
 </head>
 <body>
@@ -116,7 +152,6 @@ footer{background:#171717;color:#aaa;padding:30px 0;text-align:center;font-size:
       <button class="tab" id="tabLogin">Satıcı paneli</button>
     </div>
 
-    <!-- QEYDİYYAT -->
     <div id="regView">
       <h2>Satıcı qeydiyyatı</h2>
       <p class="sub">Məlumatlar yoxlanıldıqdan sonra mağazan aktiv olacaq.</p>
@@ -147,7 +182,6 @@ footer{background:#171717;color:#aaa;padding:30px 0;text-align:center;font-size:
       </form>
     </div>
 
-    <!-- UĞUR -->
     <div id="doneView" class="hide ok">
       <div class="big">🎉</div>
       <h2>Müraciətiniz qəbul olundu</h2>
@@ -156,7 +190,6 @@ footer{background:#171717;color:#aaa;padding:30px 0;text-align:center;font-size:
       <button class="btn alt" id="goHome">Ana səhifəyə qayıt</button>
     </div>
 
-    <!-- GİRİŞ -->
     <div id="loginView" class="hide">
       <h2>Satıcı girişi</h2>
       <p class="sub">Qeydiyyatda istifadə etdiyiniz e-poçt və şifrə ilə daxil olun.</p>
@@ -168,81 +201,128 @@ footer{background:#171717;color:#aaa;padding:30px 0;text-align:center;font-size:
 
     <!-- PANEL -->
     <div id="dashView" class="hide">
-      <div class="row">
-        <div><h2 id="dStore">Mağaza</h2><span class="badge wait" id="dStatus">Yoxlanılır</span></div>
-        <button class="link" id="logout">Çıxış</button>
-      </div>
-      <div class="stats">
-        <div class="stat"><b id="sCount">0</b>Məhsul</div>
-        <div class="stat"><b id="sStock">0</b>Ümumi stok</div>
-        <div class="stat"><b id="sValue">0.00 AZN</b>Stok dəyəri</div>
-      </div>
-      <p class="sub" id="homeInfo" style="margin-bottom:14px"></p>
-      <div class="note hide" id="pendingNote">Mağazanız hələ təsdiqlənməyib. Məhsul əlavə edə bilərsiniz, amma onlar yalnız təsdiqdən sonra saytda görünəcək. Video yükləmə təsdiqdən sonra açılır.</div>
-      <div class="note hide" id="rejectedNote">Mağazanız rədd edilib. Məlumat üçün ELFA ilə əlaqə saxlayın.</div>
+      <div class="dg">
+        <aside class="side">
+          <div class="scard">
+            <div class="av" id="dAv">E</div>
+            <div><h3 id="dStore">Mağaza</h3><span class="badge wait" id="dStatus">Yoxlanılır</span></div>
+          </div>
+          <nav class="menu">
+            <button class="on" data-nav="secHome"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v10H3z"/></svg>Ana səhifə</button>
+            <button data-nav="secProd"><svg viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>Məhsullarım</button>
+            <button data-nav="secProf"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Mağaza profili</button>
+          </nav>
+          <button class="out" id="logout">Çıxış</button>
+        </aside>
 
-      <details class="box" id="profBox">
-        <summary>Mağaza profili (loqo, WhatsApp, sosial şəbəkələr)</summary>
-        <div class="f"><label for="lgFile">Mağaza loqosu</label>
-          <input id="lgFile" type="file" accept="image/*" style="height:auto;padding:10px">
-          <img id="lgPrev" alt="" class="hide" style="width:84px;height:84px;object-fit:cover;border-radius:50%;border:1px solid var(--line);margin-top:8px">
-        </div>
-        <div class="two">
-          <div class="f"><label for="prWa">WhatsApp nömrəsi</label><input id="prWa" type="tel" placeholder="050 123 45 67"><div class="hint">Boş qalsa, qeydiyyat telefonunuz WhatsApp üçün istifadə olunur.</div></div>
-          <div class="f"><label for="prCity">Şəhər</label><input id="prCity" maxlength="60" placeholder="Bakı"></div>
-        </div>
-        <div class="two">
-          <div class="f"><label for="prIg">Instagram</label><input id="prIg" placeholder="@ad və ya link"></div>
-          <div class="f"><label for="prTk">TikTok</label><input id="prTk" placeholder="@ad və ya link"></div>
-        </div>
-        <div class="f"><label for="prAddr">Ünvan</label><input id="prAddr" maxlength="200" placeholder="Küçə, nömrə"></div>
-        <div class="f"><label for="prAbout">Mağaza haqqında</label><textarea id="prAbout" maxlength="500"></textarea></div>
-        <button class="btn" id="saveProf">Profili yadda saxla</button>
-      </details>
+        <div>
+          <div id="secHome" class="sec" style="background:none;border:0;padding:0">
+            <h2 style="font-size:26px;margin-bottom:16px">Satıcı paneli</h2>
+            <div class="stats">
+              <div class="stat"><i><svg viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg></i><div>Məhsullar<b id="sCount">0</b></div></div>
+              <div class="stat"><i><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/></svg></i><div>Ümumi stok<b id="sStock">0</b></div></div>
+              <div class="stat"><i><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M14.5 9c-.5-1-1.5-1.5-2.5-1.5-1.4 0-2.5.8-2.5 2s1 1.6 2.5 2 2.5.8 2.5 2-1.1 2-2.5 2c-1 0-2-.5-2.5-1.5M12 6v1.5M12 16.5V18"/></svg></i><div>Stok dəyəri<b id="sValue">0.00 AZN</b></div></div>
+            </div>
+            <p class="sub" id="homeInfo" style="margin-bottom:14px"></p>
+            <div class="note hide" id="pendingNote">Mağazanız hələ təsdiqlənməyib. Məhsul əlavə edə bilərsiniz, amma onlar yalnız təsdiqdən sonra saytda görünəcək. Video yükləmə təsdiqdən sonra açılır.</div>
+            <div class="note hide" id="rejectedNote">Mağazanız rədd edilib. Məlumat üçün ELFA ilə əlaqə saxlayın.</div>
+          </div>
 
-      <h2 style="font-size:19px;margin:6px 0 14px" id="formTitle">Yeni məhsul əlavə et</h2>
-      <div class="editbar hide" id="editBar">Redaktə rejimi: dəyişiklikləri edin və “Dəyişiklikləri saxla” düyməsinə basın. Yeni şəkil və ya video seçməsəniz, köhnələri qalır.</div>
-      <div class="f"><label for="pName">Məhsul adı *</label><input id="pName" maxlength="80" placeholder="Məs: Premium Parfum"></div>
-      <div class="two">
-        <div class="f"><label for="pPrice">Qiymət (AZN) *</label><input id="pPrice" type="number" min="0" step="0.01" inputmode="decimal" placeholder="49.90"></div>
-        <div class="f"><label for="pStock">Stok sayı *</label><input id="pStock" type="number" min="0" step="1" inputmode="numeric" placeholder="10"></div>
-      </div>
-      <div class="two">
-        <div class="f"><label for="pCat">Kateqoriya</label><select id="pCat"><option value="">Seçin</option></select></div>
-        <div class="f"><label for="pBrand">Marka</label><input id="pBrand" maxlength="60" placeholder="Məs: Nike"></div>
-      </div>
-      <div class="two">
-        <div class="f"><label for="pGender">Cinsiyyət</label><select id="pGender"><option value="">Seçin</option></select></div>
-        <div class="f hide" id="ageWrap"><label for="pAge">Yaş aralığı</label><select id="pAge"><option value="">Seçin</option></select></div>
-      </div>
-      <div class="f" id="sizeWrap"><label>Ölçülər</label><div class="chips" id="pSizes"></div></div>
-      <div class="two">
-        <div class="f"><label for="pColor">Rəng</label><select id="pColor"><option value="">Seçin</option></select></div>
-        <div class="f"><label for="pSizeClass">Boyut</label><select id="pSizeClass"><option value="">Seçin</option></select></div>
-      </div>
-      <div class="two">
-        <div class="f"><label for="pDim">Ölçülər (sm)</label><input id="pDim" maxlength="60" placeholder="Məs: 20 × 30 sm"></div>
-        <div class="f"><label for="pMat">Material</label><input id="pMat" maxlength="60" placeholder="Məs: Pambıq"></div>
-      </div>
-      <div class="f">
-        <label for="pFile">Məhsul şəkli</label>
-        <input id="pFile" type="file" accept="image/*" style="height:auto;padding:10px">
-        <img id="pPrev" alt="" class="hide" style="width:110px;height:110px;object-fit:cover;border-radius:10px;border:1px solid var(--line);margin-top:8px">
-        <div class="hint">Kompüterdən və ya telefondan şəkil seçin (JPG, PNG, WEBP). Şəkil avtomatik optimallaşdırılır. iPhone HEIC şəkli oxunmursa, ayarlarda “Ən uyğun” formatını seçin.</div>
-      </div>
-      <div class="f" id="videoField">
-        <label for="vFile">Məhsul videosu</label>
-        <input id="vFile" type="file" accept="video/mp4,video/quicktime,video/webm,video/x-m4v,.mp4,.mov,.webm,.m4v" style="height:auto;padding:10px">
-        <div class="hint" id="vHint"></div>
-        <div class="bar hide" id="vBar"><i></i></div>
-      </div>
-      <div class="f"><label for="pImg">və ya şəkil linki (ixtiyari)</label><input id="pImg" type="url" placeholder="https://..."><div class="hint">Şəkil əlavə etməsəniz standart görünüş göstəriləcək.</div></div>
-      <div class="f"><label for="pDesc">Təsvir</label><textarea id="pDesc" maxlength="600" placeholder="Məhsul haqqında məlumat..."></textarea></div>
-      <button class="btn" id="addP">Məhsulu əlavə et</button>
-      <button class="btn alt hide" id="cancelEdit">Redaktəni ləğv et</button>
+          <div id="secProd" class="sec">
+            <div class="shead"><h2>Məhsullarım</h2><button class="btn fit" id="newP">+ Məhsul əlavə et</button></div>
+            <div class="plist" id="plist"></div>
+          </div>
 
-      <h2 style="font-size:19px;margin:28px 0 12px">Məhsullarım</h2>
-      <div class="plist" id="plist"></div>
+          <div id="secProf" class="sec">
+            <h2 style="margin-bottom:16px">Mağaza profili</h2>
+            <div class="logoRow">
+              <div class="f">
+                <label>Mağaza loqosu</label>
+                <label class="drop" for="lgFile">
+                  <img id="lgPrev" alt="" class="hide" style="width:84px;height:84px;object-fit:cover;border-radius:50%;border:1px solid var(--line)">
+                  <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="M21 16l-5-5-9 9"/></svg>
+                  Loqonu seçin
+                  <small>JPG, PNG, WEBP</small>
+                  <input id="lgFile" type="file" accept="image/*">
+                </label>
+              </div>
+              <div>
+                <div class="two">
+                  <div class="f"><label for="prWa">WhatsApp nömrəsi</label><input id="prWa" type="tel" placeholder="+994 50 123 45 67"><div class="hint">Boş qalsa, qeydiyyat telefonunuz WhatsApp üçün istifadə olunur.</div></div>
+                  <div class="f"><label for="prCity">Şəhər</label><input id="prCity" maxlength="60" placeholder="Bakı"></div>
+                </div>
+                <div class="two">
+                  <div class="f"><label for="prIg">Instagram</label><input id="prIg" placeholder="@ad və ya link"></div>
+                  <div class="f"><label for="prTk">TikTok</label><input id="prTk" placeholder="@ad və ya link"></div>
+                </div>
+                <div class="f"><label for="prAddr">Ünvan</label><input id="prAddr" maxlength="200" placeholder="Məsələn: Nizami küçəsi 12, Bakı"></div>
+              </div>
+            </div>
+            <div class="f"><label for="prAbout">Mağaza haqqında</label><textarea id="prAbout" maxlength="500" placeholder="Mağazanız haqqında qısa məlumat..."></textarea></div>
+            <button class="btn fit" id="saveProf">Profili yadda saxla</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MƏHSUL MODALI -->
+      <div class="ov hide" id="ov">
+        <div class="md" role="dialog" aria-modal="true" aria-labelledby="formTitle">
+          <div class="mh">
+            <div><h2 id="formTitle">Yeni məhsul əlavə et</h2><p class="sub" style="margin:0">Məhsul məlumatlarını doldurun və mağazanızda paylaşın.</p></div>
+            <button class="mx" id="mClose" aria-label="Bağla">✕</button>
+          </div>
+          <div class="editbar hide" id="editBar">Redaktə rejimi: dəyişiklikləri edin və “Dəyişiklikləri saxla” düyməsinə basın. Yeni şəkil və ya video seçməsəniz, köhnələri qalır.</div>
+          <div class="mb">
+            <div class="gal">
+              <div class="main-img"><span>Əsas şəkil</span><div id="pNone">Şəkil seçilməyib</div><img id="pPrev" alt="" class="hide"></div>
+              <label class="drop" for="pFile">
+                <svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg>
+                Şəkil əlavə et
+                <small>Kompüterdən və ya telefondan şəkil seçin (JPG, PNG, WEBP). Şəkil avtomatik optimallaşdırılır. iPhone HEIC şəkli oxunmursa, ayarlarda “Ən uyğun” formatını seçin.</small>
+                <input id="pFile" type="file" accept="image/*">
+              </label>
+              <div id="videoField">
+                <label class="drop" for="vFile">
+                  <svg viewBox="0 0 24 24"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-3v10l-6-3"/></svg>
+                  Məhsul videosu əlavə et
+                  <small id="vHint"></small>
+                  <input id="vFile" type="file" accept="video/mp4,video/quicktime,video/webm,video/x-m4v,.mp4,.mov,.webm,.m4v">
+                </label>
+                <div class="bar hide" id="vBar"><i></i></div>
+              </div>
+              <div class="f" style="margin:0"><label for="pImg">və ya şəkil linki (ixtiyari)</label><input id="pImg" type="url" placeholder="https://example.com/image.jpg"><div class="hint">Şəkil əlavə etməsəniz standart görünüş göstəriləcək.</div></div>
+            </div>
+
+            <div>
+              <div class="f"><label for="pName">Məhsul adı *</label><input id="pName" maxlength="80" placeholder="Məhsulun adını daxil edin"></div>
+              <div class="two">
+                <div class="f"><label for="pPrice">Qiymət (AZN) *</label><input id="pPrice" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00"></div>
+                <div class="f"><label for="pStock">Stok sayı *</label><input id="pStock" type="number" min="0" step="1" inputmode="numeric" placeholder="0"></div>
+              </div>
+              <div class="three">
+                <div class="f"><label for="pCat">Kateqoriya</label><select id="pCat"><option value="">Seçin</option></select></div>
+                <div class="f"><label for="pBrand">Marka</label><input id="pBrand" maxlength="60" placeholder="Məs: Nike"></div>
+                <div class="f"><label for="pGender">Cinsiyyət</label><select id="pGender"><option value="">Seçin</option></select></div>
+              </div>
+              <div class="f hide" id="ageWrap"><label for="pAge">Yaş aralığı</label><select id="pAge"><option value="">Seçin</option></select></div>
+              <div class="f" id="sizeWrap"><label>Ölçülər</label><div class="chips sz" id="pSizes"></div></div>
+              <div class="two">
+                <div class="f"><label for="pColor">Rəng</label><select id="pColor"><option value="">Seçin</option></select></div>
+                <div class="f"><label for="pSizeClass">Boyut</label><select id="pSizeClass"><option value="">Seçin</option></select></div>
+              </div>
+              <div class="two">
+                <div class="f"><label for="pDim">Ölçülər (sm)</label><input id="pDim" maxlength="60" placeholder="Məsələn: 10 x 20 x 5"></div>
+                <div class="f"><label for="pMat">Material</label><input id="pMat" maxlength="60" placeholder="Məsələn: Pambıq, dəri, metal"></div>
+              </div>
+              <div class="f"><label for="pDesc">Təsvir</label><textarea id="pDesc" maxlength="600" placeholder="Məhsul haqqında ətraflı məlumat yazın..."></textarea></div>
+              <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap">
+                <button class="btn alt fit hide" id="cancelEdit">Redaktəni ləğv et</button>
+                <button class="btn fit" id="addP">Məhsulu əlavə et</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 </main>
@@ -264,6 +344,7 @@ $('#goHome').onclick=()=>location.href='/elfa.html';
 
 function show(v){
   ['regView','doneView','loginView','dashView'].forEach(id=>$('#'+id).classList.toggle('hide',id!==v));
+  document.body.classList.toggle('dash',v==='dashView');
   $('#tabReg').classList.toggle('on',v==='regView'||v==='doneView');
   $('#tabLogin').classList.toggle('on',v==='loginView'||v==='dashView');
 }
@@ -276,10 +357,27 @@ $('#phone').addEventListener('input',e=>{
   e.target.value=d.replace(/^(\d{2})(\d{0,3})(\d{0,2})(\d{0,2}).*/,(m,a,b,c,f)=>[a,b,c,f].filter(Boolean).join(' '));
 });
 
+/* ---------- Naviqasiya və modal ---------- */
+document.querySelectorAll('[data-nav]').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('[data-nav]').forEach(x=>x.classList.toggle('on',x===b));
+  document.getElementById(b.dataset.nav).scrollIntoView({behavior:'smooth',block:'start'});
+});
+function openM(){$('#ov').classList.remove('hide');document.body.style.overflow='hidden'}
+function closeM(){$('#ov').classList.add('hide');document.body.style.overflow=''}
+$('#newP').onclick=()=>{resetForm();openM()};
+$('#mClose').onclick=()=>{resetForm();closeM()};
+$('#ov').addEventListener('mousedown',e=>{if(e.target.id==='ov'){resetForm();closeM()}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#ov').classList.contains('hide')){resetForm();closeM()}});
+function setPrev(src){
+  const p=$('#pPrev');
+  if(src){p.src=src;p.classList.remove('hide');$('#pNone').classList.add('hide')}
+  else{p.classList.add('hide');p.removeAttribute('src');$('#pNone').classList.remove('hide')}
+}
+
 /* ---------- API ---------- */
 function forceLogout(msg){
   LS.s('elfa_seller_session',null);
-  show('loginView');
+  closeM();show('loginView');
   toast(msg||'Sessiya bitib, yenidən daxil olun');
 }
 async function api(path,opts={}){
@@ -316,7 +414,6 @@ $('#regForm').addEventListener('submit',async e=>{
   if(pw.length<6) return toast('Şifrə ən azı 6 simvol olmalıdır');
   if(pw!==pw2) return toast('Şifrələr üst-üstə düşmür');
   if(!$('#agree').checked) return toast('Qaydalarla razılaşmalısınız');
-
   const btn=$('#regBtn');btn.disabled=true;btn.textContent='Göndərilir...';
   try{
     v.phone='+994'+v.phone;
@@ -345,26 +442,27 @@ $('#logout').onclick=async()=>{
   const s=session();
   try{if(s) await fetch('/api/seller/logout',{method:'POST',headers:auth()})}catch{}
   LS.s('elfa_seller_session',null);
-  resetForm();
+  resetForm();closeM();
   show('loginView');toast('Çıxış edildi');
 };
 
 /* ---------- Panel ---------- */
 let MYLIST=[];
 const currentStatus=()=>(session()&&session().status)||'pending';
+function setName(n){$('#dStore').textContent=n||'Mağaza';if(!$('#dAv').style.backgroundImage)$('#dAv').textContent=(n||'E').trim().charAt(0).toUpperCase()}
 
 async function openDash(){
   const s=session();
   if(!s) return show('loginView');
   show('dashView');
-  $('#dStore').textContent=s.store_name||'Mağaza';
+  setName(s.store_name);
   let st=s.status||'pending';
   try{
     const res=await api('/api/seller/me',{headers:auth()});
     st=res.status||st;
     setHomeInfo(res);fillProfile(res);
     LS.s('elfa_seller_session',{...s,status:st,store_name:res.store_name||s.store_name});
-    $('#dStore').textContent=res.store_name||s.store_name||'Mağaza';
+    setName(res.store_name||s.store_name);
   }catch(err){
     if(err.auth) return;
     toast(err.message||'Satıcı məlumatları yenilənmədi');
@@ -379,7 +477,7 @@ function applyStatus(st){
   b.className='badge '+(ok?'green':rej?'red':'wait');
   $('#pendingNote').classList.toggle('hide',st!=='pending');
   $('#rejectedNote').classList.toggle('hide',!rej);
-  $('#addP').disabled=rej;
+  $('#addP').disabled=rej;$('#newP').disabled=rej;
 }
 function setHomeInfo(res){
   const used=res.home_used||0,slots=res.home_slots||0;
@@ -415,7 +513,7 @@ async function renderProducts(){
         <button class="del g" data-home="${esc(p.id)}" data-on="${p.on_home?'1':'0'}">${p.on_home?'Ana səhifədən çıxar':'Ana səhifəyə qoy'}</button>
         <button class="del" data-del="${esc(p.id)}">Sil</button>
       </div>
-    </div>`).join(''):'<p class="sub">Hələ məhsul əlavə etməmisiniz.</p>';
+    </div>`).join(''):'<p class="sub">Hələ heç bir məhsul əlavə edilməyib. İlk məhsulunu əlavə et və mağazanı inkişaf etdir.</p>';
 }
 $('#plist').addEventListener('click',e=>{
   const ed=e.target.closest('[data-edit]');if(ed) return startEdit(ed.dataset.edit);
@@ -510,7 +608,6 @@ async function uploadImageSmart(file){
     const blob=await compressImage(file,2000,0.86);
     return storageUpload('image',blob,'image/jpeg');
   }
-  /* R2 qoşulmayıbsa və ya mağaza hələ təsdiqlənməyibsə, şəkil serverin bazasında saxlanılır */
   return dbUploadImage(await compressImage(file,1200,0.82));
 }
 const VIDEO_TYPES={mp4:'video/mp4',mov:'video/quicktime',webm:'video/webm',m4v:'video/x-m4v'};
@@ -521,9 +618,8 @@ function videoType(f){
 }
 function showBar(pct){const bar=$('#vBar');bar.classList.remove('hide');bar.firstElementChild.style.width=pct+'%'}
 $('#pFile').addEventListener('change',()=>{
-  const f=$('#pFile').files[0],prev=$('#pPrev');
-  if(!f){prev.classList.add('hide');prev.removeAttribute('src');return}
-  prev.src=URL.createObjectURL(f);prev.classList.remove('hide');
+  const f=$('#pFile').files[0];
+  setPrev(f?URL.createObjectURL(f):'');
 });
 $('#vFile').addEventListener('change',()=>{
   const f=$('#vFile').files[0];
@@ -539,7 +635,7 @@ const FORM_IDS=['pName','pPrice','pStock','pImg','pDesc','pFile','vFile','pBrand
 function resetForm(){
   editId=null;editImage='';editVideo='';
   FORM_IDS.forEach(id=>$('#'+id).value='');
-  $('#pPrev').classList.add('hide');$('#pPrev').removeAttribute('src');
+  setPrev('');
   $('#vBar').classList.add('hide');$('#vHint').textContent=VHINT;
   renderSizeChips(false);syncKid();
   $('#formTitle').textContent='Yeni məhsul əlavə et';
@@ -562,15 +658,15 @@ function startEdit(id){
   $('#pDim').value=p.dimensions||'';$('#pMat').value=p.material||'';
   $('#pDesc').value=p.description||'';
   if(/^https?:\/\//i.test(editImage)) $('#pImg').value=editImage;
-  if(editImage){$('#pPrev').src=editImage;$('#pPrev').classList.remove('hide')}
+  if(editImage) setPrev(editImage);
   if(editVideo) $('#vHint').textContent='Cari video saxlanılacaq. Dəyişmək üçün yeni video seçin.';
   $('#formTitle').textContent='Məhsulu redaktə et';
   $('#addP').textContent='Dəyişiklikləri saxla';
   $('#editBar').classList.remove('hide');
   $('#cancelEdit').classList.remove('hide');
-  $('#formTitle').scrollIntoView({behavior:'smooth',block:'start'});
+  openM();
 }
-$('#cancelEdit').onclick=resetForm;
+$('#cancelEdit').onclick=()=>{resetForm();closeM()};
 
 $('#addP').onclick=async()=>{
   if(!session()) return;
@@ -593,7 +689,7 @@ $('#addP').onclick=async()=>{
   if(vfile&&!videoType(vfile)) return toast('Video formatı dəstəklənmir (MP4, MOV, WEBM)');
   if(vfile&&currentStatus()!=='approved') return toast('Video yükləmək üçün mağazanın təsdiqlənməsi lazımdır');
 
-  const btn=$('#addP'),label=editId?'Dəyişiklikləri saxla':'Məhsulu əlavə et';
+  const btn=$('#addP'),wasEdit=!!editId;
   btn.disabled=true;
   try{
     if(file){
@@ -604,15 +700,15 @@ $('#addP').onclick=async()=>{
       btn.textContent='Video yüklənir... 0%';showBar(0);
       p.video_url=await storageUpload('video',vfile,videoType(vfile),pct=>{btn.textContent='Video yüklənir... '+pct+'%';showBar(pct)});
     }
-    btn.textContent=editId?'Saxlanılır...':'Məhsul əlavə edilir...';
-    if(editId){
+    btn.textContent=wasEdit?'Saxlanılır...':'Məhsul əlavə edilir...';
+    if(wasEdit){
       await api('/api/seller/products/'+encodeURIComponent(editId),{method:'PUT',headers:auth(),body:JSON.stringify(p)});
       toast('Məhsul yeniləndi ✓');
     }else{
       await api('/api/seller/products',{method:'POST',headers:auth(),body:JSON.stringify(p)});
       toast('Məhsul əlavə olundu ✓');
     }
-    resetForm();
+    resetForm();closeM();
     await renderProducts();
   }catch(err){if(!err.auth)toast(err.message||'Xəta baş verdi')}
   btn.textContent=editId?'Dəyişiklikləri saxla':'Məhsulu əlavə et';
@@ -629,8 +725,9 @@ async function delProduct(id){
 
 /* ---------- Mağaza profili ---------- */
 function fillProfile(r){
-  const logoUrl=r.logo_url||'',prev=$('#lgPrev');
-  if(logoUrl){prev.src=logoUrl;prev.classList.remove('hide')}else{prev.classList.add('hide');prev.removeAttribute('src')}
+  const logoUrl=r.logo_url||'',prev=$('#lgPrev'),av=$('#dAv');
+  if(logoUrl){prev.src=logoUrl;prev.classList.remove('hide');av.style.backgroundImage='url("'+logoUrl.replace(/"/g,'%22')+'")';av.textContent=''}
+  else{prev.classList.add('hide');prev.removeAttribute('src');av.style.backgroundImage=''}
   $('#prWa').value=r.whatsapp||'';$('#prCity').value=r.city||'';
   $('#prIg').value=r.instagram||'';$('#prTk').value=r.tiktok||'';
   $('#prAddr').value=r.address||'';$('#prAbout').value=r.about||'';
@@ -660,7 +757,6 @@ $('#saveProf').onclick=async()=>{
   btn.textContent='Profili yadda saxla';btn.disabled=false;
 };
 
-/* Başlanğıc */
 if(session()) openDash();
 </script>
 </body>
