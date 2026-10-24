@@ -273,7 +273,7 @@ class RegisterIn(BaseModel):
     category: str = Field(default="Digər", max_length=40)
     phone: str = Field(max_length=30)
     email: str = Field(max_length=120)
-    password: str = Field(min_length=6, max_length=100)
+    password: str = Field(max_length=100)
     city: str = Field(default="", max_length=120)
     about: str = Field(default="", max_length=500)
 
@@ -388,6 +388,24 @@ def clean_phone(value: str) -> str:
     if not d:
         raise HTTPException(400, "Telefon nömrəsi düzgün deyil (məs: 050 123 45 67)")
     return "+" + d
+
+
+def check_password(pw: str):
+    """Düz 11 simvol: 8 rəqəm + 1 böyük hərf + 1 kiçik hərf + 1 simvol (boşluq olmaz)."""
+    digits = sum(c in "0123456789" for c in pw)
+    ok = (
+        len(pw) == 11
+        and not any(c.isspace() for c in pw)
+        and digits >= 8
+        and any(c.isupper() for c in pw)
+        and any(c.islower() for c in pw)
+        and any(not c.isalnum() for c in pw)
+    )
+    if not ok:
+        raise HTTPException(
+            400,
+            "Şifrə düz 11 simvol olmalıdır: 8 rəqəm, 1 böyük hərf, 1 kiçik hərf və 1 simvol (məs: 12345678Aa!)",
+        )
 
 
 def clean_whatsapp(value: str) -> str:
@@ -531,6 +549,7 @@ def register(data: RegisterIn):
     if category not in SELLER_CATEGORIES:
         raise HTTPException(400, "Kateqoriya düzgün deyil")
 
+    check_password(data.password)
     salt, pw = hash_password(data.password)
     try:
         with db() as con:
