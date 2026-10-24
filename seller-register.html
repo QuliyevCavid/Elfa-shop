@@ -407,6 +407,9 @@ const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;'
 const money=n=>(+n||0).toFixed(2)+' AZN';
 const VHINT='MP4, MOV və ya WEBM. Ölçü və müddət limiti yoxdur, böyük video yüklənməsi bir az çəkə bilər.';
 const MAXIMG=5,OTHER='__other';
+/* Brauzerin köhnə yadda saxladığı (səhv) şəkilləri keçmək üçün: serverdəki şəkil linklərinə səhifə açılış vaxtı əlavə olunur */
+const BUST=Date.now();
+const bu=u=>/^\/api\/images\/\d+$/.test(u||'')?u+'?v='+BUST:(u||'');
 let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2600)}
 
 $('#backBtn').onclick=()=>{ if(history.length>1) history.back(); else location.href='/elfa.html'; };
@@ -591,7 +594,7 @@ async function toggleHome(id,on){
 const EMPTY='<div class="empty"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="M21 16l-5-5-9 9"/></svg><b>Hələ heç bir məhsul əlavə edilməyib.</b>İlk məhsulunu əlavə et və mağazanı inkişaf et.</div>';
 const rowHtml=p=>`
     <div class="pi">
-      <div class="im">${p.image_url?`<img src="${esc(p.image_url)}" alt="" onerror="this.remove()">`:'ELFA'}</div>
+      <div class="im">${p.image_url?`<img src="${esc(bu(p.image_url))}" alt="" onerror="this.remove()">`:'ELFA'}</div>
       <div class="mid"><b>${esc(p.name)}</b><small>${money(p.price)} · Stok: ${esc(p.stock)}${p.video_url?' · ▶ video':''}${p.on_home?' · ana səhifədə':''}</small></div>
       <div class="pact">
         <button class="del b" data-edit="${esc(p.id)}">Redaktə</button>
@@ -806,7 +809,7 @@ function startEdit(id){
   $('#pDim').value=p.dimensions||'';$('#pMat').value=p.material||'';
   $('#pDesc').value=p.description||'';
   const list=(p.images&&p.images.length)?p.images:(p.image_url?[p.image_url]:[]);
-  imgs=list.slice(0,MAXIMG).map(u=>({src:u,url:u}));
+  imgs=list.slice(0,MAXIMG).map(u=>({src:bu(u),url:u}));
   renderImgs();
   if(editVideo) $('#vHint').textContent='Cari video saxlanılacaq. Dəyişmək üçün yeni video seçin.';
   $('#formTitle').textContent='Məhsulu redaktə et';
@@ -887,7 +890,7 @@ async function delProduct(id){
 
 /* ---------- Mağaza profili ---------- */
 function fillProfile(r){
-  const logoUrl=r.logo_url||'',prev=$('#lgPrev');
+  const logoUrl=bu(r.logo_url||''),prev=$('#lgPrev');
   ['#dAv','#hAv'].forEach(id=>{
     const av=$(id);
     if(logoUrl){av.style.backgroundImage='url("'+logoUrl.replace(/"/g,'%22')+'")';av.textContent=''}
