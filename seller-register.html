@@ -89,6 +89,8 @@ footer{background:#171717;color:#aaa;padding:30px 0;text-align:center;font-size:
 .ic.nm input{padding-right:54px}
 .ic.nm .cnt{bottom:auto;top:50%;transform:translateY(-50%)}
 .oth{margin-top:8px}
+.drop.dis{opacity:.55;cursor:not-allowed}
+.drop.dis input{pointer-events:none}
 
 /* ---- Satıcı paneli (giriş sonrası) ---- */
 body.dash .topbar,body.dash .intro,body.dash .tabs{display:none}
@@ -308,7 +310,7 @@ body.noside .side{display:none}
                   <div class="f"><label for="prWa">WhatsApp nömrəsi</label>
                     <div class="phone-box"><span>+994</span><input id="prWa" type="tel" inputmode="numeric" maxlength="9" placeholder="501234567" autocomplete="off"></div>
                     <div class="hint">Yalnız 9 rəqəm yazın (məs: 501234567). Boş qalsa, qeydiyyat telefonunuz WhatsApp üçün istifadə olunur.</div></div>
-                  <div class="f"><label for="prCity">Şəhər</label><div class="ic"><svg viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-11a7 7 0 0 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg><input id="prCity" maxlength="60" placeholder="Bakı"></div></div>
+                  <div class="f"><label for="prCity">Şəhər</label><div class="ic"><svg viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-11a7 7 0 0 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg><input id="prCity" maxlength="120" placeholder="Bakı"></div></div>
                 </div>
                 <div class="two">
                   <div class="f"><label for="prIg">Instagram</label><div class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".6"/></svg><input id="prIg" placeholder="@ad və ya link"></div></div>
@@ -349,7 +351,7 @@ body.noside .side{display:none}
                 <input id="pFile" type="file" accept="image/*" multiple>
               </label>
               <div id="videoField">
-                <label class="drop" for="vFile">
+                <label class="drop" for="vFile" id="vDrop">
                   <svg viewBox="0 0 24 24"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-3v10l-6-3"/></svg>
                   Məhsul videosu əlavə et (1 ədəd)
                   <small id="vHint"></small>
@@ -553,6 +555,15 @@ async function openDash(){
   applyStatus(st);
   await renderProducts();
 }
+function syncVideoUI(){
+  const f=$('#vFile'),d=$('#vDrop'),h=$('#vHint');
+  let msg='';
+  if(!OPT.storage_enabled) msg='Video yükləmə hələ aktiv deyil: saytın fayl saxlama xidməti (R2) qoşulmayıb. Administrator qoşandan sonra işləyəcək.';
+  else if(currentStatus()!=='approved') msg='Video yükləmək üçün mağazanın ELFA tərəfindən təsdiqlənməsi lazımdır.';
+  f.disabled=!!msg;d.classList.toggle('dis',!!msg);
+  if(msg){f.value='';h.textContent=msg}
+  else if(!editVideo&&!f.files[0]) h.textContent=VHINT;
+}
 function applyStatus(st){
   const ok=st==='approved',rej=st==='rejected';
   const b=$('#dStatus');
@@ -561,6 +572,7 @@ function applyStatus(st){
   $('#pendingNote').classList.toggle('hide',st!=='pending');
   $('#rejectedNote').classList.toggle('hide',!rej);
   $('#addP').disabled=rej;$('#newP').disabled=rej;$('#newP2').disabled=rej;
+  syncVideoUI();
 }
 function setHomeInfo(res){
   const used=res.home_used||0,slots=res.home_slots||0;
@@ -648,8 +660,7 @@ async function loadOptions(){
   fillSel('pCat',OPT.categories,true);fillSel('pGender',OPT.genders);fillSel('pAge',OPT.age_groups);
   fillSel('pColor',OPT.colors,true);fillSel('pSizeClass',OPT.size_classes,true);
   renderSizeChips(false);syncKid();syncOthers();
-  $('#videoField').classList.toggle('hide',!OPT.storage_enabled);
-  $('#vHint').textContent=VHINT;
+  syncVideoUI();
 }
 loadOptions();
 
@@ -766,7 +777,7 @@ const FORM_IDS=['pName','pPrice','pStock','pDesc','pFile','vFile','pBrand','pDim
 function resetForm(){
   editId=null;editVideo='';imgs=[];
   FORM_IDS.forEach(id=>$('#'+id).value='');
-  $('#vBar').classList.add('hide');$('#vHint').textContent=VHINT;
+  $('#vBar').classList.add('hide');syncVideoUI();
   renderSizeChips(false);syncKid();syncOthers();renderImgs();updCnt();
   $('#formTitle').textContent='Yeni məhsul əlavə et';
   $('#addTxt').textContent='Məhsulu əlavə et';
