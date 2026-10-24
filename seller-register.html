@@ -223,9 +223,10 @@ body.noside .side{display:none}
         </div>
         <div class="f"><label for="email">E-poçt *</label><input id="email" type="email" placeholder="ad@mail.com" autocomplete="email"></div>
         <div class="two">
-          <div class="f"><label for="pw">Şifrə *</label><input id="pw" type="password" placeholder="Ən azı 6 simvol" autocomplete="new-password"></div>
-          <div class="f"><label for="pw2">Şifrənin təkrarı *</label><input id="pw2" type="password" placeholder="Təkrar yazın" autocomplete="new-password"></div>
+          <div class="f"><label for="pw">Şifrə *</label><input id="pw" type="password" maxlength="11" placeholder="11 simvol" autocomplete="new-password"></div>
+          <div class="f"><label for="pw2">Şifrənin təkrarı *</label><input id="pw2" type="password" maxlength="11" placeholder="Təkrar yazın" autocomplete="new-password"></div>
         </div>
+        <div class="hint" id="pwHint" style="margin:-6px 0 14px">Şifrə düz <b>11 simvol</b> olmalıdır: <b>8 rəqəm</b>, <b>1 böyük hərf</b>, <b>1 kiçik hərf</b> və <b>1 simvol</b> (məs: <b>12345678Aa!</b>).</div>
         <div class="f"><label for="city">Şəhər və obyektin ünvanı</label><input id="city" maxlength="120" placeholder="Məs: Bakı, Nizami küçəsi 12"></div>
         <div class="f"><label for="about">Mağaza haqqında</label><textarea id="about" maxlength="500" placeholder="Nə satırsınız? Qısa məlumat yazın..."></textarea></div>
         <label class="chk"><input type="checkbox" id="agree"><span>ELFA satıcı qaydaları ilə tanış oldum və razıyam.</span></label>
@@ -480,6 +481,18 @@ async function api(path,opts={}){
 }
 const auth=()=>{const s=session();return {Authorization:'Bearer '+((s&&s.token)||'')}};
 
+/* ---------- Şifrə qaydası: düz 11 simvol = 8 rəqəm + 1 böyük + 1 kiçik hərf + 1 simvol ---------- */
+function checkPw(pw){
+  if(/\s/.test(pw)) return 'Şifrədə boşluq ola bilməz';
+  if(pw.length!==11) return 'Şifrə düz 11 simvol olmalıdır (hazırda '+pw.length+')';
+  const digits=(pw.match(/[0-9]/g)||[]).length;
+  if(digits<8) return 'Şifrədə 8 rəqəm olmalıdır';
+  if(!/\p{Lu}/u.test(pw)) return 'Şifrədə 1 böyük hərf olmalıdır';
+  if(!/\p{Ll}/u.test(pw)) return 'Şifrədə 1 kiçik hərf olmalıdır';
+  if(!/[^\p{L}\p{N}\s]/u.test(pw)) return 'Şifrədə 1 simvol olmalıdır (məs: ! @ # $ %)';
+  return '';
+}
+
 /* ---------- Qeydiyyat ---------- */
 $('#regForm').addEventListener('submit',async e=>{
   e.preventDefault();
@@ -494,7 +507,8 @@ $('#regForm').addEventListener('submit',async e=>{
   if(v.owner_name.length<2) return toast('Ad və soyad ən azı 2 hərf olmalıdır');
   if(v.phone.length!==9) return toast('Telefon nömrəsi 9 rəqəm olmalıdır');
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email)) return toast('E-poçt düzgün deyil');
-  if(pw.length<6) return toast('Şifrə ən azı 6 simvol olmalıdır');
+  const pwErr=checkPw(pw);
+  if(pwErr) return toast(pwErr);
   if(pw!==pw2) return toast('Şifrələr üst-üstə düşmür');
   if(!$('#agree').checked) return toast('Qaydalarla razılaşmalısınız');
   const btn=$('#regBtn');btn.disabled=true;btn.textContent='Göndərilir...';
