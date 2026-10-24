@@ -1,5 +1,6 @@
 import hashlib
 import hmac
+import json
 import os
 import re
 import secrets
@@ -77,6 +78,7 @@ PRODUCT_NEW_COLUMNS = [
     ("size_class", "TEXT NOT NULL DEFAULT ''"),
     ("dimensions", "TEXT NOT NULL DEFAULT ''"),
     ("material", "TEXT NOT NULL DEFAULT ''"),
+    ("images", "TEXT NOT NULL DEFAULT ''"),
 ]
 
 
@@ -236,7 +238,7 @@ FIELD_LABELS = {
     "store_name": "Mağaza adı", "owner_name": "Ad və soyad", "category": "Kateqoriya",
     "phone": "Telefon", "email": "E-poçt", "password": "Şifrə", "city": "Şəhər",
     "about": "Haqqında", "name": "Məhsulun adı", "price": "Qiymət", "stock": "Stok",
-    "image_url": "Şəkil linki", "description": "Təsvir", "brand": "Marka",
+    "image_url": "Şəkil linki", "images": "Şəkillər", "description": "Təsvir", "brand": "Marka",
     "dimensions": "Ölçülər", "material": "Material", "address": "Ünvan",
     "whatsapp": "WhatsApp", "instagram": "Instagram", "tiktok": "TikTok",
 }
@@ -268,11 +270,11 @@ async def validation_exc(_: Request, exc: RequestValidationError):
 class RegisterIn(BaseModel):
     store_name: str = Field(min_length=2, max_length=40)
     owner_name: str = Field(min_length=2, max_length=80)
-    category: str = Field(min_length=1, max_length=40)
+    category: str = Field(default="Digər", max_length=40)
     phone: str = Field(max_length=30)
     email: str = Field(max_length=120)
     password: str = Field(min_length=6, max_length=100)
-    city: str = Field(default="", max_length=60)
+    city: str = Field(default="", max_length=120)
     about: str = Field(default="", max_length=500)
 
 
@@ -286,14 +288,15 @@ class ProductIn(BaseModel):
     price: float = Field(ge=0, le=1_000_000)
     stock: int = Field(default=0, ge=0, le=1_000_000)
     image_url: str = Field(default="", max_length=500)
+    images: List[str] = Field(default_factory=list, max_length=5)
     description: str = Field(default="", max_length=600)
-    category: str = Field(default="", max_length=40)
+    category: str = Field(default="", max_length=60)
     brand: str = Field(default="", max_length=60)
     gender: str = Field(default="", max_length=20)
     age_group: str = Field(default="", max_length=20)
     sizes: List[str] = Field(default_factory=list, max_length=20)
-    color: str = Field(default="", max_length=30)
-    size_class: str = Field(default="", max_length=20)
+    color: str = Field(default="", max_length=40)
+    size_class: str = Field(default="", max_length=40)
     dimensions: str = Field(default="", max_length=60)
     material: str = Field(default="", max_length=60)
     video_url: str = Field(default="", max_length=500)
@@ -301,7 +304,7 @@ class ProductIn(BaseModel):
 
 class ProfileIn(BaseModel):
     about: Optional[str] = Field(default=None, max_length=500)
-    city: Optional[str] = Field(default=None, max_length=60)
+    city: Optional[str] = Field(default=None, max_length=120)
     address: Optional[str] = Field(default=None, max_length=200)
     logo_url: Optional[str] = Field(default=None, max_length=500)
     whatsapp: Optional[str] = Field(default=None, max_length=30)
@@ -388,17 +391,14 @@ def clean_phone(value: str) -> str:
 
 
 def clean_whatsapp(value: str) -> str:
+    """Yalnız Azərbaycan nömrəsi: 9 rəqəm (məs: 501234567) -> +994501234567"""
     v = (value or "").strip()
     if not v:
         return ""
-    digits = re.sub(r"\D", "", v)
-    if len(digits) == 9:
-        digits = "994" + digits
-    elif len(digits) == 10 and digits.startswith("0"):
-        digits = "994" + digits[1:]
-    if not 11 <= len(digits) <= 15:
-        raise HTTPException(400, "WhatsApp nömrəsi düzgün deyil")
-    return "+" + digits
+    d = normalize_az_number(v)
+    if not d:
+        raise HTTPException(400, "WhatsApp nömrəsi 9 rəqəm olmalıdır (məs: 501234567)")
+    return "+" + d
 
 
 def clean_video_url(value: str, seller_id: int) -> str:
@@ -417,9 +417,7 @@ def clean_product(data: ProductIn, seller_id: int) -> dict:
     if not name:
         raise HTTPException(400, "Məhsulun adı boş ola bilməz")
 
-    category = data.category.strip()
-    if category and category not in CATEGORIES:
-        raise HTTPException(400, "Kateqoriya düzgün deyil")
+    category = data.category.strip()  # siyahıdan və ya satıcının özü yazdığı kateqoriya
 
     gender = data.gender.strip()
     if gender and gender not in GENDERS:
@@ -439,26 +437,30 @@ def clean_product(data: ProductIn, seller_id: int) -> dict:
     else:
         age_group = ""
         for x in sizes:
-            if x not in CLOTHING_SIZES and x not in SHOE_SIZES:
-                raise HTTPException(400, "Bədən ölçüsü düzgün deyil")
-            if category == "Ayaqqabı" and x not in SHOE_SIZES:
-                raise HTTPException(400, "Ayaqqabı üçün 36–45 ölçüləri seçilməlidir")
-            if category == "Geyim" and x not in CLOTHING_SIZES:
-                raise HTTPException(400, "Geyim üçün XS–XXL ölçüləri seçilməlidir")
+            if len(x) > 20:
+                raise HTTPException(400, "Bədən ölçüsü çox uzundur")
 
     color = data.color.strip()
-    if color and color not in COLORS:
-        raise HTTPException(400, "Rəng düzgün deyil")
 
     size_class = data.size_class.strip()
-    if size_class and size_class not in SIZE_CLASSES:
-        raise HTTPException(400, "Boyut düzgün deyil")
+
+    images = []
+    for u in data.images:
+        u = clean_image_url(u, "Şəkil linki")
+        if len(u) > 500:
+            raise HTTPException(400, "Şəkil linki çox uzundur")
+        if u and u not in images:
+            images.append(u)
+    if not images and data.image_url.strip():
+        images = [clean_image_url(data.image_url, "Şəkil linki")]
+    images = images[:5]
 
     return {
         "name": name,
         "price": data.price,
         "stock": data.stock,
-        "image_url": clean_image_url(data.image_url, "Şəkil linki"),
+        "image_url": images[0] if images else "",
+        "images": json.dumps(images),
         "description": data.description.strip(),
         "category": category,
         "brand": data.brand.strip(),
@@ -474,10 +476,24 @@ def clean_product(data: ProductIn, seller_id: int) -> dict:
 
 
 PRODUCT_FIELDS = (
-    "name", "price", "stock", "image_url", "description", "category",
+    "name", "price", "stock", "image_url", "images", "description", "category",
     "brand", "gender", "age_group", "sizes", "color", "size_class",
     "dimensions", "material", "video_url",
 )
+
+
+def row_image_urls(row) -> set:
+    """Məhsul sətrindəki bütün şəkil linkləri (əsas + əlavə)."""
+    urls = set()
+    if row["image_url"]:
+        urls.add(row["image_url"])
+    try:
+        for u in json.loads(row["images"] or "[]"):
+            if isinstance(u, str) and u:
+                urls.add(u)
+    except ValueError:
+        pass
+    return urls
 
 
 def drop_image(con, seller_id: int, url: str):
@@ -487,9 +503,9 @@ def drop_image(con, seller_id: int, url: str):
         return
     iid = int(m.group(1))
     used = con.execute(
-        """SELECT (SELECT COUNT(*) FROM products WHERE image_url = ?)
+        """SELECT (SELECT COUNT(*) FROM products WHERE image_url = ? OR images LIKE ?)
                 + (SELECT COUNT(*) FROM sellers WHERE logo_url = ?)""",
-        (url, url),
+        (url, '%' + json.dumps(url) + '%', url),
     ).fetchone()[0]
     if used == 0:
         con.execute("DELETE FROM images WHERE id = ? AND seller_id = ?", (iid, seller_id))
@@ -511,7 +527,8 @@ def register(data: RegisterIn):
         raise HTTPException(400, "Mağaza adı ən azı 2 hərf olmalıdır")
     if len(owner_name) < 2:
         raise HTTPException(400, "Ad və soyad ən azı 2 hərf olmalıdır")
-    if data.category not in SELLER_CATEGORIES:
+    category = (data.category or "").strip() or "Digər"
+    if category not in SELLER_CATEGORIES:
         raise HTTPException(400, "Kateqoriya düzgün deyil")
 
     salt, pw = hash_password(data.password)
@@ -522,7 +539,7 @@ def register(data: RegisterIn):
                    (store_name, owner_name, category, phone, email,
                     city, about, pw_salt, pw_hash, status, created_at)
                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?)""",
-                (store_name, owner_name, data.category, phone, email,
+                (store_name, owner_name, category, phone, email,
                  data.city.strip(), data.about.strip(), salt, pw, now().isoformat()),
             )
     except sqlite3.IntegrityError:
@@ -780,6 +797,15 @@ def product_dict(r: sqlite3.Row) -> dict:
         )
     }
     data["sizes"] = [x for x in (r["sizes"] or "").split(",") if x]
+    imgs = []
+    if "images" in keys:
+        try:
+            imgs = [u for u in json.loads(r["images"] or "[]") if isinstance(u, str) and u]
+        except ValueError:
+            imgs = []
+    if not imgs and r["image_url"]:
+        imgs = [r["image_url"]]
+    data["images"] = imgs
     data["on_home"] = bool(r["on_home"])
     if "store_name" in keys:
         data["store_name"] = r["store_name"]
@@ -889,7 +915,7 @@ def update_product(pid: int, data: ProductIn, s: sqlite3.Row = Depends(current_s
     f = clean_product(data, s["id"])
     with db() as con:
         old = con.execute(
-            "SELECT image_url FROM products WHERE id = ? AND seller_id = ?", (pid, s["id"])
+            "SELECT image_url, images FROM products WHERE id = ? AND seller_id = ?", (pid, s["id"])
         ).fetchone()
         if not old:
             raise HTTPException(404, "Məhsul tapılmadı")
@@ -898,8 +924,9 @@ def update_product(pid: int, data: ProductIn, s: sqlite3.Row = Depends(current_s
                 WHERE id = ? AND seller_id = ?""",
             (*[f[k] for k in PRODUCT_FIELDS], pid, s["id"]),
         )
-        if old["image_url"] != f["image_url"]:
-            drop_image(con, s["id"], old["image_url"])
+        new_urls = {f["image_url"], *json.loads(f["images"])}
+        for u in row_image_urls(old) - new_urls:
+            drop_image(con, s["id"], u)
         row = con.execute("SELECT * FROM products WHERE id = ?", (pid,)).fetchone()
     return product_dict(row)
 
@@ -908,12 +935,13 @@ def update_product(pid: int, data: ProductIn, s: sqlite3.Row = Depends(current_s
 def delete_product(pid: int, s: sqlite3.Row = Depends(current_seller)):
     with db() as con:
         old = con.execute(
-            "SELECT image_url FROM products WHERE id = ? AND seller_id = ?", (pid, s["id"])
+            "SELECT image_url, images FROM products WHERE id = ? AND seller_id = ?", (pid, s["id"])
         ).fetchone()
         if not old:
             raise HTTPException(404, "Məhsul tapılmadı")
         con.execute("DELETE FROM products WHERE id = ? AND seller_id = ?", (pid, s["id"]))
-        drop_image(con, s["id"], old["image_url"])
+        for u in row_image_urls(old):
+            drop_image(con, s["id"], u)
     return {"ok": True}
 
 
@@ -1191,12 +1219,13 @@ def admin_products():
 def admin_delete_product(pid: int):
     with db() as con:
         old = con.execute(
-            "SELECT seller_id, image_url FROM products WHERE id = ?", (pid,)
+            "SELECT seller_id, image_url, images FROM products WHERE id = ?", (pid,)
         ).fetchone()
         if not old:
             raise HTTPException(404, "Məhsul tapılmadı")
         con.execute("DELETE FROM products WHERE id = ?", (pid,))
-        drop_image(con, old["seller_id"], old["image_url"])
+        for u in row_image_urls(old):
+            drop_image(con, old["seller_id"], u)
     return {"ok": True}
 
 
