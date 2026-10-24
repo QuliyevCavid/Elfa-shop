@@ -269,6 +269,7 @@ footer{margin-top:56px;background:#171717;color:#fff;padding:40px 0}
 .pd-stage{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
 .pd-stage img,.pd-stage video{width:100%;height:100%;object-fit:contain;display:block}
 .pd-stage video{background:#000}
+.pd-stage iframe{width:100%;height:100%;border:0;background:#000}
 .pd-ph{font-size:20px;letter-spacing:8px;color:#cfc6bb;font-weight:800}
 .pd-nav{position:absolute;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.96);box-shadow:0 2px 12px rgba(0,0,0,.18);font-size:22px;line-height:1;z-index:3;display:flex;align-items:center;justify-content:center;padding-bottom:3px}
 .pd-nav:hover{background:#171717;color:#fff}
@@ -315,6 +316,64 @@ footer{margin-top:56px;background:#171717;color:#fff;padding:40px 0}
  .pd-nav{width:34px;height:34px;font-size:19px}
 }
 @media(max-width:420px){.pd-specs{grid-template-columns:1fr}}
+
+/* ===== cəlbedici dizayn və qalma müddətini artıran hissələr ===== */
+.hero{background:linear-gradient(115deg,#f4e6d8 0%,#ebd2b6 48%,#dcb48c 100%)}
+.hero:before{content:"";position:absolute;width:420px;height:420px;border-radius:50%;background:rgba(255,255,255,.35);left:-140px;bottom:-210px}
+.hero-btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.hero .hero-btns .pill{margin-top:0}
+.pill.ghost{background:transparent;color:#171717;border:1.5px solid #171717;padding:10.5px 22px}
+.pill.ghost:hover{background:#171717;color:#fff}
+.hero-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+.hero-chips span{background:rgba(255,255,255,.7);border-radius:16px;padding:6px 12px;font-size:10.5px;font-weight:700}
+.statsbar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:18px auto 0}
+.statsbar div{background:#fff;border-radius:12px;padding:14px 16px;text-align:center;border:1px solid var(--line)}
+.statsbar b{display:block;font-size:22px;font-weight:800;letter-spacing:-.5px}
+.statsbar span{font-size:11px;color:var(--muted);font-weight:600}
+.dept i{transition:.2s}
+.dept:hover i{transform:translateY(-3px)}
+.store{transition:transform .2s,box-shadow .2s,border-color .2s}
+.store:hover{transform:translateY(-3px);box-shadow:0 10px 22px rgba(0,0,0,.08)}
+.pcard{transition:transform .2s,box-shadow .2s,border-color .2s;animation:pop .4s ease both}
+.photo img{transition:transform .4s,opacity .3s}
+.photo img.alt{opacity:0}
+@media(hover:hover){
+ .pcard:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(0,0,0,.09)}
+ .pcard:hover .photo img:first-child{transform:scale(1.04)}
+ .pcard:hover .photo img.alt{opacity:1}
+}
+@keyframes pop{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.sbadge.low{color:#a05a00}
+.pcard.sk{animation:none;pointer-events:none}
+.sk .photo{background:linear-gradient(90deg,#efe9e2 25%,#f8f4ee 50%,#efe9e2 75%);background-size:200% 100%;animation:shim 1.2s infinite}
+.sk .photo:before{display:none}
+.sk-l{height:10px;border-radius:6px;background:#efe9e2;margin:6px 0 10px;width:80%}
+.sk-l.s{width:45%}
+@keyframes shim{to{background-position:-200% 0}}
+.hscroll{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(170px,210px);gap:12px;overflow-x:auto;scrollbar-width:none;padding:2px 2px 10px;scroll-snap-type:x proximity}
+.hscroll::-webkit-scrollbar{display:none}
+.hscroll .pcard{scroll-snap-align:start}
+.pd-more{max-width:1240px;margin:8px auto 0}
+.modal .pd-more h3{font-size:18px;margin:30px 0 12px;font-weight:800}
+.sellcta{margin-top:40px}
+.sellcta-in{background:#171717;color:#fff;border-radius:18px;padding:34px 40px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.sellcta .eyebrow{opacity:.7;margin-bottom:8px}
+.sellcta h2{font-size:clamp(20px,2.6vw,28px);letter-spacing:-.6px;font-weight:800;margin-bottom:8px;max-width:560px}
+.sellcta p{font-size:12.5px;color:#ccc;line-height:1.6;max-width:560px;font-weight:500}
+.bnav{display:none}
+.totop{position:fixed;right:16px;bottom:24px;width:42px;height:42px;border-radius:50%;background:#171717;color:#fff;font-size:18px;box-shadow:0 4px 14px rgba(0,0,0,.25);z-index:30;opacity:0;pointer-events:none;transition:.25s;transform:translateY(10px)}
+.totop.show{opacity:1;pointer-events:auto;transform:none}
+@media(max-width:800px){
+ .bnav{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(255,255,255,.98);border-top:1px solid var(--line);padding:6px 2px calc(6px + env(safe-area-inset-bottom))}
+ .bnav button,.bnav a{background:none;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:9.5px;font-weight:700;color:#8a8a8a;padding:4px 0}
+ .bnav svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+ .bnav .on{color:#171717}
+ body{padding-bottom:62px}
+ .toast{bottom:80px}
+ .totop{bottom:76px}
+ .sellcta-in{padding:26px 22px}
+}
+@media(max-width:420px){.statsbar b{font-size:18px}.hscroll{grid-auto-columns:150px}}
 </style>
 
 <!-- ============================================================
@@ -360,8 +419,23 @@ footer{margin-top:56px;background:#171717;color:#fff;padding:40px 0}
         <div class="eyebrow">ELFA · YENİ NƏSİL MARKETPLACE</div>
         <h1>Sadəcə baxma.<br>Kəşf et.</h1>
         <p>Sevdiyin məhsulu tap, mağazanı seç və satıcı ilə birbaşa əlaqə saxla.</p>
-        <button class="pill" data-act="scrollFeat">Məhsulları kəşf et →</button>
+        <div class="hero-btns">
+          <button class="pill" data-act="scrollFeat">Məhsulları kəşf et →</button>
+          <button class="pill ghost" data-act="allStores">Mağazalara bax</button>
+        </div>
+        <div class="hero-chips"><span>✓ Satıcı ilə birbaşa əlaqə</span><span>✓ Mağazaları kəşf et</span><span>♡ Sevimlilərini yadda saxla</span></div>
       </div>
+    </section>
+
+    <section class="section statsbar hide" id="statsBar">
+      <div><b id="stStores">0</b><span>Mağaza</span></div>
+      <div><b id="stProducts">0</b><span>Məhsul</span></div>
+      <div><b id="stCats">0</b><span>Şöbə</span></div>
+    </section>
+
+    <section class="section hide" id="recentSec">
+      <div class="section-head"><div><h2>Son baxdığınız məhsullar</h2><p>Qaldığınız yerdən davam edin</p></div><button class="see" id="clearRecent">Təmizlə</button></div>
+      <div class="hscroll" id="recentRow"></div>
     </section>
 
     <section class="section">
@@ -390,6 +464,8 @@ footer{margin-top:56px;background:#171717;color:#fff;padding:40px 0}
       <div class="empty hide" id="homeEmpty"></div>
     </section>
 
+    <div id="catRows"></div>
+
     <section class="section">
       <div class="banners">
         <div class="banner">
@@ -409,6 +485,17 @@ footer{margin-top:56px;background:#171717;color:#fff;padding:40px 0}
         <button class="see" data-act="allStores">Bütün mağazalar →</button>
       </div>
       <div class="tiles" id="storeTiles"></div>
+    </section>
+
+    <section class="section sellcta">
+      <div class="sellcta-in">
+        <div>
+          <div class="eyebrow">SATICILAR ÜÇÜN</div>
+          <h2>Mağazanı aç, məhsullarını minlərlə alıcıya göstər.</h2>
+          <p>Alıcılar sənə birbaşa WhatsApp və ya zəng ilə yazsın. Məhsullarını şəkil və video ilə təqdim et.</p>
+        </div>
+        <a class="pill white" href="/seller-register.html">Satıcı ol →</a>
+      </div>
     </section>
   </div>
 
@@ -459,6 +546,14 @@ footer{margin-top:56px;background:#171717;color:#fff;padding:40px 0}
 </footer>
 
 <div class="ov" id="ov"><div class="modal"><button class="x" id="mx" aria-label="Bağla">×</button><div id="mb"></div></div></div>
+<button class="totop" id="toTop" aria-label="Yuxarı">↑</button>
+<nav class="bnav" id="bnav">
+  <button class="on" data-bn="home"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v10H3z"/></svg>Ana səhifə</button>
+  <button data-bn="cats"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Kateqoriya</button>
+  <button data-bn="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>Axtar</button>
+  <button data-bn="fav"><svg viewBox="0 0 24 24"><path d="M12 20.5S3.5 15 3.5 9A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 8.5 2c0 6-8.5 11.5-8.5 11.5z"/></svg>Sevimlilər</button>
+  <a href="/seller-register.html"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4.5 4.2-6.5 8-6.5s7 2 8 6.5"/></svg>Satıcı ol</a>
+</nav>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -514,6 +609,8 @@ let STORES=[];
 let favs=LS.g('elfa_favs',[]).map(String);
 const activeCount=()=>Object.values(F).filter(Boolean).length;
 const inResults=()=>showAll||activeCount()>0;
+let resFlag=false,popping=false,loadingMore=false,IO=null,TOTAL_PRODUCTS=0;
+const snap=()=>({F:{...F},showAll});
 
 /* ---------- seçim siyahıları ---------- */
 function fillSelect(sel,values,keep){
@@ -535,11 +632,15 @@ function syncFilterUI(){
   fillSelect('#fSize',sizeValues(),true);
   F.size=$('#fSize').value;
 }
-async function loadBrandMaterial(){
+async function loadBrandMaterial(want){
   try{
     const f=await getJSON('/api/filters'+(F.category?'?category='+encodeURIComponent(F.category):''));
     fillSelect('#fBrand',f.brands||[],true);
     fillSelect('#fMaterial',f.materials||[],true);
+    if(want){
+      if(want.brand&&(f.brands||[]).includes(want.brand))$('#fBrand').value=want.brand;
+      if(want.material&&(f.materials||[]).includes(want.material))$('#fMaterial').value=want.material;
+    }
     F.brand=$('#fBrand').value;F.material=$('#fMaterial').value;
   }catch(e){}
 }
@@ -552,6 +653,7 @@ async function loadOptions(){
   fillSelect('#fSizeClass',OPT.size_classes);
   syncFilterUI();
   await loadBrandMaterial();
+  mergeFilterValues(Object.values(cache));
 }
 
 /* ---------- nav və ikonlar ---------- */
@@ -569,6 +671,13 @@ function applyMode(){
   const parts=[F.store_category,F.category].filter(Boolean).join(' › ');
   $('#prodTitle').textContent=F.q?'"'+F.q+'" üçün nəticələr'+(parts?' · '+parts:''):(parts||'Bütün məhsullar');
   $$('#cats a').forEach(a=>a.classList.toggle('active',!!F.store_category&&a.dataset.dept===F.store_category));
+  $$('#bnav [data-bn]').forEach(b=>b.classList.toggle('on',b.dataset.bn==='home'&&!res));
+  /* brauzerin "Geri" düyməsi üçün tarixçə: nəticələr səhifəsi ayrıca addım sayılır */
+  if(!popping){
+    const hs={modal:stack.length,res:res?snap():null};
+    if(res&&!resFlag){history.pushState(hs,'');resFlag=true}
+    else if(res||resFlag){history.replaceState(hs,'');resFlag=res}
+  }
 }
 function queryString(offset){
   const p=new URLSearchParams();
@@ -578,7 +687,8 @@ function queryString(offset){
 }
 function photoHtml(p,badge){
   const u=safeUrl(p.image_url);
-  return '<div class="photo">'+(u?'<img src="'+esc(u)+'" alt="" loading="lazy" onerror="this.style.display=\'none\'">':'')+(badge?'<span class="vbadge">▶ Video</span>':'')+'</div>';
+  const u2=(p.images&&p.images[1])?safeUrl(p.images[1]):'';
+  return '<div class="photo">'+(u?'<img src="'+esc(u)+'" alt="" loading="lazy" onerror="this.style.display=\'none\'">':'')+(u2?'<img class="alt" src="'+esc(u2)+'" alt="" loading="lazy" onerror="this.style.display=\'none\'">':'')+(badge?'<span class="vbadge">▶ Video</span>':'')+'</div>';
 }
 function cardHtml(p){
   const fav=favs.includes(String(p.id));
@@ -587,7 +697,7 @@ function cardHtml(p){
   const href=wa?wa+'?text='+msg:(p.store_phone?telHref(p.store_phone):'');
   const contact=href?'<a class="ccontact" href="'+esc(href)+'"'+(wa?' target="_blank" rel="noopener noreferrer"':'')+' title="Satıcıya yaz" aria-label="Satıcıya yaz">'+ICON_CHAT+'</a>':'';
   const sub=[p.category,p.gender].filter(Boolean).join(' · ')||p.store_name||'';
-  const out=p.stock<=0?'<span class="sbadge">Stokda yoxdur</span>':'';
+  const out=p.stock<=0?'<span class="sbadge">Stokda yoxdur</span>':(p.stock<=3?'<span class="sbadge low">Son '+esc(p.stock)+' ədəd</span>':'');
   return '<article class="pcard" data-pid="'+esc(p.id)+'">'+photoHtml(p,!!safeVideo(p.video_url)).replace('</div>',out+'</div>')+
     '<button class="heart'+(fav?' on':'')+'" data-heart="'+esc(p.id)+'" aria-label="Sevimlilər">'+(fav?'♥':'♡')+'</button>'+
     '<div class="pinfo"><div class="pname">'+esc(p.name)+'</div><div class="psub">'+esc(sub)+'</div><div class="prow"><span class="price">'+money(p.price)+'</span>'+contact+'</div></div></article>';
@@ -596,7 +706,8 @@ async function loadProducts(reset){
   if(!inResults()){applyMode();return}
   const seq=++loadSeq;
   applyMode();
-  if(reset){list=[];$('#products').innerHTML='';$('#empty').classList.remove('hide');$('#empty').textContent='Yüklənir...';$('#moreBtn').classList.add('hide')}
+  if(reset){list=[];$('#products').innerHTML=skel(8);$('#empty').classList.add('hide');$('#moreBtn').classList.add('hide')}
+  else loadingMore=true;
   try{
     const r=await fetch('/api/products?'+queryString(reset?0:list.length));
     if(!r.ok)throw new Error('Server xətası ('+r.status+')');
@@ -617,11 +728,14 @@ async function loadProducts(reset){
     }else e.classList.add('hide');
     const hasMore=total!==null?list.length<total:rows.length===PAGE;
     $('#moreBtn').classList.toggle('hide',!hasMore);
+    mergeFilterValues(rows);
+    if(hasMore)reobserve();
   }catch(err){
     if(seq!==loadSeq)return;
+    $('#products').innerHTML='';
     $('#empty').classList.remove('hide');
     $('#empty').textContent='Məhsulları yükləmək mümkün olmadı. Bir az sonra yenidən cəhd edin.';
-  }
+  }finally{loadingMore=false}
 }
 $('#moreBtn').onclick=()=>loadProducts(false);
 
@@ -630,7 +744,7 @@ const FMAP={fCategory:'category',fBrand:'brand',fGender:'gender',fAge:'age',fSiz
 async function openResults(patch,all){
   F={...EMPTY_F,...(patch||{})};showAll=!!all;
   $('#q').value=F.q;
-  Object.keys(FMAP).forEach(id=>{$('#'+id).value=F[FMAP[id]]||''});
+  Object.keys(FMAP).forEach(id=>{ensureOpt(id,F[FMAP[id]]);$('#'+id).value=F[FMAP[id]]||''});
   syncFilterUI();
   applyMode();
   window.scrollTo({top:0});
@@ -638,6 +752,8 @@ async function openResults(patch,all){
   loadProducts(true);
 }
 function clearAll(){
+  /* nəticələr səhifəsi tarixçəyə yazılıb: "Geri" ilə eyni addım olsun */
+  if(!stack.length&&resFlag&&history.state&&history.state.res){history.back();setTimeout(()=>window.scrollTo({top:0,behavior:'smooth'}),60);return}
   F={...EMPTY_F};showAll=false;
   Object.keys(FMAP).forEach(id=>$('#'+id).value='');
   $('#q').value='';
@@ -819,10 +935,10 @@ saveFavs();
 
 /* ---------- pəncərə və ← Geri ---------- */
 let stack=[];
-function view(fn){stack.push(fn);renderView()}
+function view(fn){stack.push(fn);history.pushState({modal:stack.length,res:resFlag?snap():null},'');renderView()}
 function renderView(){
   const fn=stack[stack.length-1];
-  if(!fn){closeAll();return}
+  if(!fn){closeModalDom();return}
   const v=fn();
   const backBtn=v.keepBack
     ?'<button class="mback" data-back>← Geri</button>'
@@ -834,8 +950,10 @@ function renderView(){
   $('.modal').scrollTop=0;
   if(v.bind)v.bind();
 }
-function back(){stack.pop();if(stack.length)renderView();else closeAll()}
-function closeAll(){stack=[];$('#ov').classList.remove('open','full');$('.modal').classList.remove('full');$('#mb').innerHTML=''}
+/* "Geri" və bağlama düymələri brauzerin tarixçəsi ilə işləyir: popstate hadisəsi pəncərəni özü bağlayır/dəyişir */
+function back(){if(stack.length)history.back()}
+function closeModalDom(){stack=[];$('#ov').classList.remove('open','full');$('.modal').classList.remove('full');$('#mb').innerHTML='';renderRecent()}
+function closeAll(){if(stack.length)history.go(-stack.length);else closeModalDom()}
 $('#mx').onclick=closeAll;
 $('#ov').onclick=e=>{if(e.target.id==='ov')closeAll()};
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){toggleMega(false);closeAll()}});
@@ -859,6 +977,8 @@ $('#mb').addEventListener('click',e=>{
 $('main').addEventListener('click',e=>{
   if(shared(e))return;
   /* kateqoriya ikonları: həmin şöbənin məhsullarını açır */
+  const ct=e.target.closest('[data-cat]');
+  if(ct){openResults({category:ct.dataset.cat});return}
   const d=e.target.closest('[data-dept]');
   if(d){openResults({store_category:d.dataset.dept});return}
   const a=e.target.closest('[data-act]');
@@ -872,6 +992,13 @@ $('main').addEventListener('click',e=>{
 $$('[data-info]').forEach(a=>a.onclick=()=>view(()=>({html:'<h3>'+esc(a.dataset.info)+'</h3><p>'+esc(INFO[a.dataset.info])+'</p>'})));
 
 /* ---------- məhsul səhifəsi ---------- */
+function videoHtml(u){
+  const yt=u.match(/^https:\/\/(?:www\.|m\.)?(?:youtube\.com\/(?:watch\?(?:[^#]*&)?v=|shorts\/|embed\/)|youtu\.be\/)([\w-]{11})/i);
+  if(yt)return '<iframe src="https://www.youtube.com/embed/'+yt[1]+'" allow="accelerometer; autoplay; encrypted-media; picture-in-picture" allowfullscreen loading="lazy"></iframe>';
+  const vm=u.match(/^https:\/\/(?:www\.|player\.)?vimeo\.com\/(?:video\/)?(\d+)/i);
+  if(vm)return '<iframe src="https://player.vimeo.com/video/'+vm[1]+'" allow="fullscreen; picture-in-picture" allowfullscreen loading="lazy"></iframe>';
+  return '<video src="'+esc(u)+'" controls playsinline preload="metadata"></video>';
+}
 function contactHtml(p){
   const msg=encodeURIComponent('Salam, ELFA-da "'+p.name+'" məhsulu ilə maraqlanıram.');
   const wa=safeUrl(p.store_whatsapp_url);
@@ -883,6 +1010,7 @@ function productView(id){
   return()=>{
     const p=cache[id];
     if(!p)return {html:'<p>Məhsul tapılmadı.</p>'};
+    pushRecent(p);
     const fav=favs.includes(String(p.id));
     const vid=safeVideo(p.video_url);
     const imgs=((p.images&&p.images.length)?p.images:[p.image_url]).map(safeUrl).filter(Boolean).slice(0,5);
@@ -903,8 +1031,9 @@ function productView(id){
         (rows.length?'<div class="pd-specs">'+rows.map(r=>'<div class="pd-spec"><span>'+esc(r[0])+'</span><b>'+esc(r[1])+'</b></div>').join('')+'</div>':'')+
         '<div class="pd-store" data-store="'+esc(p.store_id)+'"><div class="av">'+esc(initials(p.store_name))+'</div><div><b>'+esc(p.store_name)+'</b><small>'+esc(p.store_city||'Mağazaya bax')+'</small></div><i>›</i></div>'+
         '<div class="pd-cta">'+contactHtml(p)+'<button class="btn alt" id="favInDetail">'+(fav?'♥ Sevimlilərdə':'♡ Sevimlilərə əlavə et')+'</button></div>'+
-      '</div></div>',
+      '</div></div><div class="pd-more" id="pdMore"></div>',
       bind(){
+        loadMoreLikeThis(p);
         let i=0;
         const stage=$('#pdStage');
         const show=n=>{
@@ -912,7 +1041,7 @@ function productView(id){
           i=(n+media.length)%media.length;
           const m=media[i];
           stage.innerHTML=m.t==='v'
-            ?'<video src="'+esc(m.u)+'" controls playsinline preload="metadata"></video>'
+            ?videoHtml(m.u)
             :'<img src="'+esc(m.u)+'" alt="" onerror="this.style.display=\'none\'">';
           $$('.pd-th').forEach((b,k)=>b.classList.toggle('on',k===i));
           const c=$('#pdCount');if(c)c.textContent=(i+1)+' / '+media.length;
@@ -971,6 +1100,7 @@ async function loadStores(){
   sc.innerHTML=STORES.map(storeCard).join('');
   tl.innerHTML=STORES.map(storeTile).join('');
   updateArrows();
+  updateStats();
 }
 const allStoresView=()=>({
   html:'<h3>Bütün mağazalar</h3>'+(STORES.length?'<div class="grid3">'+STORES.map(storeCard).join('')+'</div>':'<p>Hələ təsdiqlənmiş mağaza yoxdur.</p>')
@@ -1027,6 +1157,7 @@ $('#favBtn').onclick=()=>view(()=>({
 /* ---------- ana səhifənin məhsulları ---------- */
 async function loadHome(){
   const box=$('#homeProducts'),em=$('#homeEmpty');
+  box.innerHTML=skel(6);
   try{
     let r=await fetch('/api/products?home=1&limit=12');
     let rows=r.ok?await r.json():[];
@@ -1048,11 +1179,144 @@ async function loadHome(){
 }
 
 /* ---------- başlanğıc ---------- */
+/* ---------- yeni funksiyalar ---------- */
+const skel=n=>Array.from({length:n},()=>'<div class="pcard sk"><div class="photo"></div><div class="pinfo"><div class="sk-l"></div><div class="sk-l s"></div></div></div>').join('');
+
+function addOpt(id,v){
+  v=String(v||'').trim();if(!v)return;
+  const el=$('#'+id);
+  if(![...el.options].some(o=>o.value.toLowerCase()===v.toLowerCase()))el.insertAdjacentHTML('beforeend','<option value="'+esc(v)+'">'+esc(v)+'</option>');
+}
+const ensureOpt=(id,v)=>{if(['fCategory','fColor','fSizeClass'].includes(id))addOpt(id,v)};
+/* satıcıların özü yazdığı kateqoriya/rəng/boyut filtrlərdə də görünsün */
+function mergeFilterValues(rows){rows.forEach(p=>{addOpt('fCategory',p.category);addOpt('fColor',p.color);addOpt('fSizeClass',p.size_class)})}
+
+function updateStats(){
+  const s=STORES.length,pn=TOTAL_PRODUCTS;
+  $('#statsBar').classList.toggle('hide',!s&&!pn);
+  $('#stStores').textContent=s;$('#stProducts').textContent=pn;$('#stCats').textContent=DEPTS.length;
+}
+
+const RKEY='elfa_recent';
+function pushRecent(p){
+  const l=LS.g(RKEY,[]).map(String).filter(x=>x!==String(p.id));
+  l.unshift(String(p.id));LS.s(RKEY,l.slice(0,12));
+}
+async function renderRecent(){
+  let l=LS.g(RKEY,[]).map(String);
+  const sec=$('#recentSec');
+  if(!l.length){sec.classList.add('hide');return}
+  const gone=new Set();
+  await Promise.all(l.filter(id=>!cache[id]).map(async id=>{
+    try{cache[id]=await getJSON('/api/products/'+encodeURIComponent(id))}
+    catch(e){if(e.status===404)gone.add(id)}
+  }));
+  if(gone.size){l=l.filter(id=>!gone.has(id));LS.s(RKEY,l)}
+  const shown=l.filter(id=>cache[id]);
+  sec.classList.toggle('hide',!shown.length);
+  $('#recentRow').innerHTML=shown.map(id=>cardHtml(cache[id])).join('');
+}
+$('#clearRecent').onclick=()=>{LS.s(RKEY,[]);renderRecent()};
+
+async function loadCatRows(){
+  try{
+    const r=await fetch('/api/products?limit=100');
+    if(!r.ok)return;
+    const rows=await r.json();
+    const t=r.headers.get('X-Total-Count');
+    TOTAL_PRODUCTS=t?(Number(t)||rows.length):rows.length;updateStats();
+    rows.forEach(p=>{cache[p.id]=p});
+    mergeFilterValues(rows);
+    const g={};
+    rows.forEach(p=>{const c=String(p.category||'').trim();if(c)(g[c]=g[c]||[]).push(p)});
+    const cats=Object.keys(g).filter(c=>g[c].length>=3).sort((a,b)=>g[b].length-g[a].length).slice(0,3);
+    $('#catRows').innerHTML=cats.map(c=>'<section class="section"><div class="section-head"><div><h2>'+esc(c)+'</h2><p>Bu kateqoriyadan seçilmişlər</p></div><button class="see" data-cat="'+esc(c)+'">Hamısına bax →</button></div><div class="hscroll">'+g[c].slice(0,12).map(cardHtml).join('')+'</div></section>').join('');
+  }catch(e){}
+}
+
+async function loadMoreLikeThis(p){
+  const box=$('#pdMore');if(!box)return;
+  const part=(title,rows)=>rows.length?'<h3>'+esc(title)+'</h3><div class="hscroll">'+rows.map(cardHtml).join('')+'</div>':'';
+  let a=[],b=[];
+  try{
+    if(p.store_id){
+      const r=await getJSON('/api/products?store_id='+encodeURIComponent(p.store_id)+'&limit=13');
+      a=r.filter(x=>x.id!==p.id).slice(0,10);
+    }
+    if(p.category){
+      const r=await getJSON('/api/products?category='+encodeURIComponent(p.category)+'&limit=17');
+      const seen=new Set(a.map(x=>x.id));
+      b=r.filter(x=>x.id!==p.id&&!seen.has(x.id)).slice(0,10);
+    }
+  }catch(e){}
+  if(!box.isConnected||$('#pdMore')!==box)return;
+  [...a,...b].forEach(x=>{cache[x.id]=x});
+  box.innerHTML=part('Mağazanın digər məhsulları',a)+part('Oxşar məhsullar',b);
+}
+
+/* avtomatik yüklənmə: səhifənin sonuna çatanda növbəti məhsullar özü gəlir */
+function reobserve(){const b=$('#moreBtn');if(IO){IO.unobserve(b);IO.observe(b)}}
+if('IntersectionObserver' in window){
+  IO=new IntersectionObserver(es=>{
+    if(es[0].isIntersecting&&!$('#moreBtn').classList.contains('hide')&&!loadingMore)loadProducts(false);
+  },{rootMargin:'500px'});
+  IO.observe($('#moreBtn'));
+}
+
+/* telefonda alt menyu və yuxarı düyməsi */
+$('#bnav').addEventListener('click',e=>{
+  const b=e.target.closest('[data-bn]');if(!b)return;
+  const k=b.dataset.bn;
+  if(k==='home'){if(inResults()||stack.length)clearAll();else window.scrollTo({top:0,behavior:'smooth'})}
+  else if(k==='cats'){window.scrollTo({top:0});toggleMega(true)}
+  else if(k==='search'){window.scrollTo({top:0});$('#q').focus()}
+  else if(k==='fav')$('#favBtn').click();
+});
+window.addEventListener('scroll',()=>$('#toTop').classList.toggle('show',window.scrollY>700),{passive:true});
+$('#toTop').onclick=()=>window.scrollTo({top:0,behavior:'smooth'});
+
+/* ---------- brauzerin "Geri" düyməsi ---------- */
+async function restoreRes(r){
+  const before=JSON.stringify(snap());
+  F={...EMPTY_F,...r.F};showAll=!!r.showAll;
+  if(JSON.stringify(snap())===before){applyMode();return}
+  Object.keys(FMAP).forEach(id=>{ensureOpt(id,F[FMAP[id]]);$('#'+id).value=F[FMAP[id]]||''});
+  $('#q').value=F.q||'';
+  syncFilterUI();
+  applyMode();
+  await loadBrandMaterial({brand:r.F.brand,material:r.F.material});
+  loadProducts(true);
+}
+window.addEventListener('popstate',e=>{
+  const st=e.state||{modal:0,res:null};
+  popping=true;
+  try{
+    if(st.res){restoreRes(st.res);resFlag=true}
+    else{
+      if(resFlag||inResults()){
+        F={...EMPTY_F};showAll=false;
+        Object.keys(FMAP).forEach(id=>$('#'+id).value='');
+        $('#q').value='';
+        syncFilterUI();applyMode();loadBrandMaterial();
+      }
+      resFlag=false;
+    }
+    let want=st.modal||0;
+    if(want>stack.length){want=stack.length;history.replaceState({modal:want,res:st.res||null},'')}
+    if(want<stack.length)stack.length=want;
+    if(!stack.length)closeModalDom();else renderView();
+  }finally{popping=false}
+});
+
+/* ---------- başlanğıc ---------- */
 (async function init(){
+  history.replaceState({modal:0,res:null},'');
   applyMode();
   renderMega();
   loadStores();
   loadHome();
+  loadCatRows();
+  renderRecent();
   loadOptions();
 })();
 </script>
