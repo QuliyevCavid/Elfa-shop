@@ -464,7 +464,7 @@ footer{margin-top:56px;background:#171717;color:#fff;padding:40px 0}
 <script>
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const safeUrl=u=>(/^https?:\/\//i.test(u||'')||/^\/api\/images\/\d+$/.test(u||''))?u:'';
+const safeUrl=u=>/^https?:\/\//i.test(u||'')?u:(/^\/api\/images\/\d+$/.test(u||'')?u+'?v=2':'');
 const safeVideo=u=>/^https:\/\//i.test(u||'')?u:'';
 const money=n=>(+n||0).toFixed(2)+' AZN';
 const LS={
