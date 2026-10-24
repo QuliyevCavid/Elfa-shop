@@ -768,19 +768,24 @@ def upload_url(data: UploadUrlIn, s: sqlite3.Row = Depends(current_seller)):
 
 
 @app.get("/api/images/{iid}")
-def get_image(iid: int):
+def get_image(iid: int, request: Request):
     with db() as con:
         row = con.execute("SELECT mime, data FROM images WHERE id = ?", (iid,)).fetchone()
     if not row:
         raise HTTPException(404, "Şəkil tapılmadı")
-    return Response(
-        content=bytes(row["data"]),
-        media_type=row["mime"],
-        headers={
-            "Cache-Control": "public, max-age=31536000, immutable",
-            "X-Content-Type-Options": "nosniff",
-        },
-    )
+    data = bytes(row["data"])
+    # Əvvəl "immutable" keş var idi: baza sıfırlananda eyni nömrə (id) başqa şəkilə düşür,
+    # brauzer isə köhnə şəkli göstərirdi. İndi ETag ilə hər dəfə yoxlanılır (dəyişməyibsə 304).
+    etag = '"' + hashlib.sha256(data).hexdigest()[:32] + '"'
+    headers = {"ETag": etag, "Cache-Control": "no-cache", "X-Content-Type-Options": "nosniff"}
+    if request.headers.get("if-none-match") == etag:
+        return Response(status_code=304, headers=headers)
+    return Response(content=data, media_type=row["mime"], headers=headers)
+
+
+@app.get("/favicon.ico", include_in_schema=False)
+def favicon():
+    return Response(status_code=204)
 
 
 # ---------------------------------------------------------------
@@ -1258,7 +1263,3 @@ def seller_page():
 # Şəkil, CSS və s. üçün: layihə qovluğunda "static" qovluğu yaradın (məs. static/hero.jpg -> /static/hero.jpg)
 if (BASE_DIR / "static").is_dir():
     app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
-
-@app.get("/favicon.ico", include_in_schema=False)
-def favicon():
-    return Response(status_code=204)
