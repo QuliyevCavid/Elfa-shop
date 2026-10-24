@@ -163,6 +163,10 @@ footer{margin-top:56px;background:#171717;color:#fff;padding:40px 0}
 .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:16px}
 .detail{display:grid;grid-template-columns:1fr 1fr;gap:26px}
 .detail .photo{aspect-ratio:auto;min-height:360px;border-radius:12px}
+.gthumbs{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.gth{width:68px;height:68px;border-radius:8px;overflow:hidden;border:2px solid transparent;padding:0;background:#efe9e2;opacity:.75}
+.gth.on{border-color:#171717;opacity:1}
+.gth img{width:100%;height:100%;object-fit:cover;display:block}
 .dvideo{width:100%;margin-top:12px;border-radius:12px;background:#000;max-height:420px}
 .detail h2{font-size:26px;margin:6px 0 10px;font-weight:800}
 .brand{font-size:10.5px;color:#888;text-transform:uppercase;letter-spacing:1px;font-weight:600}
@@ -828,8 +832,11 @@ function productView(id){
     const vid=safeVideo(p.video_url);
     const rows=[['Kateqoriya',p.category],['Cinsiyyət',p.gender],['Yaş aralığı',p.age_group],['Ölçü',(p.sizes||[]).join(', ')],['Rəng',p.color],['Boyut',p.size_class],['Ölçülər',p.dimensions],['Material',p.material],['Stok',p.stock>0?p.stock+' ədəd':'Stokda yoxdur']]
       .filter(r=>r[1]);
+    const imgs=((p.images&&p.images.length)?p.images:[p.image_url]).map(safeUrl).filter(Boolean).slice(0,5);
+    const gallery='<div class="photo"><img id="gimg" src="'+esc(imgs[0]||'')+'" alt=""'+(imgs.length?'':' style="display:none"')+' onerror="this.style.display=\'none\'"></div>'+
+      (imgs.length>1?'<div class="gthumbs">'+imgs.map((u,i)=>'<button type="button" class="gth'+(i===0?' on':'')+'" data-gi="'+i+'" aria-label="Şəkil '+(i+1)+'"><img src="'+esc(u)+'" alt=""></button>').join('')+'</div>':'');
     return {full:true,html:
-      '<div class="detail"><div>'+photoHtml(p)+
+      '<div class="detail"><div>'+gallery+
       (vid?'<video class="dvideo" src="'+esc(vid)+'" controls playsinline preload="metadata"></video>':'')+
       '</div><div>'+
       '<span class="brand">'+esc(p.brand||'')+'</span>'+
@@ -842,6 +849,11 @@ function productView(id){
       '<button class="btn alt" id="favInDetail">'+(fav?'♥ Sevimlilərdə':'♡ Sevimlilərə əlavə et')+'</button>'+
       '</div></div>',
       bind(){
+        $$('.gth').forEach(b=>b.onclick=e=>{
+          e.stopPropagation();
+          const g=$('#gimg');g.style.display='';g.src=imgs[+b.dataset.gi];
+          $$('.gth').forEach(x=>x.classList.toggle('on',x===b));
+        });
         $('#favInDetail').onclick=e=>{e.stopPropagation();toggleFav(p.id);$('#favInDetail').textContent=favs.includes(String(p.id))?'♥ Sevimlilərdə':'♡ Sevimlilərə əlavə et'};
       }};
   };
