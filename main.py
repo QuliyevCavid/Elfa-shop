@@ -1258,3 +1258,7 @@ def seller_page():
 # Şəkil, CSS və s. üçün: layihə qovluğunda "static" qovluğu yaradın (məs. static/hero.jpg -> /static/hero.jpg)
 if (BASE_DIR / "static").is_dir():
     app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
+
+@app.get("/favicon.ico", include_in_schema=False)
+def favicon():
+    return Response(status_code=204)
