@@ -419,15 +419,28 @@ def clean_whatsapp(value: str) -> str:
     return "+" + d
 
 
+VIDEO_HOSTS = {
+    "youtube.com", "www.youtube.com", "m.youtube.com", "youtu.be",
+    "vimeo.com", "www.vimeo.com", "player.vimeo.com",
+}
+VIDEO_FILE_RE = re.compile(r"^https://[^\s]+\.(mp4|webm|mov|m4v)(\?[^\s]*)?$", re.I)
+
+
 def clean_video_url(value: str, seller_id: int) -> str:
-    """Yalnız bu satıcının öz R2 qovluğuna yüklənmiş video qəbul olunur."""
+    """Qəbul olunur: satıcının öz R2 videosu, YouTube/Vimeo linki və ya birbaşa .mp4/.webm/.mov linki."""
     v = (value or "").strip()
     if not v:
         return ""
-    prefix = f"{R2_PUBLIC_URL}/seller_{seller_id}/"
-    if not STORAGE_ENABLED or not v.startswith(prefix):
-        raise HTTPException(400, "Video linki düzgün deyil")
-    return v
+    if len(v) > 500:
+        raise HTTPException(400, "Video linki çox uzundur")
+    if STORAGE_ENABLED and v.startswith(f"{R2_PUBLIC_URL}/seller_{seller_id}/"):
+        return v
+    m = re.match(r"^https://([^/\s?#]+)(/[^\s]*)?$", v, re.I)
+    if m and m.group(1).lower() in VIDEO_HOSTS:
+        return v
+    if VIDEO_FILE_RE.match(v):
+        return v
+    raise HTTPException(400, "Video linki düzgün deyil. YouTube, Vimeo və ya .mp4 linki yazın")
 
 
 def clean_product(data: ProductIn, seller_id: int) -> dict:
@@ -1050,6 +1063,7 @@ def public_products(
     store_id: Optional[int] = None,
     store_category: Optional[str] = None,
     home: Optional[bool] = None,
+    sort: Optional[str] = None,
     limit: int = Query(100, ge=1, le=200),
     offset: int = Query(0, ge=0),
 ):
@@ -1092,8 +1106,17 @@ def public_products(
                 continue
         result.append(r)
 
-    # Stokda olanlar əvvəl, qalanlar sonda (sıra yenə də ən yenidən köhnəyə)
-    result.sort(key=lambda r: 0 if r["stock"] > 0 else 1)
+    # Həmişə stokda olanlar əvvəl, qalanlar sonda. Qalan sıra "sort" parametrinə görə.
+    # (approved_rows artıq ən yenidən köhnəyə düzür; Python sort sabitdir, bərabərlikdə bu sıra qalır)
+    if sort == "price_asc":
+        result.sort(key=lambda r: (r["stock"] <= 0, r["price"]))
+    elif sort == "price_desc":
+        result.sort(key=lambda r: (r["stock"] <= 0, -r["price"]))
+    elif sort == "newest":
+        result.sort(key=lambda r: r["stock"] <= 0)
+    else:
+        # Tövsiyə olunan: ana səhifə üçün seçilmiş məhsullar əvvəl
+        result.sort(key=lambda r: (r["stock"] <= 0, 0 if (r["on_home"] or r["store_home_all"]) else 1))
     response.headers["X-Total-Count"] = str(len(result))
     response.headers["Access-Control-Expose-Headers"] = "X-Total-Count"
     return [public_product_dict(r) for r in result[offset:offset + limit]]
