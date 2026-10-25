@@ -3,13 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#263B35">
 <title>ELFA — Alış-verişin yeni üzü</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#f8f6f2;--text:#171717;--muted:#8a8a8a;--line:#ebe7e1;--wrap:min(1400px,94%)}
+:root{--bg:#F8F6F2;--card:#FFFFFF;--text:#242424;--brand:#263B35;--soft:#EAE7DF;--accent:#E9B949;--muted:#847F74;--line:#EAE7DF;--wrap:min(1400px,94%)}
 body{font-family:'Montserrat',Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
 button,input,select{font:inherit}
 button{cursor:pointer;border:0;color:inherit}
@@ -18,17 +19,17 @@ a{text-decoration:none;color:inherit;cursor:pointer}
 svg{display:block}
 
 /* üst zolaq və başlıq */
-.topbar{background:#171717;color:#fff;text-align:center;padding:9px 20px;font-size:11.5px;font-weight:600;letter-spacing:.4px}
+.topbar{background:var(--brand);color:#fff;text-align:center;padding:9px 20px;font-size:11.5px;font-weight:600;letter-spacing:.4px}
 header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
 .nav{width:var(--wrap);height:66px;margin:auto;display:flex;align-items:center;gap:28px}
 .logo{font-size:27px;font-weight:800;letter-spacing:6px;min-width:110px}
 .search{flex:1;max-width:520px;margin:auto;position:relative}
-.search input{width:100%;height:40px;border:1px solid #e6e2dc;border-radius:24px;padding:0 54px 0 20px;outline:none;background:#faf9f7;font-size:12px}
+.search input{width:100%;height:40px;border:1px solid var(--soft);border-radius:24px;padding:0 54px 0 20px;outline:none;background:var(--bg);font-size:12px}
 .search input:focus{border-color:#aaa;background:#fff}
-.search button{position:absolute;right:4px;top:4px;width:32px;height:32px;border-radius:50%;background:#171717;color:#fff;display:flex;align-items:center;justify-content:center}
+.search button{position:absolute;right:4px;top:4px;width:32px;height:32px;border-radius:50%;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center}
 .nav-actions{display:flex;align-items:center;gap:22px}
 .action{font-size:11.5px;font-weight:600;white-space:nowrap;display:flex;align-items:center;gap:7px;position:relative}
-.badge{background:#171717;color:#fff;border-radius:10px;font-size:9px;padding:2px 6px;display:none;font-weight:700}
+.badge{background:var(--brand);color:#fff;border-radius:10px;font-size:9px;padding:2px 6px;display:none;font-weight:700}
 
 .categories{background:#fff;border-bottom:1px solid var(--line);position:relative;z-index:15}
 .cat-inner{width:var(--wrap);margin:auto;display:flex;gap:42px;align-items:center;overflow-x:auto;height:36px;scrollbar-width:none}
@@ -36,29 +37,29 @@ header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0
 .megabtn{background:none;font-size:11.5px;font-weight:700;display:flex;align-items:center;gap:9px;white-space:nowrap;margin-right:22px}
 .cat-inner a{font-size:11.5px;font-weight:600;white-space:nowrap;color:#222;height:36px;display:flex;align-items:center;border-bottom:2px solid transparent}
 .cat-inner a:hover{color:#000}
-.cat-inner a.active{border-color:#171717}
+.cat-inner a.active{border-color:var(--brand)}
 .megapanel{position:absolute;left:0;right:0;top:100%;background:#fff;border-bottom:1px solid var(--line);box-shadow:0 14px 24px rgba(0,0,0,.08)}
 .megapanel-in{width:var(--wrap);margin:auto;padding:22px 0 26px;display:flex;align-items:stretch}
 .mega-side{width:220px;flex:0 0 220px;display:flex;flex-direction:column;gap:4px;border-right:1px solid var(--line);padding-right:14px}
 .mega-tab{width:100%;display:flex;justify-content:space-between;align-items:center;padding:11px 12px;background:transparent;text-align:left;border-radius:7px;font-size:12px;font-weight:600}
-.mega-tab:hover,.mega-tab.on{background:#f5f1eb}
+.mega-tab:hover,.mega-tab.on{background:var(--soft)}
 .mega-cols{flex:1;min-width:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:22px;padding-left:22px;align-items:start}
 .mega-group{min-width:0;display:flex;flex-direction:column;align-items:stretch}
 .mega-group h4{font-size:12px;margin:0 0 8px}
 .megapanel .mega-group a{display:block;padding:6px 0;font-size:11px;line-height:1.5;overflow-wrap:anywhere}
-.megapanel .mega-group a:hover{color:#8a6a3c}
+.megapanel .mega-group a:hover{color:var(--brand)}
 .mega-more{align-self:flex-start;margin-top:7px;background:none;font-size:10px;font-weight:700;text-decoration:underline}
 .mega-extra[hidden]{display:none!important}
 
 /* hero */
-.hero{width:var(--wrap);margin:16px auto 0;min-height:clamp(240px,23vw,320px);border-radius:16px;overflow:hidden;background:#dacabb;position:relative;display:flex;align-items:center}
+.hero{width:var(--wrap);margin:16px auto 0;min-height:clamp(240px,23vw,320px);border-radius:16px;overflow:hidden;background:var(--soft);position:relative;display:flex;align-items:center}
 .hero-img{position:absolute;right:0;top:0;bottom:0;width:58%;background-size:cover;background-position:left center;-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 24%);mask-image:linear-gradient(90deg,transparent 0,#000 24%)}
 .hero-content{position:relative;padding:26px 52px;max-width:600px}
 .eyebrow{font-size:10.5px;letter-spacing:2.2px;text-transform:uppercase;font-weight:700;margin-bottom:10px}
 .hero h1{font-size:clamp(38px,4.6vw,56px);line-height:.94;letter-spacing:-2px;font-weight:800;margin-bottom:12px}
 .hero p{line-height:1.6;max-width:440px;font-size:13px;font-weight:500}
-.pill{display:inline-block;background:#171717;color:#fff;padding:12px 24px;border-radius:24px;font-size:11.5px;font-weight:700}
-.pill.white{background:#fff;color:#171717}
+.pill{display:inline-block;background:var(--brand);color:#fff;padding:12px 24px;border-radius:24px;font-size:11.5px;font-weight:700}
+.pill.white{background:#fff;color:var(--brand)}
 .hero .pill{margin-top:16px}
 
 /* bölmələr */
@@ -73,16 +74,16 @@ header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0
 .depts::-webkit-scrollbar{display:none}
 .dept{flex:1;min-width:92px;display:flex;flex-direction:column;align-items:center;gap:10px;background:none;font-size:11.5px;font-weight:700;position:relative;padding:4px 0}
 .dept+.dept:before{content:"";position:absolute;left:-3px;top:16px;height:44px;border-left:1px solid var(--line)}
-.dept i{width:64px;height:64px;border-radius:50%;background:#f3e8df;display:flex;align-items:center;justify-content:center;transition:.2s}
-.dept:hover i{background:#e9d8c8}
-.dept svg{width:30px;height:30px;stroke:#1b1b1b;fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
+.dept i{width:64px;height:64px;border-radius:50%;background:var(--soft);display:flex;align-items:center;justify-content:center;transition:.2s}
+.dept:hover i{background:#DFDACC}
+.dept svg{width:30px;height:30px;stroke:var(--brand);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
 
 .carousel{position:relative}
 .scroller{display:grid;grid-auto-flow:column;grid-auto-columns:calc((100% - 5*14px)/6);gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding:2px 0}
 .scroller::-webkit-scrollbar{display:none}
 .store{background:#fff;border-radius:10px;padding:18px 10px 14px;text-align:center;cursor:pointer;scroll-snap-align:start;border:1px solid transparent;min-width:0}
-.store:hover{border-color:#171717}
-.store-logo{width:58px;height:58px;border-radius:50%;background:#171717;color:#fff;margin:0 auto 11px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;overflow:hidden;letter-spacing:1px}
+.store:hover{border-color:var(--brand)}
+.store-logo{width:58px;height:58px;border-radius:50%;background:var(--brand);color:#fff;margin:0 auto 11px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;overflow:hidden;letter-spacing:1px}
 .store-logo img{width:100%;height:100%;object-fit:cover}
 .store strong{font-size:11.5px;font-weight:700;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .store small{display:block;font-size:10px;color:var(--muted);margin-top:4px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -92,27 +93,27 @@ header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0
 .feat{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
 .products{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
 .pcard{background:#fff;border-radius:10px;overflow:hidden;position:relative;cursor:pointer;border:1px solid transparent;min-width:0}
-.pcard:hover{border-color:#171717}
-.photo{aspect-ratio:1/.82;background:#efe9e2;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
-.photo:before{content:"ELFA";font-size:15px;letter-spacing:6px;color:#bdb3a8;font-weight:800}
+.pcard:hover{border-color:var(--brand)}
+.photo{aspect-ratio:1/.82;background:var(--soft);position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.photo:before{content:"ELFA";font-size:15px;letter-spacing:6px;color:#B9B5A4;font-weight:800}
 .photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .heart{position:absolute;right:8px;top:8px;width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.95);font-size:14px;line-height:1;z-index:2;display:flex;align-items:center;justify-content:center}
 .heart.on{color:#d22}
-.vbadge{position:absolute;left:8px;bottom:8px;background:#171717;color:#fff;border-radius:12px;padding:3px 9px;font-size:9.5px;font-weight:700;z-index:2}
+.vbadge{position:absolute;left:8px;bottom:8px;background:var(--brand);color:#fff;border-radius:12px;padding:3px 9px;font-size:9.5px;font-weight:700;z-index:2}
 .sbadge{position:absolute;left:8px;top:8px;background:#fff;color:#b42323;border-radius:12px;padding:3px 9px;font-size:9.5px;font-weight:700;z-index:2}
 .pinfo{padding:11px 12px 12px}
 .pname{font-size:11.5px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .psub{font-size:10px;color:var(--muted);margin:4px 0 10px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .prow{display:flex;justify-content:space-between;align-items:center}
 .price{font-size:12px;font-weight:800}
-.ccontact{width:28px;height:28px;border-radius:8px;background:#171717;color:#fff;display:flex;align-items:center;justify-content:center}
+.ccontact{width:28px;height:28px;border-radius:8px;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center}
 .ccontact:hover{background:#333}
 .empty{text-align:center;color:var(--muted);padding:44px 12px;background:#fff;border-radius:12px;line-height:1.7;font-size:13px;font-weight:500}
-.more{display:block;margin:20px auto 0;background:#171717;color:#fff;padding:12px 28px;border-radius:24px;font-weight:700;font-size:12px}
+.more{display:block;margin:20px auto 0;background:var(--brand);color:#fff;padding:12px 28px;border-radius:24px;font-weight:700;font-size:12px}
 
 .banners{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.banner{position:relative;border-radius:10px;overflow:hidden;min-height:134px;display:flex;align-items:center;background:#e8d5c5}
-.banner.dark{background:#161616;color:#fff}
+.banner{position:relative;border-radius:10px;overflow:hidden;min-height:134px;display:flex;align-items:center;background:var(--soft)}
+.banner.dark{background:var(--brand);color:#fff}
 .banner-img{position:absolute;right:0;top:0;bottom:0;width:52%;background-size:cover;background-position:center;-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 30%);mask-image:linear-gradient(90deg,transparent 0,#000 30%)}
 .banner-body{position:relative;padding:22px 28px;max-width:62%}
 .banner h3{font-size:18px;font-weight:800;margin-bottom:6px;letter-spacing:-.3px}
@@ -121,18 +122,18 @@ header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0
 
 .tiles{display:grid;grid-auto-flow:column;grid-auto-columns:calc((100% - 5*12px)/6);gap:12px;overflow-x:auto;scrollbar-width:none;scroll-snap-type:x mandatory}
 .tiles::-webkit-scrollbar{display:none}
-.tile{position:relative;height:100px;border-radius:10px;overflow:hidden;background:linear-gradient(135deg,#3a3633,#141414);color:#fff;cursor:pointer;scroll-snap-align:start;min-width:0}
+.tile{position:relative;height:100px;border-radius:10px;overflow:hidden;background:linear-gradient(135deg,#3A5750,var(--brand));color:#fff;cursor:pointer;scroll-snap-align:start;min-width:0}
 .tile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .tile:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.05) 20%,rgba(0,0,0,.7))}
 .tile-body{position:absolute;left:12px;right:42px;bottom:10px;z-index:2}
 .tile-body strong{display:block;font-size:12.5px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tile-body small{font-size:10px;opacity:.85;font-weight:500}
-.tarrow{position:absolute;right:10px;bottom:10px;z-index:2;width:22px;height:22px;border-radius:50%;background:#fff;color:#171717;display:flex;align-items:center;justify-content:center;font-size:12px;font-style:normal}
+.tarrow{position:absolute;right:10px;bottom:10px;z-index:2;width:22px;height:22px;border-radius:50%;background:#fff;color:var(--brand);display:flex;align-items:center;justify-content:center;font-size:12px;font-style:normal}
 
 /* nəticələr */
-.pback{background:none;font-size:12px;font-weight:700;margin-bottom:10px;padding:0}
-.pback:hover{color:#777}
-.filter-toggle{display:none;background:#171717;color:#fff;padding:10px 18px;border-radius:22px;font-size:12px;font-weight:700}
+.gback{display:inline-flex;align-items:center;gap:6px;background:none;font-size:12px;font-weight:700;margin-bottom:10px;padding:0}
+.gback:hover{color:var(--brand)}
+.filter-toggle{display:none;background:var(--brand);color:#fff;padding:10px 18px;border-radius:22px;font-size:12px;font-weight:700}
 .shop{display:grid;grid-template-columns:1fr;gap:22px;align-items:start}
 .shop.searching{grid-template-columns:250px 1fr}
 .filters{display:block;background:#fff;border-radius:12px;padding:18px;position:sticky;top:90px;max-height:calc(100vh - 110px);overflow:auto}
@@ -141,11 +142,11 @@ header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0
 .filters h3{font-size:14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
 .filters h3 button{background:none;font-size:11px;text-decoration:underline;color:#555;font-weight:600}
 .filters label{display:block;font-size:11px;font-weight:700;color:#444;margin-bottom:12px}
-.filters select,.filters input{display:block;width:100%;height:38px;margin-top:6px;padding:0 10px;border:1px solid #ddd;border-radius:8px;background:#fff;font-size:12px;outline:none}
-.filters select:focus,.filters input:focus{border-color:#171717}
+.filters select,.filters input{display:block;width:100%;height:38px;margin-top:6px;padding:0 10px;border:1px solid #D9D5CA;border-radius:8px;background:#fff;font-size:12px;outline:none}
+.filters select:focus,.filters input:focus{border-color:var(--brand)}
 .price-row{display:flex;gap:8px}
 
-footer{margin-top:56px;background:#171717;color:#fff;padding:40px 0}
+footer{margin-top:56px;background:var(--brand);color:#fff;padding:40px 0}
 .footer-inner{width:var(--wrap);margin:auto;display:flex;justify-content:space-between;gap:20px}
 .footer-logo{font-size:24px;letter-spacing:5px;font-weight:800}
 .footer-inner p{font-size:11px;color:#aaa;margin-top:10px}
@@ -156,16 +157,15 @@ footer{margin-top:56px;background:#171717;color:#fff;padding:40px 0}
 .ov.open{display:flex}
 .modal{background:#fff;border-radius:16px;width:min(1000px,100%);max-height:92vh;overflow:auto;padding:26px;position:relative}
 .modal .x{position:absolute;right:14px;top:10px;background:none;font-size:26px;z-index:3}
-.mback{background:none;font-size:12px;font-weight:700;margin-bottom:14px;padding:0}
-.mback:hover{color:#777}
+.modal .gback{margin-bottom:14px}
 .modal h3{font-size:20px;margin-bottom:14px;font-weight:700}
 .modal p{font-size:13px;line-height:1.6;color:#444;font-weight:500}
 .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:16px}
 .detail{display:grid;grid-template-columns:1fr 1fr;gap:26px}
 .detail .photo{aspect-ratio:auto;min-height:360px;border-radius:12px}
 .gthumbs{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
-.gth{width:68px;height:68px;border-radius:8px;overflow:hidden;border:2px solid transparent;padding:0;background:#efe9e2;opacity:.75}
-.gth.on{border-color:#171717;opacity:1}
+.gth{width:68px;height:68px;border-radius:8px;overflow:hidden;border:2px solid transparent;padding:0;background:var(--soft);opacity:.75}
+.gth.on{border-color:var(--brand);opacity:1}
 .gth img{width:100%;height:100%;object-fit:cover;display:block}
 .dvideo{width:100%;margin-top:12px;border-radius:12px;background:#000;max-height:420px}
 .detail h2{font-size:26px;margin:6px 0 10px;font-weight:800}
@@ -174,14 +174,14 @@ footer{margin-top:56px;background:#171717;color:#fff;padding:40px 0}
 .specs{margin:16px 0;border-top:1px solid var(--line)}
 .specs div{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:12px}
 .specs span{color:#888}
-.btn{display:block;width:100%;margin-top:10px;background:#171717;color:#fff;padding:13px;border-radius:24px;font-weight:700;font-size:13px;text-align:center}
-.btn.wa{background:#1fa855}
-.btn.alt{background:#eee;color:#171717}
+.btn{display:block;width:100%;margin-top:10px;background:var(--brand);color:#fff;padding:13px;border-radius:24px;font-weight:700;font-size:13px;text-align:center}
+.btn.wa{background:var(--brand)}
+.btn.alt{background:var(--soft);color:var(--brand)}
 .soc{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
-.soc a{background:#f3f2ee;border-radius:20px;padding:8px 14px;font-size:12px;font-weight:600}
+.soc a{background:var(--soft);border-radius:20px;padding:8px 14px;font-size:12px;font-weight:600}
 .storehead{display:flex;gap:16px;align-items:center;margin-bottom:6px}
 .storehead .store-logo{margin:0;width:70px;height:70px;flex:none}
-.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);background:#171717;color:#fff;padding:11px 20px;border-radius:24px;font-size:12px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:60;max-width:90%;text-align:center}
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);background:var(--brand);color:#fff;padding:11px 20px;border-radius:24px;font-size:12px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:60;max-width:90%;text-align:center}
 .toast.show{opacity:1;transform:translateX(-50%)}
 
 /* ekran ölçüləri */
@@ -244,21 +244,18 @@ footer{margin-top:56px;background:#171717;color:#fff;padding:40px 0}
  .hero-content{padding:26px 18px}
 }
 
-/* geri düymələri (ikon + yazı) */
-.mback,.pback{display:inline-flex;align-items:center;gap:6px}
-
 /* məhsul pəncərəsi: tam ekran */
 .ov.full{padding:0}
 .modal.full{width:100%;height:100%;max-height:100%;border-radius:0;padding:56px 5% 30px}
 .modal.full .detail{max-width:1400px;margin:0 auto;grid-template-columns:1.2fr 1fr}
 .modal.full .detail .photo{min-height:75vh}
 .modal.full .detail .photo img{object-fit:contain}
-.modal.full .mback{position:absolute;left:5%;top:16px;margin:0}
+.modal.full .gback{position:absolute;left:5%;top:16px;margin:0}
 @media(max-width:800px){
  .modal.full{padding:56px 16px 24px}
  .modal.full .detail{grid-template-columns:1fr}
  .modal.full .detail .photo{min-height:50vh}
- .modal.full .mback{left:16px}
+ .modal.full .gback{left:16px}
 }
 
 /* ===== məhsul səhifəsi (yeni dizayn) ===== */
@@ -270,33 +267,33 @@ footer{margin-top:56px;background:#171717;color:#fff;padding:40px 0}
 .pd-stage img,.pd-stage video{width:100%;height:100%;object-fit:contain;display:block}
 .pd-stage video{background:#000}
 .pd-stage iframe{width:100%;height:100%;border:0;background:#000}
-.pd-ph{font-size:20px;letter-spacing:8px;color:#cfc6bb;font-weight:800}
+.pd-ph{font-size:20px;letter-spacing:8px;color:#C9C5B6;font-weight:800}
 .pd-nav{position:absolute;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.96);box-shadow:0 2px 12px rgba(0,0,0,.18);font-size:22px;line-height:1;z-index:3;display:flex;align-items:center;justify-content:center;padding-bottom:3px}
-.pd-nav:hover{background:#171717;color:#fff}
+.pd-nav:hover{background:var(--brand);color:#fff}
 .pd-nav.l{left:12px}.pd-nav.r{right:12px}
 .pd-count{position:absolute;right:12px;bottom:12px;background:rgba(23,23,23,.78);color:#fff;font-size:11px;font-weight:600;padding:4px 11px;border-radius:12px;z-index:3;pointer-events:none}
 .pd-thumbs{display:flex;gap:10px;margin-top:12px;overflow-x:auto;scrollbar-width:none;padding:2px}
 .pd-thumbs::-webkit-scrollbar{display:none}
 .pd-th{flex:none;width:76px;height:76px;border-radius:12px;overflow:hidden;border:2px solid transparent;background:#fff;padding:0;position:relative;opacity:.7;transition:.15s}
 .pd-th:hover{opacity:1}
-.pd-th.on{border-color:#171717;opacity:1}
+.pd-th.on{border-color:var(--brand);opacity:1}
 .pd-th img{width:100%;height:100%;object-fit:cover;display:block}
-.pd-th.v{background:#1b1b1b}
+.pd-th.v{background:var(--brand)}
 .pd-th.v:after{content:"▶";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px}
 .pd-info{background:#fff;border:1px solid var(--line);border-radius:20px;padding:30px;min-width:0}
-.pd-brand{display:inline-block;font-size:10.5px;color:#8a6a3c;text-transform:uppercase;letter-spacing:1.4px;font-weight:700;margin-bottom:6px}
+.pd-brand{display:inline-block;font-size:10.5px;color:var(--brand);text-transform:uppercase;letter-spacing:1.4px;font-weight:700;margin-bottom:6px}
 .pd-info h2{font-size:26px;line-height:1.2;font-weight:800;letter-spacing:-.5px;margin:0 0 4px;overflow-wrap:anywhere}
 .pd-price{font-size:30px;font-weight:800;margin:14px 0 10px;letter-spacing:-.5px}
-.pd-stock{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;padding:5px 12px;border-radius:14px;background:#e3f6e8;color:#1a7a35}
-.pd-stock.out{background:#fde4e4;color:#b42323}
+.pd-stock{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;padding:5px 12px;border-radius:14px;background:rgba(38,59,53,.1);color:var(--brand)}
+.pd-stock.out{background:#FBE3E0;color:#b42323}
 .modal .pd-desc{margin:18px 0 0;font-size:13px;line-height:1.75;color:#444;white-space:pre-line;overflow-wrap:anywhere}
 .pd-specs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:20px 0 0}
-.pd-spec{background:#faf8f5;border-radius:12px;padding:11px 13px;font-size:11px;min-width:0}
+.pd-spec{background:var(--soft);border-radius:12px;padding:11px 13px;font-size:11px;min-width:0}
 .pd-spec span{display:block;color:#8a8a8a;font-weight:600;margin-bottom:3px}
 .pd-spec b{font-size:12.5px;font-weight:700;overflow-wrap:anywhere}
 .pd-store{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:20px 0 0;cursor:pointer;transition:.15s}
-.pd-store:hover{border-color:#171717;background:#faf8f5}
-.pd-store .av{width:42px;height:42px;border-radius:50%;background:#171717;color:#fff;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex:none}
+.pd-store:hover{border-color:var(--brand);background:var(--bg)}
+.pd-store .av{width:42px;height:42px;border-radius:50%;background:var(--brand);color:#fff;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex:none}
 .pd-store div+div{flex:1;min-width:0}
 .pd-store b{font-size:13px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pd-store small{display:block;color:#888;font-size:11px;margin-top:2px;font-weight:500}
@@ -318,12 +315,12 @@ footer{margin-top:56px;background:#171717;color:#fff;padding:40px 0}
 @media(max-width:420px){.pd-specs{grid-template-columns:1fr}}
 
 /* ===== cəlbedici dizayn və qalma müddətini artıran hissələr ===== */
-.hero{background:linear-gradient(115deg,#f4e6d8 0%,#ebd2b6 48%,#dcb48c 100%)}
-.hero:before{content:"";position:absolute;width:420px;height:420px;border-radius:50%;background:rgba(255,255,255,.35);left:-140px;bottom:-210px}
+.hero{background:linear-gradient(115deg,#EAE7DF 0%,#E5E1D4 55%,#DAD3BF 100%)}
+.hero:before{content:"";position:absolute;width:420px;height:420px;border-radius:50%;background:rgba(233,185,73,.22);left:-140px;bottom:-210px}
 .hero-btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
 .hero .hero-btns .pill{margin-top:0}
-.pill.ghost{background:transparent;color:#171717;border:1.5px solid #171717;padding:10.5px 22px}
-.pill.ghost:hover{background:#171717;color:#fff}
+.pill.ghost{background:transparent;color:var(--brand);border:1.5px solid var(--brand);padding:10.5px 22px}
+.pill.ghost:hover{background:var(--brand);color:#fff}
 .hero-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
 .hero-chips span{background:rgba(255,255,255,.7);border-radius:16px;padding:6px 12px;font-size:10.5px;font-weight:700}
 .statsbar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:18px auto 0}
@@ -343,11 +340,12 @@ footer{margin-top:56px;background:#171717;color:#fff;padding:40px 0}
  .pcard:hover .photo img.alt{opacity:1}
 }
 @keyframes pop{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-.sbadge.low{color:#a05a00}
+.sbadge.low{background:var(--accent);color:var(--brand)}
+.sbadge.pick{background:var(--brand);color:var(--accent)}
 .pcard.sk{animation:none;pointer-events:none}
-.sk .photo{background:linear-gradient(90deg,#efe9e2 25%,#f8f4ee 50%,#efe9e2 75%);background-size:200% 100%;animation:shim 1.2s infinite}
+.sk .photo{background:linear-gradient(90deg,var(--soft) 25%,#F4F2EC 50%,var(--soft) 75%);background-size:200% 100%;animation:shim 1.2s infinite}
 .sk .photo:before{display:none}
-.sk-l{height:10px;border-radius:6px;background:#efe9e2;margin:6px 0 10px;width:80%}
+.sk-l{height:10px;border-radius:6px;background:var(--soft);margin:6px 0 10px;width:80%}
 .sk-l.s{width:45%}
 @keyframes shim{to{background-position:-200% 0}}
 .hscroll{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(170px,210px);gap:12px;overflow-x:auto;scrollbar-width:none;padding:2px 2px 10px;scroll-snap-type:x proximity}
@@ -356,24 +354,45 @@ footer{margin-top:56px;background:#171717;color:#fff;padding:40px 0}
 .pd-more{max-width:1240px;margin:8px auto 0}
 .modal .pd-more h3{font-size:18px;margin:30px 0 12px;font-weight:800}
 .sellcta{margin-top:40px}
-.sellcta-in{background:#171717;color:#fff;border-radius:18px;padding:34px 40px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.sellcta-in{background:var(--brand);color:#fff;border-radius:18px;padding:34px 40px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
 .sellcta .eyebrow{opacity:.7;margin-bottom:8px}
 .sellcta h2{font-size:clamp(20px,2.6vw,28px);letter-spacing:-.6px;font-weight:800;margin-bottom:8px;max-width:560px}
 .sellcta p{font-size:12.5px;color:#ccc;line-height:1.6;max-width:560px;font-weight:500}
 .bnav{display:none}
-.totop{position:fixed;right:16px;bottom:24px;width:42px;height:42px;border-radius:50%;background:#171717;color:#fff;font-size:18px;box-shadow:0 4px 14px rgba(0,0,0,.25);z-index:30;opacity:0;pointer-events:none;transition:.25s;transform:translateY(10px)}
+.totop{position:fixed;right:16px;bottom:24px;width:42px;height:42px;border-radius:50%;background:var(--brand);color:#fff;font-size:18px;box-shadow:0 4px 14px rgba(0,0,0,.25);z-index:30;opacity:0;pointer-events:none;transition:.25s;transform:translateY(10px)}
 .totop.show{opacity:1;pointer-events:auto;transform:none}
 @media(max-width:800px){
  .bnav{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(255,255,255,.98);border-top:1px solid var(--line);padding:6px 2px calc(6px + env(safe-area-inset-bottom))}
  .bnav button,.bnav a{background:none;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:9.5px;font-weight:700;color:#8a8a8a;padding:4px 0}
  .bnav svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
- .bnav .on{color:#171717}
+ .bnav .on{color:var(--brand)}
  body{padding-bottom:62px}
  .toast{bottom:80px}
  .totop{bottom:76px}
  .sellcta-in{padding:26px 22px}
 }
 @media(max-width:420px){.statsbar b{font-size:18px}.hscroll{grid-auto-columns:150px}}
+
+/* ===== sıralama menyusu ===== */
+.head-tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.sortbox{position:relative;min-width:260px}
+.sortbtn{width:100%;display:flex;align-items:center;justify-content:space-between;gap:14px;background:#FCFBF8;border:1.5px solid var(--soft);border-radius:16px;padding:11px 16px;font-size:12.5px;font-weight:600;color:var(--brand);text-align:left}
+.sortbox.open .sortbtn{border-color:#D5D0C2}
+.sortbtn svg{width:16px;height:16px;flex:none;stroke:var(--brand);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s}
+.sortbox:not(.open) .sortbtn svg{transform:rotate(180deg)}
+.sortlist{position:absolute;left:0;right:0;top:calc(100% + 8px);z-index:25;background:#FCFBF8;border:1px solid var(--soft);border-radius:18px;padding:8px;box-shadow:0 14px 30px rgba(38,59,53,.14)}
+.sopt{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;background:none;text-align:left;padding:13px 14px;border-radius:12px;font-size:12.5px;font-weight:500;color:var(--brand)}
+.sopt:hover{background:rgba(38,59,53,.06)}
+.sopt.on{background:rgba(38,59,53,.1);font-weight:600}
+.sopt svg{width:18px;height:18px;flex:none;stroke:var(--brand);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.hero-eyebrow-fix{display:none}
+.hero .eyebrow{color:var(--brand)}
+.sellcta .eyebrow{color:var(--accent);opacity:1}
+@media(max-width:800px){
+ #resultsView .section-head{flex-wrap:wrap}
+ .head-tools{width:100%;justify-content:space-between;flex-wrap:nowrap}
+ .sortbox{flex:1;min-width:0}
+}
 </style>
 
 <!-- ============================================================
@@ -399,14 +418,14 @@ footer{margin-top:56px;background:#171717;color:#fff;padding:40px 0}
       <button id="sbtn" aria-label="Axtar"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></button>
     </div>
     <div class="nav-actions">
-      <a class="action" id="favBtn"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#171717" stroke-width="1.8" stroke-linejoin="round"><path d="M12 20.5S3.5 15 3.5 9A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 8.5 2c0 6-8.5 11.5-8.5 11.5z"/></svg><span>Sevimlilər</span><b class="badge" id="favN"></b></a>
-      <a class="action" href="/seller-register.html" title="Satıcı ol / giriş"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#171717" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4.5 4.2-6.5 8-6.5s7 2 8 6.5"/></svg></a>
+      <a class="action" id="favBtn"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#263B35" stroke-width="1.8" stroke-linejoin="round"><path d="M12 20.5S3.5 15 3.5 9A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 8.5 2c0 6-8.5 11.5-8.5 11.5z"/></svg><span>Sevimlilər</span><b class="badge" id="favN"></b></a>
+      <a class="action" href="/seller-register.html" title="Satıcı ol / giriş"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#263B35" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4.5 4.2-6.5 8-6.5s7 2 8 6.5"/></svg></a>
     </div>
   </div>
 </header>
 <nav class="categories" id="catnav">
   <div class="cat-inner" id="cats">
-    <button class="megabtn" id="megaBtn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#171717" stroke-width="2.2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>Bütün kateqoriyalar <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#171717" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9l7 7 7-7"/></svg></button>
+    <button class="megabtn" id="megaBtn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#263B35" stroke-width="2.2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>Bütün kateqoriyalar <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#263B35" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9l7 7 7-7"/></svg></button>
   </div>
   <div class="megapanel hide" id="megaPanel"><div class="megapanel-in" id="megaList"></div></div>
 </nav>
@@ -502,11 +521,16 @@ footer{margin-top:56px;background:#171717;color:#fff;padding:40px 0}
   <section class="section hide" id="resultsView">
     <div class="section-head">
       <div>
-        <button class="pback" id="pageBack" aria-label="Geri"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg><span>Geri</span></button>
+        <button class="gback" id="pageBack" aria-label="Geri"></button>
         <h2 id="prodTitle">Bütün məhsullar</h2>
-        <p id="prodSub"></p>
       </div>
-      <button class="filter-toggle" id="fToggle">Filtrlər</button>
+      <div class="head-tools">
+        <button class="filter-toggle" id="fToggle">Filtrlər</button>
+        <div class="sortbox" id="sortBox">
+          <button type="button" class="sortbtn" id="sortBtn" aria-haspopup="listbox" aria-expanded="false"><span id="sortLabel">Tövsiyə olunan sıralama</span><svg viewBox="0 0 24 24"><path d="M5 15l7-7 7 7"/></svg></button>
+          <div class="sortlist hide" id="sortList" role="listbox" aria-label="Sıralama"></div>
+        </div>
+      </div>
     </div>
 
     <div class="shop" id="shop">
@@ -579,6 +603,7 @@ async function getJSON(path){
   return r.json();
 }
 const ICON_CHAT='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>';
+const backInner=k=>k?'← Geri':ICON_BACK+'<span>Geri</span>';
 const ICON_BACK='<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>';
 
 const INFO={
@@ -601,7 +626,7 @@ const DEPTS=[
 /* ---------- vəziyyət ---------- */
 const PAGE=24;
 const EMPTY_F={q:'',category:'',store_category:'',brand:'',gender:'',age:'',size:'',color:'',material:'',size_class:'',price_min:'',price_max:''};
-let F={...EMPTY_F}, showAll=false;
+let F={...EMPTY_F}, showAll=false, SORT='';
 let OPT={categories:[],genders:[],age_groups:[],clothing_sizes:[],shoe_sizes:[],colors:[],size_classes:[]};
 let list=[],total=0,loadSeq=0;
 const cache={};
@@ -610,7 +635,7 @@ let favs=LS.g('elfa_favs',[]).map(String);
 const activeCount=()=>Object.values(F).filter(Boolean).length;
 const inResults=()=>showAll||activeCount()>0;
 let resFlag=false,popping=false,loadingMore=false,IO=null,TOTAL_PRODUCTS=0;
-const snap=()=>({F:{...F},showAll});
+const snap=()=>({F:{...F},showAll,sort:SORT});
 
 /* ---------- seçim siyahıları ---------- */
 function fillSelect(sel,values,keep){
@@ -669,7 +694,8 @@ function applyMode(){
   $('#fToggle').classList.toggle('show',res);
   if(!res)$('#filters').classList.remove('open');
   const parts=[F.store_category,F.category].filter(Boolean).join(' › ');
-  $('#prodTitle').textContent=F.q?'"'+F.q+'" üçün nəticələr'+(parts?' · '+parts:''):(parts||'Bütün məhsullar');
+  $('#prodTitle').textContent='ELFA · '+(parts||'Bütün məhsullar');
+  renderSort();
   $$('#cats a').forEach(a=>a.classList.toggle('active',!!F.store_category&&a.dataset.dept===F.store_category));
   $$('#bnav [data-bn]').forEach(b=>b.classList.toggle('on',b.dataset.bn==='home'&&!res));
   /* brauzerin "Geri" düyməsi üçün tarixçə: nəticələr səhifəsi ayrıca addım sayılır */
@@ -682,6 +708,7 @@ function applyMode(){
 function queryString(offset){
   const p=new URLSearchParams();
   Object.entries(F).forEach(([k,v])=>{if(v!=='')p.set(k,v)});
+  if(SORT)p.set('sort',SORT);
   p.set('limit',PAGE);p.set('offset',offset);
   return p.toString();
 }
@@ -697,7 +724,7 @@ function cardHtml(p){
   const href=wa?wa+'?text='+msg:(p.store_phone?telHref(p.store_phone):'');
   const contact=href?'<a class="ccontact" href="'+esc(href)+'"'+(wa?' target="_blank" rel="noopener noreferrer"':'')+' title="Satıcıya yaz" aria-label="Satıcıya yaz">'+ICON_CHAT+'</a>':'';
   const sub=[p.category,p.gender].filter(Boolean).join(' · ')||p.store_name||'';
-  const out=p.stock<=0?'<span class="sbadge">Stokda yoxdur</span>':(p.stock<=3?'<span class="sbadge low">Son '+esc(p.stock)+' ədəd</span>':'');
+  const out=p.stock<=0?'<span class="sbadge">Stokda yoxdur</span>':(p.stock<=3?'<span class="sbadge low">Son '+esc(p.stock)+' ədəd</span>':(p.on_home?'<span class="sbadge pick">★ Seçilmiş</span>':''));
   return '<article class="pcard" data-pid="'+esc(p.id)+'">'+photoHtml(p,!!safeVideo(p.video_url)).replace('</div>',out+'</div>')+
     '<button class="heart'+(fav?' on':'')+'" data-heart="'+esc(p.id)+'" aria-label="Sevimlilər">'+(fav?'♥':'♡')+'</button>'+
     '<div class="pinfo"><div class="pname">'+esc(p.name)+'</div><div class="psub">'+esc(sub)+'</div><div class="prow"><span class="price">'+money(p.price)+'</span>'+contact+'</div></div></article>';
@@ -715,12 +742,10 @@ async function loadProducts(reset){
     if(seq!==loadSeq)return;
     const totalHeader=r.headers.get('X-Total-Count');
     rows=Array.isArray(rows)?rows:[];
-    const offset=reset?0:list.length;
     rows.forEach(p=>{cache[p.id]=p});
     list=list.concat(rows);
     total=totalHeader!==null&&totalHeader!==''?Math.max(0,Number(totalHeader)||0):null;
     $('#products').innerHTML=list.map(cardHtml).join('');
-    $('#prodSub').textContent=(total!==null?total:(offset+rows.length+(rows.length===PAGE?1:0)))+' məhsul tapıldı';
     const e=$('#empty');
     if(!list.length){
       e.classList.remove('hide');
@@ -742,7 +767,7 @@ $('#moreBtn').onclick=()=>loadProducts(false);
 const FMAP={fCategory:'category',fBrand:'brand',fGender:'gender',fAge:'age',fSize:'size',fColor:'color',fSizeClass:'size_class',fMaterial:'material',fMin:'price_min',fMax:'price_max'};
 
 async function openResults(patch,all){
-  F={...EMPTY_F,...(patch||{})};showAll=!!all;
+  F={...EMPTY_F,...(patch||{})};showAll=!!all;SORT='';
   $('#q').value=F.q;
   Object.keys(FMAP).forEach(id=>{ensureOpt(id,F[FMAP[id]]);$('#'+id).value=F[FMAP[id]]||''});
   syncFilterUI();
@@ -754,7 +779,7 @@ async function openResults(patch,all){
 function clearAll(){
   /* nəticələr səhifəsi tarixçəyə yazılıb: "Geri" ilə eyni addım olsun */
   if(!stack.length&&resFlag&&history.state&&history.state.res){history.back();setTimeout(()=>window.scrollTo({top:0,behavior:'smooth'}),60);return}
-  F={...EMPTY_F};showAll=false;
+  F={...EMPTY_F};showAll=false;SORT='';
   Object.keys(FMAP).forEach(id=>$('#'+id).value='');
   $('#q').value='';
   syncFilterUI();
@@ -782,6 +807,7 @@ $('#clearF').onclick=async()=>{
   Object.keys(FMAP).forEach(id=>$('#'+id).value='');
   syncFilterUI();await loadBrandMaterial();loadProducts(true);
 };
+$('#pageBack').innerHTML=backInner();
 $('#pageBack').onclick=clearAll;
 $('#fToggle').onclick=()=>$('#filters').classList.toggle('open');
 
@@ -940,9 +966,9 @@ function renderView(){
   const fn=stack[stack.length-1];
   if(!fn){closeModalDom();return}
   const v=fn();
-  const backBtn=v.keepBack
-    ?'<button class="mback" data-back>← Geri</button>'
-    :'<button class="mback" data-back aria-label="Geri">'+ICON_BACK+'<span>Geri</span></button>';
+  const backBtn='<button class="gback" data-back aria-label="Geri">'+backInner(v.keepBack)+'</button>';
+  /* ✕ yalnız sevimlilər pəncərəsində qalır; qalan ekranlarda tək "Geri" düyməsi var */
+  $('#mx').classList.toggle('hide',!v.keepX);
   $('#mb').innerHTML=backBtn+v.html;
   $('.modal').classList.toggle('full',!!v.full);
   $('#ov').classList.toggle('full',!!v.full);
@@ -956,7 +982,7 @@ function closeModalDom(){stack=[];$('#ov').classList.remove('open','full');$('.m
 function closeAll(){if(stack.length)history.go(-stack.length);else closeModalDom()}
 $('#mx').onclick=closeAll;
 $('#ov').onclick=e=>{if(e.target.id==='ov')closeAll()};
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){toggleMega(false);closeAll()}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){toggleMega(false);toggleSort(false);closeAll()}});
 function shared(e){
   if(e.target.closest('.ccontact'))return true;
   const h=e.target.closest('[data-heart]');
@@ -1135,7 +1161,7 @@ function storeView(id){
 
 /* ---------- sevimlilər pəncərəsi ---------- */
 $('#favBtn').onclick=()=>view(()=>({
-  keepBack:true,
+  keepBack:true,keepX:true,
   html:'<h3>Sevimlilər</h3><div id="favBox"><p>Yüklənir...</p></div>',
   async bind(){
     if(!favs.length){$('#favBox').innerHTML='<p>Hələ sevimli məhsulunuz yoxdur. ♡ düyməsinə basın.</p>';return}
@@ -1179,6 +1205,30 @@ async function loadHome(){
 }
 
 /* ---------- başlanğıc ---------- */
+/* ---------- sıralama menyusu ---------- */
+const SORTS=[['','Tövsiyə olunan sıralama'],['price_asc','Ən aşağı qiymət'],['price_desc','Ən yüksək qiymət'],['newest','Ən yenilər']];
+const ICON_CHECK='<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+function renderSort(){
+  const cur=SORTS.find(x=>x[0]===SORT)||SORTS[0];
+  $('#sortLabel').textContent=cur[1];
+  $('#sortList').innerHTML=SORTS.map(x=>'<button type="button" role="option" class="sopt'+(x[0]===SORT?' on':'')+'" data-sort="'+x[0]+'" aria-selected="'+(x[0]===SORT)+'"><span>'+x[1]+'</span>'+(x[0]===SORT?ICON_CHECK:'')+'</button>').join('');
+}
+function toggleSort(force){
+  const l=$('#sortList'),open=force===undefined?l.classList.contains('hide'):!!force;
+  l.classList.toggle('hide',!open);
+  $('#sortBox').classList.toggle('open',open);
+  $('#sortBtn').setAttribute('aria-expanded',open?'true':'false');
+}
+$('#sortBtn').onclick=e=>{e.stopPropagation();toggleSort()};
+$('#sortList').addEventListener('click',e=>{
+  const b=e.target.closest('[data-sort]');if(!b)return;
+  toggleSort(false);
+  if(b.dataset.sort===SORT)return;
+  SORT=b.dataset.sort;
+  loadProducts(true);
+});
+document.addEventListener('click',e=>{if(!e.target.closest('#sortBox'))toggleSort(false)});
+
 /* ---------- yeni funksiyalar ---------- */
 const skel=n=>Array.from({length:n},()=>'<div class="pcard sk"><div class="photo"></div><div class="pinfo"><div class="sk-l"></div><div class="sk-l s"></div></div></div>').join('');
 
@@ -1278,7 +1328,7 @@ $('#toTop').onclick=()=>window.scrollTo({top:0,behavior:'smooth'});
 /* ---------- brauzerin "Geri" düyməsi ---------- */
 async function restoreRes(r){
   const before=JSON.stringify(snap());
-  F={...EMPTY_F,...r.F};showAll=!!r.showAll;
+  F={...EMPTY_F,...r.F};showAll=!!r.showAll;SORT=r.sort||'';
   if(JSON.stringify(snap())===before){applyMode();return}
   Object.keys(FMAP).forEach(id=>{ensureOpt(id,F[FMAP[id]]);$('#'+id).value=F[FMAP[id]]||''});
   $('#q').value=F.q||'';
@@ -1294,7 +1344,7 @@ window.addEventListener('popstate',e=>{
     if(st.res){restoreRes(st.res);resFlag=true}
     else{
       if(resFlag||inResults()){
-        F={...EMPTY_F};showAll=false;
+        F={...EMPTY_F};showAll=false;SORT='';
         Object.keys(FMAP).forEach(id=>$('#'+id).value='');
         $('#q').value='';
         syncFilterUI();applyMode();loadBrandMaterial();
