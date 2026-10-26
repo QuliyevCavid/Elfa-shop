@@ -4,7 +4,6 @@ import json
 import os
 import re
 import secrets
-import sqlite3
 import time
 from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
@@ -12,6 +11,7 @@ from pathlib import Path
 from typing import List, Optional
 from urllib.parse import quote
 
+import psycopg
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request, Response
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse
@@ -19,8 +19,8 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 BASE_DIR = Path(__file__).resolve().parent
-# DİQQƏT: hostinqdə ELFA_DB daimi diskə (volume) yönəlməlidir, əks halda hər deploy-da məlumat silinir.
-DB_PATH = os.environ.get("ELFA_DB", str(BASE_DIR / "elfa.db"))
+# Render-də Environment bölməsində DATABASE_URL (Supabase Session pooler linki) təyin edilməlidir.
+DATABASE_URL = os.environ.get("DATABASE_URL", "")
 ADMIN_TOKEN = os.environ.get("ADMIN_TOKEN", "")
 R2_ACCOUNT_ID = os.environ.get("R2_ACCOUNT_ID", "").strip()
 R2_ACCESS_KEY_ID = os.environ.get("R2_ACCESS_KEY_ID", "").strip()
@@ -83,33 +83,61 @@ PRODUCT_NEW_COLUMNS = [
 
 
 # ---------------------------------------------------------------
-# Verilənlər bazası
+# Verilənlər bazası (Supabase Postgres)
 # ---------------------------------------------------------------
+class Row(dict):
+    """Həm row["ad"], həm row[0] işləyir."""
+
+    def __getitem__(self, k):
+        if isinstance(k, int):
+            return list(self.values())[k]
+        return super().__getitem__(k)
+
+
+def row_factory(cursor):
+    cols = [c.name for c in cursor.description] if cursor.description else []
+
+    def make(values):
+        return Row(zip(cols, values))
+
+    return make
+
+
+class Conn:
+    def __init__(self, raw):
+        self.raw = raw
+
+    def execute(self, sql, params=None):
+        if params:
+            return self.raw.execute(sql.replace("?", "%s"), params)
+        return self.raw.execute(sql)
+
+
 @contextmanager
 def db():
-    con = sqlite3.connect(DB_PATH, timeout=15)
-    con.row_factory = sqlite3.Row
-    con.execute("PRAGMA foreign_keys = ON")
-    con.execute("PRAGMA journal_mode = WAL")
+    raw = psycopg.connect(
+        DATABASE_URL,
+        row_factory=row_factory,
+        prepare_threshold=None,
+        connect_timeout=15,
+    )
     try:
-        yield con
-        con.commit()
+        yield Conn(raw)
+        raw.commit()
     finally:
-        con.close()
+        raw.close()
 
 
 def ensure_columns(con, table: str, columns):
-    existing = {r["name"] for r in con.execute(f"PRAGMA table_info({table})")}
     for name, ddl in columns:
-        if name not in existing:
-            con.execute(f"ALTER TABLE {table} ADD COLUMN {name} {ddl}")
+        con.execute(f"ALTER TABLE {table} ADD COLUMN IF NOT EXISTS {name} {ddl}")
 
 
 def init_db():
     with db() as con:
-        con.executescript("""
+        con.execute("""
             CREATE TABLE IF NOT EXISTS sellers (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 store_name TEXT NOT NULL,
                 owner_name TEXT NOT NULL,
                 category TEXT NOT NULL,
@@ -128,10 +156,10 @@ def init_db():
                 expires_at TEXT NOT NULL
             );
             CREATE TABLE IF NOT EXISTS products (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 seller_id INTEGER NOT NULL REFERENCES sellers(id) ON DELETE CASCADE,
                 name TEXT NOT NULL,
-                price REAL NOT NULL,
+                price DOUBLE PRECISION NOT NULL,
                 stock INTEGER NOT NULL,
                 image_url TEXT DEFAULT '',
                 description TEXT DEFAULT '',
@@ -139,10 +167,10 @@ def init_db():
             );
             CREATE INDEX IF NOT EXISTS idx_products_seller ON products(seller_id);
             CREATE TABLE IF NOT EXISTS images (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 seller_id INTEGER NOT NULL REFERENCES sellers(id) ON DELETE CASCADE,
                 mime TEXT NOT NULL,
-                data BLOB NOT NULL,
+                data BYTEA NOT NULL,
                 created_at TEXT NOT NULL
             );
         """)
@@ -205,7 +233,7 @@ def client_ip(request: Request) -> str:
     return request.client.host if request.client else "?"
 
 
-def current_seller(authorization: Optional[str] = Header(None)) -> sqlite3.Row:
+def current_seller(authorization: Optional[str] = Header(None)) -> Row:
     token = bearer(authorization)
     with db() as con:
         row = con.execute(
@@ -574,7 +602,7 @@ def register(data: RegisterIn):
                 (store_name, owner_name, category, phone, email,
                  data.city.strip(), data.about.strip(), salt, pw, now().isoformat()),
             )
-    except sqlite3.IntegrityError:
+    except psycopg.errors.UniqueViolation:
         raise HTTPException(409, "Bu e-poçt artıq qeydiyyatdan keçib")
     return {"ok": True, "status": "pending"}
 
@@ -608,7 +636,7 @@ def login(data: LoginIn, request: Request):
 @app.post("/api/seller/logout")
 def logout(
     authorization: Optional[str] = Header(None),
-    s: sqlite3.Row = Depends(current_seller),
+    s: Row = Depends(current_seller),
 ):
     with db() as con:
         con.execute("DELETE FROM sessions WHERE token_hash = ?", (sha(bearer(authorization)),))
@@ -622,7 +650,7 @@ def home_used(con, seller_id: int) -> int:
     ).fetchone()[0]
 
 
-def seller_private(s: sqlite3.Row, used: int = 0) -> dict:
+def seller_private(s: Row, used: int = 0) -> dict:
     return {
         "home_slots": s["home_slots"],
         "home_used": used,
@@ -643,14 +671,14 @@ def seller_private(s: sqlite3.Row, used: int = 0) -> dict:
 
 
 @app.get("/api/seller/me")
-def me(s: sqlite3.Row = Depends(current_seller)):
+def me(s: Row = Depends(current_seller)):
     with db() as con:
         used = home_used(con, s["id"])
     return seller_private(s, used)
 
 
 @app.put("/api/seller/profile")
-def update_profile(data: ProfileIn, s: sqlite3.Row = Depends(current_seller)):
+def update_profile(data: ProfileIn, s: Row = Depends(current_seller)):
     raw = data.model_dump(exclude_unset=True)
     upd = {}
     for key, value in raw.items():
@@ -697,7 +725,7 @@ def sniff_image(b: bytes) -> Optional[str]:
 
 
 @app.post("/api/seller/upload")
-async def upload_image(request: Request, s: sqlite3.Row = Depends(current_seller)):
+async def upload_image(request: Request, s: Row = Depends(current_seller)):
     declared = request.headers.get("content-length")
     if declared and declared.isdigit() and int(declared) > MAX_IMAGE_BYTES:
         raise HTTPException(413, "Şəkil çox böyükdür (maksimum 3 MB)")
@@ -717,10 +745,11 @@ async def upload_image(request: Request, s: sqlite3.Row = Depends(current_seller
         if n >= MAX_IMAGES_PER_SELLER:
             raise HTTPException(400, "Şəkil limiti doldu. Lazımsız məhsulları silin")
         cur = con.execute(
-            "INSERT INTO images (seller_id, mime, data, created_at) VALUES (?, ?, ?, ?)",
+            "INSERT INTO images (seller_id, mime, data, created_at) VALUES (?, ?, ?, ?) RETURNING id",
             (s["id"], mime, body, now().isoformat()),
         )
-    return {"url": f"/api/images/{cur.lastrowid}"}
+        new_id = cur.fetchone()["id"]
+    return {"url": f"/api/images/{new_id}"}
 
 
 def sigv4_presign(
@@ -777,7 +806,7 @@ class UploadUrlIn(BaseModel):
 
 
 @app.post("/api/seller/upload-url")
-def upload_url(data: UploadUrlIn, s: sqlite3.Row = Depends(current_seller)):
+def upload_url(data: UploadUrlIn, s: Row = Depends(current_seller)):
     if not STORAGE_ENABLED:
         raise HTTPException(503, "Fayl yükləmə hələ aktiv edilməyib")
     if s["status"] != "approved":
@@ -806,8 +835,6 @@ def get_image(iid: int, request: Request):
     if not row:
         raise HTTPException(404, "Şəkil tapılmadı")
     data = bytes(row["data"])
-    # Əvvəl "immutable" keş var idi: baza sıfırlananda eyni nömrə (id) başqa şəkilə düşür,
-    # brauzer isə köhnə şəkli göstərirdi. İndi ETag ilə hər dəfə yoxlanılır (dəyişməyibsə 304).
     etag = '"' + hashlib.sha256(data).hexdigest()[:32] + '"'
     headers = {"ETag": etag, "Cache-Control": "no-cache", "X-Content-Type-Options": "nosniff"}
     if request.headers.get("if-none-match") == etag:
@@ -823,7 +850,7 @@ def favicon():
 # ---------------------------------------------------------------
 # Məhsullar
 # ---------------------------------------------------------------
-def product_dict(r: sqlite3.Row) -> dict:
+def product_dict(r: Row) -> dict:
     keys = r.keys()
     data = {
         k: r[k]
@@ -866,7 +893,7 @@ def tiktok_url(v: str) -> str:
     return v if HTTP_RE.match(v) else "https://www.tiktok.com/@" + v
 
 
-def public_product_dict(r: sqlite3.Row) -> dict:
+def public_product_dict(r: Row) -> dict:
     data = product_dict(r)
     data["store_id"] = r["seller_id"]
     data["store_city"] = r["store_city"]
@@ -877,7 +904,7 @@ def public_product_dict(r: sqlite3.Row) -> dict:
     return data
 
 
-def public_store_dict(s: sqlite3.Row, product_count: Optional[int] = None) -> dict:
+def public_store_dict(s: Row, product_count: Optional[int] = None) -> dict:
     data = {
         "id": s["id"],
         "store_name": s["store_name"],
@@ -898,7 +925,7 @@ def public_store_dict(s: sqlite3.Row, product_count: Optional[int] = None) -> di
 
 
 @app.get("/api/seller/products")
-def my_products(s: sqlite3.Row = Depends(current_seller)):
+def my_products(s: Row = Depends(current_seller)):
     with db() as con:
         rows = con.execute(
             "SELECT * FROM products WHERE seller_id = ? ORDER BY id DESC", (s["id"],)
@@ -907,7 +934,7 @@ def my_products(s: sqlite3.Row = Depends(current_seller)):
 
 
 @app.post("/api/seller/products")
-def add_product(data: ProductIn, s: sqlite3.Row = Depends(current_seller)):
+def add_product(data: ProductIn, s: Row = Depends(current_seller)):
     if s["status"] == "rejected":
         raise HTTPException(403, "Mağazanız rədd edilib, məhsul əlavə etmək olmaz")
     f = clean_product(data, s["id"])
@@ -916,15 +943,17 @@ def add_product(data: ProductIn, s: sqlite3.Row = Depends(current_seller)):
         cur = con.execute(
             f"""INSERT INTO products
                 (seller_id, {", ".join(PRODUCT_FIELDS)}, created_at)
-                VALUES (?, {", ".join("?" for _ in PRODUCT_FIELDS)}, ?)""",
+                VALUES (?, {", ".join("?" for _ in PRODUCT_FIELDS)}, ?)
+                RETURNING id""",
             (s["id"], *[f[k] for k in PRODUCT_FIELDS], now().isoformat()),
         )
-        row = con.execute("SELECT * FROM products WHERE id = ?", (cur.lastrowid,)).fetchone()
+        new_id = cur.fetchone()["id"]
+        row = con.execute("SELECT * FROM products WHERE id = ?", (new_id,)).fetchone()
     return product_dict(row)
 
 
 @app.put("/api/seller/products/{pid}/home")
-def seller_set_home(pid: int, data: HomeIn, s: sqlite3.Row = Depends(current_seller)):
+def seller_set_home(pid: int, data: HomeIn, s: Row = Depends(current_seller)):
     with db() as con:
         p = con.execute(
             "SELECT id, on_home FROM products WHERE id = ? AND seller_id = ?",
@@ -944,7 +973,7 @@ def seller_set_home(pid: int, data: HomeIn, s: sqlite3.Row = Depends(current_sel
 
 
 @app.put("/api/seller/products/{pid}")
-def update_product(pid: int, data: ProductIn, s: sqlite3.Row = Depends(current_seller)):
+def update_product(pid: int, data: ProductIn, s: Row = Depends(current_seller)):
     """Məhsulu tam yeniləyir. Göndərilməyən sahə boşaldılır, ona görə bütün sahələri göndərin.
     'on_home' bu sorğu ilə dəyişmir."""
     if s["status"] == "rejected":
@@ -969,7 +998,7 @@ def update_product(pid: int, data: ProductIn, s: sqlite3.Row = Depends(current_s
 
 
 @app.delete("/api/seller/products/{pid}")
-def delete_product(pid: int, s: sqlite3.Row = Depends(current_seller)):
+def delete_product(pid: int, s: Row = Depends(current_seller)):
     with db() as con:
         old = con.execute(
             "SELECT image_url, images FROM products WHERE id = ? AND seller_id = ?", (pid, s["id"])
@@ -1110,7 +1139,6 @@ def public_products(
         result.append(r)
 
     # Həmişə stokda olanlar əvvəl, qalanlar sonda. Qalan sıra "sort" parametrinə görə.
-    # (approved_rows artıq ən yenidən köhnəyə düzür; Python sort sabitdir, bərabərlikdə bu sıra qalır)
     if sort == "price_asc":
         result.sort(key=lambda r: (r["stock"] <= 0, r["price"]))
     elif sort == "price_desc":
@@ -1208,10 +1236,11 @@ def admin_set_status(sid: int, data: StatusIn):
         raise HTTPException(400, "Status yanlışdır")
     with db() as con:
         cur = con.execute("UPDATE sellers SET status = ? WHERE id = ?", (data.status, sid))
+        affected = cur.rowcount
         if data.status == "rejected":
             # Rədd edilən satıcının açıq sessiyaları bağlanır
             con.execute("DELETE FROM sessions WHERE seller_id = ?", (sid,))
-    if cur.rowcount == 0:
+    if affected == 0:
         raise HTTPException(404, "Satıcı tapılmadı")
     return {"ok": True, "status": data.status}
 
@@ -1240,7 +1269,8 @@ def admin_seller_home(sid: int, data: SellerHomeIn):
 def admin_product_home(pid: int, data: HomeIn):
     with db() as con:
         cur = con.execute("UPDATE products SET on_home = ? WHERE id = ?", (1 if data.on_home else 0, pid))
-    if cur.rowcount == 0:
+        affected = cur.rowcount
+    if affected == 0:
         raise HTTPException(404, "Məhsul tapılmadı")
     return {"ok": True, "on_home": data.on_home}
 
