@@ -155,6 +155,9 @@ footer{margin-top:56px;background:var(--brand);color:#fff;padding:40px 0}
 .ov.open{display:flex}
 .modal{background:#fff;border-radius:16px;width:min(1000px,100%);max-height:92vh;overflow:auto;padding:26px;position:relative}
 .modal .x{position:absolute;right:14px;top:10px;background:none;font-size:26px;z-index:3}
+/* "← Geri" düyməsi yalnız sevimlilər pəncərəsində var */
+.gback{display:inline-flex;align-items:center;gap:6px;background:none;font-size:12px;font-weight:700;margin-bottom:14px;padding:0}
+.gback:hover{color:var(--brand)}
 .modal h3{font-size:20px;margin-bottom:14px;font-weight:700}
 .modal p{font-size:13px;line-height:1.6;color:#444;font-weight:500}
 .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:16px}
@@ -960,7 +963,7 @@ function renderView(){
   const fn=stack[stack.length-1];
   if(!fn){closeModalDom();return}
   const v=fn();
-  $('#mb').innerHTML=v.html;
+  $('#mb').innerHTML=(v.keepBack?'<button class="gback" data-back aria-label="Geri">← Geri</button>':'')+v.html;
   $('.modal').classList.toggle('full',!!v.full);
   $('#ov').classList.toggle('full',!!v.full);
   $('#ov').classList.add('open');
@@ -984,6 +987,7 @@ function shared(e){
   return false;
 }
 $('#mb').addEventListener('click',e=>{
+  if(e.target.closest('[data-back]'))return history.back();
   const wasFav=e.target.closest('[data-heart]');
   shared(e);
   /* sevimlilər pəncərəsində ürəyə basanda kart siyahıdan çıxsın */
@@ -1149,6 +1153,7 @@ function storeView(id){
 
 /* ---------- sevimlilər pəncərəsi ---------- */
 $('#favBtn').onclick=()=>view(()=>({
+  keepBack:true,
   html:'<h3>Sevimlilər</h3><div id="favBox"><p>Yüklənir...</p></div>',
   async bind(){
     if(!favs.length){$('#favBox').innerHTML='<p>Hələ sevimli məhsulunuz yoxdur. ♡ düyməsinə basın.</p>';return}
