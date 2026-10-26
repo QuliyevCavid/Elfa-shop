@@ -387,6 +387,69 @@ footer{margin-top:56px;background:var(--brand);color:#fff;padding:40px 0}
  .head-tools{width:100%;justify-content:space-between;flex-wrap:nowrap}
  .sortbox{flex:1;min-width:0}
 }
+
+/* ===== məhsul səhifəsi: başlıq görünür, səhifə kimi açılır ===== */
+.ov.full{z-index:14;background:var(--bg)}
+.modal.full{background:var(--bg);padding:22px 0 0}
+.pdp{width:min(1240px,92%);margin:0 auto}
+.pdp .pd{max-width:none;margin:0}
+.pd-stock:before{content:"";width:7px;height:7px;border-radius:50%;background:#2E9E5B;flex:none}
+.pd-stock.out:before{background:#C0392B}
+.pd-cta .btn{display:flex;align-items:center;justify-content:center;gap:8px}
+.pd-cta .btn svg{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.btn.out{background:#fff;color:var(--text);border:1px solid #D9D5CA}
+.btn.out:hover{border-color:var(--brand)}
+.btn.out.on svg{fill:#d22;stroke:#d22}
+body.pfull .totop{display:none}
+.psec{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px 22px;margin-top:22px}
+.pshead{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}
+.psl{display:flex;align-items:center;gap:12px;min-width:0}
+.psl h3{font-size:18px;font-weight:700;margin:0}
+.sicon{width:40px;height:40px;border-radius:12px;background:var(--brand);display:flex;align-items:center;justify-content:center;flex:none}
+.sicon svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.sicon.plain{background:none;width:auto}
+.sicon.plain svg{stroke:var(--brand);width:22px;height:22px}
+.pgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.sgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.hrt{width:28px;height:28px;border-radius:50%;background:transparent;display:flex;align-items:center;justify-content:center;flex:none;color:var(--text)}
+.hrt svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.hrt.on{color:#d22}
+.hrt.on svg{fill:currentColor}
+.mcard{border:1px solid var(--line);border-radius:12px;padding:8px;background:#fff;cursor:pointer;min-width:0;transition:border-color .2s,box-shadow .2s}
+.mcard:hover,.hcard:hover,.sc2:hover{border-color:var(--brand);box-shadow:0 6px 16px rgba(38,59,53,.08)}
+.mph{aspect-ratio:1/.8;border-radius:8px;background:var(--soft);overflow:hidden}
+.mph img{width:100%;height:100%;object-fit:cover;display:block}
+.mrow{display:flex;justify-content:space-between;align-items:flex-start;gap:6px;margin-top:10px}
+.mtx{min-width:0}
+.mname{font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mcat{font-size:11px;color:var(--muted);margin-top:3px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mprice{font-size:13px;font-weight:800;margin-top:12px}
+.mcard .mprice{margin-top:10px}
+.hcard{position:relative;display:flex;justify-content:space-between;gap:10px;border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff;cursor:pointer;min-height:120px;min-width:0;transition:border-color .2s,box-shadow .2s}
+.htx{display:flex;flex-direction:column;min-width:0;flex:1}
+.htx .mprice{margin-top:auto;padding-top:10px}
+.him{width:42%;flex:none;margin-top:22px;border-radius:8px;overflow:hidden;background:var(--soft)}
+.him img{width:100%;height:100%;object-fit:cover;display:block}
+.hcard .hrt{position:absolute;right:8px;top:6px}
+.sc2{border:1px solid var(--line);border-radius:14px;padding:14px;background:#fff;cursor:pointer;min-width:0;transition:border-color .2s,box-shadow .2s}
+.sc2top{display:flex;gap:14px;align-items:center}
+.sc2 .store-logo{margin:0;width:60px;height:60px;flex:none}
+.sc2tx{min-width:0}
+.sc2tx b{display:block;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sc2tx small{display:flex;align-items:center;gap:4px;color:var(--muted);font-size:11px;margin-top:4px;font-weight:500}
+.sc2tx small svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2}
+.sc2btn{display:block;margin-top:14px;background:var(--brand);color:#fff;text-align:center;padding:11px;border-radius:10px;font-size:12px;font-weight:700}
+.modal.full footer{margin-top:40px}
+@media(max-width:1000px){.sgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:800px){
+ .modal.full{padding:14px 0 0}
+ .pdp{width:94%}
+ .pgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .sgrid{grid-template-columns:1fr}
+ .psec{padding:16px}
+ .psl h3{font-size:15px}
+ .modal.full footer{padding-bottom:88px}
+}
 </style>
 
 <!-- ============================================================
@@ -762,6 +825,7 @@ $('#moreBtn').onclick=()=>loadProducts(false);
 const FMAP={fCategory:'category',fBrand:'brand',fGender:'gender',fAge:'age',fSize:'size',fColor:'color',fSizeClass:'size_class',fMaterial:'material',fMin:'price_min',fMax:'price_max'};
 
 async function openResults(patch,all){
+  dropModals();
   F={...EMPTY_F,...(patch||{})};showAll=!!all;SORT='';
   $('#q').value=F.q;
   Object.keys(FMAP).forEach(id=>{ensureOpt(id,F[FMAP[id]]);$('#'+id).value=F[FMAP[id]]||''});
@@ -773,7 +837,8 @@ async function openResults(patch,all){
 }
 function clearAll(){
   /* nəticələr səhifəsi tarixçəyə yazılıb: "Geri" ilə eyni addım olsun */
-  if(!stack.length&&resFlag&&history.state&&history.state.res){history.back();setTimeout(()=>window.scrollTo({top:0,behavior:'smooth'}),60);return}
+  const hadModal=stack.length>0;dropModals();
+  if(!hadModal&&resFlag&&history.state&&history.state.res){history.back();setTimeout(()=>window.scrollTo({top:0,behavior:'smooth'}),60);return}
   F={...EMPTY_F};showAll=false;SORT='';
   Object.keys(FMAP).forEach(id=>$('#'+id).value='');
   $('#q').value='';
@@ -812,6 +877,7 @@ function resetPanel(){
   syncFilterUI();loadBrandMaterial();
 }
 function runSearch(){
+  if(stack.length&&$('#q').value.trim()!==F.q)dropModals();
   const wasHome=!inResults();
   const nextQ=$('#q').value.trim();
   if(nextQ!==F.q){
@@ -967,11 +1033,26 @@ function renderView(){
   $('.modal').classList.toggle('full',!!v.full);
   $('#ov').classList.toggle('full',!!v.full);
   $('#ov').classList.add('open');
+  $('#mx').classList.toggle('hide',!!v.full);
+  positionOv();
   $('.modal').scrollTop=0;
   if(v.bind)v.bind();
 }
 /* "Geri" və bağlama düymələri brauzerin tarixçəsi ilə işləyir: popstate hadisəsi pəncərəni özü bağlayır/dəyişir */
-function closeModalDom(){stack=[];$('#ov').classList.remove('open','full');$('.modal').classList.remove('full');$('#mb').innerHTML='';renderRecent()}
+/* tam ekran məhsul səhifəsi saytın başlığının (və menyunun) altından açılır, başlıq həmişə görünür */
+function positionOv(){
+  const ov=$('#ov'),full=ov.classList.contains('full')&&ov.classList.contains('open');
+  if(full){
+    const top=Math.max(0,$('header').getBoundingClientRect().bottom,$('#catnav').getBoundingClientRect().bottom);
+    ov.style.top=top+'px';
+  }else ov.style.top='';
+  document.body.style.overflow=full?'hidden':'';
+  document.body.classList.toggle('pfull',full);
+}
+window.addEventListener('resize',()=>{if($('#ov').classList.contains('open'))positionOv()});
+function closeModalDom(){stack=[];$('#ov').classList.remove('open','full');$('.modal').classList.remove('full');$('#mb').innerHTML='';positionOv();renderRecent()}
+/* başlıqdan (logo, axtarış, menyu) istifadə olunanda açıq pəncərə dərhal bağlanır; tarixçə yazısı düzəldilir */
+function dropModals(){if(!stack.length)return;closeModalDom();history.replaceState({modal:0,res:resFlag?snap():null},'')}
 function closeAll(){if(stack.length)history.go(-stack.length);else closeModalDom()}
 $('#mx').onclick=closeAll;
 $('#ov').onclick=e=>{if(e.target.id==='ov')closeAll()};
@@ -988,6 +1069,11 @@ function shared(e){
 }
 $('#mb').addEventListener('click',e=>{
   if(e.target.closest('[data-back]'))return history.back();
+  const inf=e.target.closest('[data-info]');
+  if(inf){view(()=>({html:'<h3>'+esc(inf.dataset.info)+'</h3><p>'+esc(INFO[inf.dataset.info])+'</p>'}));return}
+  if(e.target.closest('[data-act=allStores]')){view(allStoresView);return}
+  const ct=e.target.closest('[data-cat]');
+  if(ct){openResults({category:ct.dataset.cat});return}
   const wasFav=e.target.closest('[data-heart]');
   shared(e);
   /* sevimlilər pəncərəsində ürəyə basanda kart siyahıdan çıxsın */
@@ -1018,11 +1104,19 @@ function videoHtml(u){
   if(vm)return '<iframe src="https://player.vimeo.com/video/'+vm[1]+'" allow="fullscreen; picture-in-picture" allowfullscreen loading="lazy"></iframe>';
   return '<video src="'+esc(u)+'" controls playsinline preload="metadata"></video>';
 }
+const ICON_HEART='<svg viewBox="0 0 24 24"><path d="M12 20.5S3.5 15 3.5 9A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 8.5 2c0 6-8.5 11.5-8.5 11.5z"/></svg>';
+const ICON_PHONE='<svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>';
+const ICON_WA='<svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>';
+const ICON_STORE='<svg viewBox="0 0 24 24"><path d="M4 9l1.6-5h12.8L20 9"/><path d="M4 9a2.7 2.7 0 0 0 5.3 0 2.7 2.7 0 0 0 5.4 0A2.7 2.7 0 0 0 20 9"/><path d="M5 12v8h14v-8M10 20v-4.5h4V20"/></svg>';
+const ICON_SPARK='<svg viewBox="0 0 24 24"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 16v4M17 18h4"/></svg>';
+const ICON_PIN='<svg viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-11a7 7 0 0 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>';
+const favLabel=on=>ICON_HEART+'<span>'+(on?'Sevimlilərdədir':'Sevimlilərə əlavə et')+'</span>';
+const PFOOT='<footer><div class="footer-inner"><div><div class="footer-logo">ELFA</div><p>Alış-verişin yeni üzü.</p></div><div class="footer-links"><a data-info="Haqqımızda">Haqqımızda</a><a href="/seller-register.html">Satıcı ol</a><a data-info="Yardım">Yardım</a><a data-info="Əlaqə">Əlaqə</a></div></div></footer>';
 function contactHtml(p){
   const msg=encodeURIComponent('Salam, ELFA-da "'+p.name+'" məhsulu ilə maraqlanıram.');
   const wa=safeUrl(p.store_whatsapp_url);
-  const parts=(wa?'<a class="btn wa" href="'+esc(wa)+'?text='+msg+'" target="_blank" rel="noopener noreferrer">💬 Satıcıya yaz (WhatsApp)</a>':'')+
-    (p.store_phone?'<a class="btn alt" href="'+esc(telHref(p.store_phone))+'">📞 Zəng et: '+esc(fmtPhone(p.store_phone))+'</a>':'');
+  const parts=(wa?'<a class="btn wa" href="'+esc(wa)+'?text='+msg+'" target="_blank" rel="noopener noreferrer">'+ICON_WA+'<span>Satıcıya yaz (WhatsApp)</span></a>':'')+
+    (p.store_phone?'<a class="btn alt" href="'+esc(telHref(p.store_phone))+'">'+ICON_PHONE+'<span>'+esc(fmtPhone(p.store_phone))+'</span></a>':'');
   return parts||'<p style="margin-top:10px">Satıcının əlaqə məlumatı əlavə olunmayıb.</p>';
 }
 function productView(id){
@@ -1040,17 +1134,17 @@ function productView(id){
     const thumbs=media.length>1?'<div class="pd-thumbs">'+media.map((m,i)=>'<button type="button" class="pd-th'+(m.t==='v'?' v':'')+(i===0?' on':'')+'" data-gi="'+i+'" aria-label="'+(m.t==='v'?'Video':'Şəkil '+(i+1))+'">'+(m.t==='i'?'<img src="'+esc(m.u)+'" alt="">':'')+'</button>').join('')+'</div>':'';
     const nav=media.length>1?'<button type="button" class="pd-nav l" data-pd="-1" aria-label="Əvvəlki">‹</button><button type="button" class="pd-nav r" data-pd="1" aria-label="Növbəti">›</button><span class="pd-count" id="pdCount"></span>':'';
     return {full:true,html:
-      '<div class="pd"><div class="pd-gal"><div class="pd-main"><div class="pd-stage" id="pdStage"></div>'+nav+'</div>'+thumbs+'</div>'+
+      '<div class="pdp"><div class="pd"><div class="pd-gal"><div class="pd-main"><div class="pd-stage" id="pdStage"></div>'+nav+'</div>'+thumbs+'</div>'+
       '<div class="pd-info">'+
         (p.brand?'<span class="pd-brand">'+esc(p.brand)+'</span>':'')+
         '<h2>'+esc(p.name)+'</h2>'+
         '<div class="pd-price">'+money(p.price)+'</div>'+
-        '<span class="pd-stock'+(inStock?'':' out')+'">'+(inStock?'Stokda var · '+esc(p.stock)+' ədəd':'Stokda yoxdur')+'</span>'+
+        '<span class="pd-stock'+(inStock?'':' out')+'">'+(inStock?'Stokda var • '+esc(p.stock)+' ədəd':'Stokda yoxdur')+'</span>'+
         (p.description?'<p class="pd-desc">'+esc(p.description)+'</p>':'')+
         (rows.length?'<div class="pd-specs">'+rows.map(r=>'<div class="pd-spec"><span>'+esc(r[0])+'</span><b>'+esc(r[1])+'</b></div>').join('')+'</div>':'')+
         '<div class="pd-store" data-store="'+esc(p.store_id)+'"><div class="av">'+esc(initials(p.store_name))+'</div><div><b>'+esc(p.store_name)+'</b><small>'+esc(p.store_city||'Mağazaya bax')+'</small></div><i>›</i></div>'+
-        '<div class="pd-cta">'+contactHtml(p)+'<button class="btn alt" id="favInDetail">'+(fav?'♥ Sevimlilərdə':'♡ Sevimlilərə əlavə et')+'</button></div>'+
-      '</div></div><div class="pd-more" id="pdMore"></div>',
+        '<div class="pd-cta">'+contactHtml(p)+'<button class="btn out'+(fav?' on':'')+'" id="favInDetail">'+favLabel(fav)+'</button></div>'+
+      '</div></div><div id="pdMore"></div></div>'+PFOOT,
       bind(){
         loadMoreLikeThis(p);
         let i=0;
@@ -1081,7 +1175,7 @@ function productView(id){
           if(e.key==='ArrowRight')show(i+1);else if(e.key==='ArrowLeft')show(i-1);
         };
         document.addEventListener('keydown',window._pdKey);
-        $('#favInDetail').onclick=e=>{e.stopPropagation();toggleFav(p.id);$('#favInDetail').textContent=favs.includes(String(p.id))?'♥ Sevimlilərdə':'♡ Sevimlilərə əlavə et'};
+        $('#favInDetail').onclick=e=>{e.stopPropagation();toggleFav(p.id);const on=favs.includes(String(p.id));$('#favInDetail').innerHTML=favLabel(on);$('#favInDetail').classList.toggle('on',on)};
       }};
   };
 }
@@ -1268,24 +1362,40 @@ async function loadCatRows(){
   }catch(e){}
 }
 
+const heartBtn=p=>'<button type="button" class="hrt'+(favs.includes(String(p.id))?' on':'')+'" data-heart="'+esc(p.id)+'" aria-label="Sevimlilər">'+ICON_HEART+'</button>';
+const miniCard=p=>{
+  const u=safeUrl(p.image_url);
+  return '<article class="mcard" data-pid="'+esc(p.id)+'"><div class="mph">'+(u?'<img src="'+esc(u)+'" alt="" loading="lazy" onerror="this.style.display=\'none\'">':'')+'</div>'+
+    '<div class="mrow"><div class="mtx"><div class="mname">'+esc(p.name)+'</div><div class="mcat">'+esc(p.category||p.store_name||'')+'</div></div>'+heartBtn(p)+'</div>'+
+    '<div class="mprice">'+money(p.price)+'</div></article>';
+};
+const sideCard=p=>{
+  const u=safeUrl(p.image_url);
+  return '<article class="hcard" data-pid="'+esc(p.id)+'"><div class="htx"><div class="mname">'+esc(p.name)+'</div><div class="mcat">'+esc(p.category||p.store_name||'')+'</div><div class="mprice">'+money(p.price)+'</div></div>'+
+    '<div class="him">'+(u?'<img src="'+esc(u)+'" alt="" loading="lazy" onerror="this.style.display=\'none\'">':'')+'</div>'+heartBtn(p)+'</article>';
+};
+const storeMini=s=>'<div class="sc2" data-store="'+esc(s.id)+'"><div class="sc2top">'+logoHtml(s)+'<div class="sc2tx"><b>'+esc(s.store_name)+'</b><small>'+esc(s.category||'')+'</small>'+(s.city?'<small>'+ICON_PIN+esc(s.city)+'</small>':'')+'</div></div><span class="sc2btn">Mağazaya bax →</span></div>';
+const pSec=(icon,title,link,body)=>'<section class="psec"><div class="pshead"><div class="psl">'+icon+'<h3>'+esc(title)+'</h3></div>'+link+'</div>'+body+'</section>';
 async function loadMoreLikeThis(p){
   const box=$('#pdMore');if(!box)return;
-  const part=(title,rows)=>rows.length?'<h3>'+esc(title)+'</h3><div class="hscroll">'+rows.map(cardHtml).join('')+'</div>':'';
-  let a=[],b=[];
+  const other=x=>String(x.store_id)!==String(p.store_id);
+  let a=[],c=[];
   try{
-    if(p.store_id){
-      const r=await getJSON('/api/products?store_id='+encodeURIComponent(p.store_id)+'&limit=13');
-      a=r.filter(x=>x.id!==p.id).slice(0,10);
-    }
-    if(p.category){
-      const r=await getJSON('/api/products?category='+encodeURIComponent(p.category)+'&limit=17');
-      const seen=new Set(a.map(x=>x.id));
-      b=r.filter(x=>x.id!==p.id&&!seen.has(x.id)).slice(0,10);
-    }
+    if(p.store_id){const r=await getJSON('/api/products?store_id='+encodeURIComponent(p.store_id)+'&limit=13');a=r.filter(x=>x.id!==p.id).slice(0,4)}
   }catch(e){}
+  try{
+    let r=p.category?await getJSON('/api/products?category='+encodeURIComponent(p.category)+'&limit=40'):[];
+    c=r.filter(other).slice(0,4);
+    if(!c.length){r=await getJSON('/api/products?limit=40');c=r.filter(other).slice(0,4)}
+  }catch(e){}
+  if(!STORES.length){try{STORES=await getJSON('/api/stores')}catch(e){}}
+  const stores=STORES.filter(s=>String(s.id)!==String(p.store_id)).slice(0,3);
   if(!box.isConnected||$('#pdMore')!==box)return;
-  [...a,...b].forEach(x=>{cache[x.id]=x});
-  box.innerHTML=part('Mağazanın digər məhsulları',a)+part('Oxşar məhsullar',b);
+  [...a,...c].forEach(x=>{cache[x.id]=x});
+  box.innerHTML=
+    (a.length?pSec('<i class="sicon">'+ICON_STORE+'</i>','Bu mağazanın digər məhsulları','<button type="button" class="see" data-store="'+esc(p.store_id)+'">Bütün məhsullara bax →</button>','<div class="pgrid">'+a.map(miniCard).join('')+'</div>'):'')+
+    (stores.length?pSec('<i class="sicon">'+ICON_STORE+'</i>','Digər mağazalar','<button type="button" class="see" data-act="allStores">Bütün mağazalar →</button>','<div class="sgrid">'+stores.map(storeMini).join('')+'</div>'):'')+
+    (c.length?pSec('<i class="sicon plain">'+ICON_SPARK+'</i>','Digər mağazalardan oxşar məhsullar',p.category?'<button type="button" class="see" data-cat="'+esc(p.category)+'">Bütün oxşar məhsullara bax →</button>':'','<div class="pgrid">'+c.map(sideCard).join('')+'</div>'):'');
 }
 
 /* avtomatik yüklənmə: səhifənin sonuna çatanda növbəti məhsullar özü gəlir */
