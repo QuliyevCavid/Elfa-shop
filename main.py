@@ -1023,13 +1023,14 @@ def options():
 @app.get("/api/filters")
 def filters(category: Optional[str] = None):
     with db() as con:
-        rows = approved_rows(con)
+        all_rows = approved_rows(con)
+    rows = all_rows
     if category:
         rows = [r for r in rows if fold(r["category"]) == fold(category)]
 
-    def distinct(col):
+    def distinct(col, src=None):
         seen = {}
-        for r in rows:
+        for r in (rows if src is None else src):
             v = (r[col] or "").strip()
             if v and fold(v) not in seen:
                 seen[fold(v)] = v
@@ -1039,6 +1040,8 @@ def filters(category: Optional[str] = None):
     return {
         "brands": distinct("brand"),
         "materials": distinct("material"),
+        # bütün (süzülməmiş) kateqoriyalar: satıcıların özü yazdıqları da daxildir
+        "categories": distinct("category", all_rows),
         "price": {
             "min": min(prices) if prices else None,
             "max": max(prices) if prices else None,
