@@ -131,8 +131,6 @@ header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0
 .tarrow{position:absolute;right:10px;bottom:10px;z-index:2;width:22px;height:22px;border-radius:50%;background:#fff;color:var(--brand);display:flex;align-items:center;justify-content:center;font-size:12px;font-style:normal}
 
 /* nəticələr */
-.gback{display:inline-flex;align-items:center;gap:6px;background:none;font-size:12px;font-weight:700;margin-bottom:10px;padding:0}
-.gback:hover{color:var(--brand)}
 .filter-toggle{display:none;background:var(--brand);color:#fff;padding:10px 18px;border-radius:22px;font-size:12px;font-weight:700}
 .shop{display:grid;grid-template-columns:1fr;gap:22px;align-items:start}
 .shop.searching{grid-template-columns:250px 1fr}
@@ -157,7 +155,6 @@ footer{margin-top:56px;background:var(--brand);color:#fff;padding:40px 0}
 .ov.open{display:flex}
 .modal{background:#fff;border-radius:16px;width:min(1000px,100%);max-height:92vh;overflow:auto;padding:26px;position:relative}
 .modal .x{position:absolute;right:14px;top:10px;background:none;font-size:26px;z-index:3}
-.modal .gback{margin-bottom:14px}
 .modal h3{font-size:20px;margin-bottom:14px;font-weight:700}
 .modal p{font-size:13px;line-height:1.6;color:#444;font-weight:500}
 .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:16px}
@@ -250,12 +247,10 @@ footer{margin-top:56px;background:var(--brand);color:#fff;padding:40px 0}
 .modal.full .detail{max-width:1400px;margin:0 auto;grid-template-columns:1.2fr 1fr}
 .modal.full .detail .photo{min-height:75vh}
 .modal.full .detail .photo img{object-fit:contain}
-.modal.full .gback{position:absolute;left:5%;top:16px;margin:0}
 @media(max-width:800px){
  .modal.full{padding:56px 16px 24px}
  .modal.full .detail{grid-template-columns:1fr}
  .modal.full .detail .photo{min-height:50vh}
- .modal.full .gback{left:16px}
 }
 
 /* ===== məhsul səhifəsi (yeni dizayn) ===== */
@@ -323,10 +318,6 @@ footer{margin-top:56px;background:var(--brand);color:#fff;padding:40px 0}
 .pill.ghost:hover{background:var(--brand);color:#fff}
 .hero-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
 .hero-chips span{background:rgba(255,255,255,.7);border-radius:16px;padding:6px 12px;font-size:10.5px;font-weight:700}
-.statsbar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:18px auto 0}
-.statsbar div{background:#fff;border-radius:12px;padding:14px 16px;text-align:center;border:1px solid var(--line)}
-.statsbar b{display:block;font-size:22px;font-weight:800;letter-spacing:-.5px}
-.statsbar span{font-size:11px;color:var(--muted);font-weight:600}
 .dept i{transition:.2s}
 .dept:hover i{transform:translateY(-3px)}
 .store{transition:transform .2s,box-shadow .2s,border-color .2s}
@@ -371,7 +362,7 @@ footer{margin-top:56px;background:var(--brand);color:#fff;padding:40px 0}
  .totop{bottom:76px}
  .sellcta-in{padding:26px 22px}
 }
-@media(max-width:420px){.statsbar b{font-size:18px}.hscroll{grid-auto-columns:150px}}
+@media(max-width:420px){.hscroll{grid-auto-columns:150px}}
 
 /* ===== sıralama menyusu ===== */
 .head-tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
@@ -446,11 +437,6 @@ footer{margin-top:56px;background:var(--brand);color:#fff;padding:40px 0}
       </div>
     </section>
 
-    <section class="section statsbar hide" id="statsBar">
-      <div><b id="stStores">0</b><span>Mağaza</span></div>
-      <div><b id="stProducts">0</b><span>Məhsul</span></div>
-      <div><b id="stCats">0</b><span>Şöbə</span></div>
-    </section>
 
     <section class="section hide" id="recentSec">
       <div class="section-head"><div><h2>Son baxdığınız məhsullar</h2><p>Qaldığınız yerdən davam edin</p></div><button class="see" id="clearRecent">Təmizlə</button></div>
@@ -521,7 +507,6 @@ footer{margin-top:56px;background:var(--brand);color:#fff;padding:40px 0}
   <section class="section hide" id="resultsView">
     <div class="section-head">
       <div>
-        <button class="gback" id="pageBack" aria-label="Geri"></button>
         <h2 id="prodTitle">Bütün məhsullar</h2>
       </div>
       <div class="head-tools">
@@ -603,8 +588,6 @@ async function getJSON(path){
   return r.json();
 }
 const ICON_CHAT='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>';
-const backInner=k=>k?'← Geri':ICON_BACK+'<span>Geri</span>';
-const ICON_BACK='<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>';
 
 const INFO={
  "Haqqımızda":"ELFA — məhsulları kəşf etməyə və satıcı ilə birbaşa əlaqə saxlamağa imkan verən yeni nəsil marketplace-dir.",
@@ -627,6 +610,10 @@ const DEPTS=[
 const PAGE=24;
 const EMPTY_F={q:'',category:'',store_category:'',brand:'',gender:'',age:'',size:'',color:'',material:'',size_class:'',price_min:'',price_max:''};
 let F={...EMPTY_F}, showAll=false, SORT='';
+let ALLCATS=[];
+const foldJs=x=>String(x||'').trim().toLocaleLowerCase('az');
+/* satıcının özü yazdığı (standart siyahıda olmayan) kateqoriyalar */
+const customCats=()=>{const std=new Set((OPT.categories||[]).map(foldJs));return ALLCATS.filter(c=>!std.has(foldJs(c)))};
 let OPT={categories:[],genders:[],age_groups:[],clothing_sizes:[],shoe_sizes:[],colors:[],size_classes:[]};
 let list=[],total=0,loadSeq=0;
 const cache={};
@@ -634,7 +621,7 @@ let STORES=[];
 let favs=LS.g('elfa_favs',[]).map(String);
 const activeCount=()=>Object.values(F).filter(Boolean).length;
 const inResults=()=>showAll||activeCount()>0;
-let resFlag=false,popping=false,loadingMore=false,IO=null,TOTAL_PRODUCTS=0;
+let resFlag=false,popping=false,loadingMore=false,IO=null;
 const snap=()=>({F:{...F},showAll,sort:SORT});
 
 /* ---------- seçim siyahıları ---------- */
@@ -662,6 +649,11 @@ async function loadBrandMaterial(want){
     const f=await getJSON('/api/filters'+(F.category?'?category='+encodeURIComponent(F.category):''));
     fillSelect('#fBrand',f.brands||[],true);
     fillSelect('#fMaterial',f.materials||[],true);
+    if(Array.isArray(f.categories)){
+      ALLCATS=f.categories;
+      customCats().forEach(c=>addOpt('fCategory',c));
+      if(!$('#megaPanel').classList.contains('hide'))renderMega();
+    }
     if(want){
       if(want.brand&&(f.brands||[]).includes(want.brand))$('#fBrand').value=want.brand;
       if(want.material&&(f.materials||[]).includes(want.material))$('#fMaterial').value=want.material;
@@ -807,8 +799,6 @@ $('#clearF').onclick=async()=>{
   Object.keys(FMAP).forEach(id=>$('#'+id).value='');
   syncFilterUI();await loadBrandMaterial();loadProducts(true);
 };
-$('#pageBack').innerHTML=backInner();
-$('#pageBack').onclick=clearAll;
 $('#fToggle').onclick=()=>$('#filters').classList.toggle('open');
 
 /* axtarış */
@@ -890,7 +880,9 @@ let menuTab='Qadın';
 function renderMega(){
   const side=Object.keys(MENU).map(k=>'<button type="button" class="mega-tab'+(k===menuTab?' on':'')+'" data-menu-tab="'+esc(k)+'">'+esc(k)+' <span>›</span></button>').join('');
   const link=(i,g)=>'<a href="#" data-subcat="'+esc(i)+'" data-group="'+esc(g)+'">'+esc(i)+'</a>';
-  const cols=(MENU[menuTab]||[]).map(g=>{
+  /* "Digər" şöbəsində standart maddənin altına satıcıların yazdığı kateqoriyalar əlavə olunur */
+  const groups=(MENU[menuTab]||[]).map((g,idx)=>menuTab==='Digər'&&idx===0?{...g,i:[...g.i,...customCats()]}:g);
+  const cols=groups.map(g=>{
     const links=g.i.map(i=>link(i,g.t)).join('');
     const extras=g.x.length?'<div class="mega-extra" hidden>'+g.x.map(i=>link(i,g.t)).join('')+'</div><button type="button" class="mega-more">Daha çox göstər ↓</button>':'';
     return '<div class="mega-group"><h4><a href="#" data-subcat="'+esc(g.t)+'">'+esc(g.t)+' →</a></h4>'+links+extras+'</div>';
@@ -920,8 +912,10 @@ $('#megaList').addEventListener('click',e=>{
   /* Menyu maddəsi serverdəki real kateqoriyadırsa filtr kimi, deyilsə axtarış sözü kimi işləyir.
      Əks halda "Paltar", "Şampun" kimi maddələr həmişə boş nəticə verərdi. */
   const sub=a.dataset.subcat,group=a.dataset.group||'';
-  const patch={store_category:menuTab};
-  if(OPT.categories.includes(sub))patch.category=sub;
+  const custom=customCats().includes(sub);
+  const patch=custom?{category:sub}:{store_category:menuTab};
+  if(custom){/* satıcının özü yazdığı kateqoriya: birbaşa filtr */}
+  else if(OPT.categories.includes(sub))patch.category=sub;
   else{
     if(group&&OPT.categories.includes(group))patch.category=group;
     patch.q=sub;
@@ -959,17 +953,14 @@ function toggleFav(id){
 }
 saveFavs();
 
-/* ---------- pəncərə və ← Geri ---------- */
+/* ---------- pəncərələr (bağlamaq: ✕, Esc, kənara basmaq və ya brauzerin Geri düyməsi) ---------- */
 let stack=[];
 function view(fn){stack.push(fn);history.pushState({modal:stack.length,res:resFlag?snap():null},'');renderView()}
 function renderView(){
   const fn=stack[stack.length-1];
   if(!fn){closeModalDom();return}
   const v=fn();
-  const backBtn='<button class="gback" data-back aria-label="Geri">'+backInner(v.keepBack)+'</button>';
-  /* ✕ yalnız sevimlilər pəncərəsində qalır; qalan ekranlarda tək "Geri" düyməsi var */
-  $('#mx').classList.toggle('hide',!v.keepX);
-  $('#mb').innerHTML=backBtn+v.html;
+  $('#mb').innerHTML=v.html;
   $('.modal').classList.toggle('full',!!v.full);
   $('#ov').classList.toggle('full',!!v.full);
   $('#ov').classList.add('open');
@@ -977,7 +968,6 @@ function renderView(){
   if(v.bind)v.bind();
 }
 /* "Geri" və bağlama düymələri brauzerin tarixçəsi ilə işləyir: popstate hadisəsi pəncərəni özü bağlayır/dəyişir */
-function back(){if(stack.length)history.back()}
 function closeModalDom(){stack=[];$('#ov').classList.remove('open','full');$('.modal').classList.remove('full');$('#mb').innerHTML='';renderRecent()}
 function closeAll(){if(stack.length)history.go(-stack.length);else closeModalDom()}
 $('#mx').onclick=closeAll;
@@ -994,7 +984,6 @@ function shared(e){
   return false;
 }
 $('#mb').addEventListener('click',e=>{
-  if(e.target.closest('[data-back]'))return back();
   const wasFav=e.target.closest('[data-heart]');
   shared(e);
   /* sevimlilər pəncərəsində ürəyə basanda kart siyahıdan çıxsın */
@@ -1126,7 +1115,6 @@ async function loadStores(){
   sc.innerHTML=STORES.map(storeCard).join('');
   tl.innerHTML=STORES.map(storeTile).join('');
   updateArrows();
-  updateStats();
 }
 const allStoresView=()=>({
   html:'<h3>Bütün mağazalar</h3>'+(STORES.length?'<div class="grid3">'+STORES.map(storeCard).join('')+'</div>':'<p>Hələ təsdiqlənmiş mağaza yoxdur.</p>')
@@ -1161,7 +1149,6 @@ function storeView(id){
 
 /* ---------- sevimlilər pəncərəsi ---------- */
 $('#favBtn').onclick=()=>view(()=>({
-  keepBack:true,keepX:true,
   html:'<h3>Sevimlilər</h3><div id="favBox"><p>Yüklənir...</p></div>',
   async bind(){
     if(!favs.length){$('#favBox').innerHTML='<p>Hələ sevimli məhsulunuz yoxdur. ♡ düyməsinə basın.</p>';return}
@@ -1241,12 +1228,6 @@ const ensureOpt=(id,v)=>{if(['fCategory','fColor','fSizeClass'].includes(id))add
 /* satıcıların özü yazdığı kateqoriya/rəng/boyut filtrlərdə də görünsün */
 function mergeFilterValues(rows){rows.forEach(p=>{addOpt('fCategory',p.category);addOpt('fColor',p.color);addOpt('fSizeClass',p.size_class)})}
 
-function updateStats(){
-  const s=STORES.length,pn=TOTAL_PRODUCTS;
-  $('#statsBar').classList.toggle('hide',!s&&!pn);
-  $('#stStores').textContent=s;$('#stProducts').textContent=pn;$('#stCats').textContent=DEPTS.length;
-}
-
 const RKEY='elfa_recent';
 function pushRecent(p){
   const l=LS.g(RKEY,[]).map(String).filter(x=>x!==String(p.id));
@@ -1273,8 +1254,6 @@ async function loadCatRows(){
     const r=await fetch('/api/products?limit=100');
     if(!r.ok)return;
     const rows=await r.json();
-    const t=r.headers.get('X-Total-Count');
-    TOTAL_PRODUCTS=t?(Number(t)||rows.length):rows.length;updateStats();
     rows.forEach(p=>{cache[p.id]=p});
     mergeFilterValues(rows);
     const g={};
