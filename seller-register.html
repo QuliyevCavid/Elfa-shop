@@ -16,8 +16,6 @@ header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0
 .nav{width:min(1240px,94%);height:70px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:16px}
 .nl{display:flex;align-items:center;gap:18px}
 .logo{font-size:26px;font-weight:400;letter-spacing:8px}
-.back{display:inline-flex;align-items:center;gap:8px;font-size:14px;background:none;color:#171717}
-.back:hover{color:#777}
 .burger{display:none;background:none;width:38px;height:38px;border-radius:10px;align-items:center;justify-content:center}
 .burger:hover{background:#f3f2ee}
 .burger svg{width:22px;height:22px;stroke:#171717;fill:none;stroke-width:1.7;stroke-linecap:round}
@@ -184,19 +182,15 @@ body.noside .side{display:none}
 <body>
 <div class="topbar">ELFA-DA SATICI OL · MƏHSULLARINI MİNLƏRLƏ ALICIYA GÖSTƏR</div>
 <header>
-  
-<div class="nav">
-  <div class="nl">
-    <a class="back" id="backBtn" href="/">← Geri</a>
-    <a class="logo" href="/elfa.html">ELFA</a>
-    <button class="burger" id="burger" aria-label="Menyu">
-      <svg viewBox="0 0 24 24">
-        <path d="M4 7h16M4 12h16M4 17h16"/>
-      </svg>
-    </button>
-  </div>
-</div>
-
+  <div class="nav">
+    <div class="nl">
+      <a class="logo" href="/elfa.html">ELFA</a>
+      <button class="burger" id="burger" aria-label="Menyu">
+        <svg viewBox="0 0 24 24">
+          <path d="M4 7h16M4 12h16M4 17h16"/>
+        </svg>
+      </button>
+    </div>
     <div class="hu" id="hUser"><div class="av sm" id="hAv">E</div><span class="nm" id="hName">Mağaza</span></div>
   </div>
 </header>
@@ -252,9 +246,11 @@ body.noside .side{display:none}
     <div id="loginView" class="hide">
       <h2>Satıcı girişi</h2>
       <p class="sub">Qeydiyyatda istifadə etdiyiniz e-poçt və şifrə ilə daxil olun.</p>
-      <div class="f"><label for="lem">E-poçt</label><input id="lem" type="email" placeholder="ad@mail.com" autocomplete="email"></div>
-      <div class="f"><label for="lpw">Şifrə</label><input id="lpw" type="password" placeholder="Şifrə" autocomplete="current-password"></div>
-      <button class="btn" id="loginBtn">Daxil ol</button>
+      <form id="loginForm" novalidate>
+        <div class="f"><label for="lem">E-poçt</label><input id="lem" type="email" placeholder="ad@mail.com" autocomplete="email"></div>
+        <div class="f"><label for="lpw">Şifrə</label><input id="lpw" type="password" placeholder="Şifrə" autocomplete="current-password"></div>
+        <button class="btn" id="loginBtn" type="submit">Daxil ol</button>
+      </form>
       <p class="hint" style="margin-top:12px">Şifrəni unutmusunuzsa, ELFA ilə əlaqə saxlayın.</p>
     </div>
 
@@ -420,7 +416,6 @@ const BUST=Date.now();
 const bu=u=>/^\/api\/images\/\d+$/.test(u||'')?u+'?v='+BUST:(u||'');
 let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2600)}
 
-$('#backBtn').onclick=()=>{ if(history.length>1) history.back(); else location.href='/elfa.html'; };
 $('#goHome').onclick=()=>location.href='/elfa.html';
 $('#burger').onclick=()=>document.body.classList.toggle('noside');
 
@@ -529,7 +524,8 @@ $('#regForm').addEventListener('submit',async e=>{
 });
 
 /* ---------- Giriş / çıxış ---------- */
-$('#loginBtn').onclick=async()=>{
+$('#loginForm').addEventListener('submit',async e=>{
+  e.preventDefault();
   const email=$('#lem').value.trim().toLowerCase(),pw=$('#lpw').value;
   if(!email||!pw) return toast('E-poçt və şifrəni yazın');
   const btn=$('#loginBtn');btn.disabled=true;
@@ -541,7 +537,7 @@ $('#loginBtn').onclick=async()=>{
     openDash();
   }catch(err){toast(err.message||'Giriş zamanı xəta baş verdi')}
   finally{btn.disabled=false}
-};
+});
 $('#logout').onclick=async()=>{
   const s=session();
   try{if(s) await fetch('/api/seller/logout',{method:'POST',headers:auth()})}catch{}
