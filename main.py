@@ -1300,9 +1300,28 @@ def admin_page():
     return page("admin.html")
 
 
-@app.get("/seller-register.html")
-def seller_page():
-    return page("seller-register.html")
+@app.get("/manifest.json", include_in_schema=False)
+def manifest():
+    file_path = BASE_DIR / "manifest.json"
+    if not file_path.is_file():
+        raise HTTPException(404, "Fayl tapılmadı")
+    return FileResponse(file_path, media_type="application/manifest+json")
+
+
+@app.get("/icon-192.png", include_in_schema=False)
+def icon_192():
+    file_path = BASE_DIR / "icon-192.png"
+    if not file_path.is_file():
+        raise HTTPException(404, "Fayl tapılmadı")
+    return FileResponse(file_path, media_type="image/png")
+
+
+@app.get("/icon-512.png", include_in_schema=False)
+def icon_512():
+    file_path = BASE_DIR / "icon-512.png"
+    if not file_path.is_file():
+        raise HTTPException(404, "Fayl tapılmadı")
+    return FileResponse(file_path, media_type="image/png")
 
 
 # Şəkil, CSS və s. üçün: layihə qovluğunda "static" qovluğu yaradın (məs. static/hero.jpg -> /static/hero.jpg)
