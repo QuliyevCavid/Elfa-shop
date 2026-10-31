@@ -1315,13 +1315,24 @@ def icon_192():
         raise HTTPException(404, "Fayl tapılmadı")
     return FileResponse(file_path, media_type="image/png")
 
-
 @app.get("/icon-512.png", include_in_schema=False)
 def icon_512():
     file_path = BASE_DIR / "icon-512.png"
     if not file_path.is_file():
         raise HTTPException(404, "Fayl tapılmadı")
     return FileResponse(file_path, media_type="image/png")
+
+
+@app.get("/sw.js", include_in_schema=False)
+def service_worker():
+    file_path = BASE_DIR / "sw.js"
+    if not file_path.is_file():
+        raise HTTPException(404, "Fayl tapılmadı")
+    return FileResponse(
+        file_path,
+        media_type="application/javascript",
+        headers={"Service-Worker-Allowed": "/", "Cache-Control": "no-cache"},
+    )
 
 
 # Şəkil, CSS və s. üçün: layihə qovluğunda "static" qovluğu yaradın (məs. static/hero.jpg -> /static/hero.jpg)
