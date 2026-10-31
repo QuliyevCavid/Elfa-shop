@@ -8,6 +8,11 @@
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#263B35">
 <link rel="apple-touch-icon" href="/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ELFA">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="format-detection" content="telephone=no">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -452,6 +457,24 @@ body.pfull .totop{display:none}
  .psec{padding:16px}
  .psl h3{font-size:15px}
  .modal.full footer{padding-bottom:88px}
+}
+
+/* ===== iPhone / iOS düzəlişləri ===== */
+html{-webkit-text-size-adjust:100%}
+*{-webkit-tap-highlight-color:transparent}
+a,button,[data-info],[data-store],[data-cat],[data-act],[data-subcat],[data-dept],[data-bn]{touch-action:manipulation}
+[data-info],[data-store],[data-cat],[data-act],[data-subcat],[data-dept],[data-bn],.store,.pcard,.tile,.pd-store{cursor:pointer}
+input:not([type=checkbox]):not([type=radio]){-webkit-appearance:none;appearance:none}
+@media(max-width:800px){
+ input,select,textarea{font-size:16px!important}
+}
+@supports(height:100dvh){
+ .filters{max-height:calc(100dvh - 110px)}
+ .modal{max-height:92dvh}
+ .pd-main{max-height:76dvh}
+ @media(max-width:600px){.modal{max-height:96dvh}}
+ @media(max-width:650px){.megapanel-in{max-height:76dvh}}
+ @media(max-width:800px){.pd-main{max-height:none}}
 }
 </style>
 
