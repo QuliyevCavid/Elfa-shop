@@ -1415,7 +1415,7 @@ $('#bnav').addEventListener('click',e=>{
   const b=e.target.closest('[data-bn]');if(!b)return;
   const k=b.dataset.bn;
   if(k==='home'){if(inResults()||stack.length)clearAll();else window.scrollTo({top:0,behavior:'smooth'})}
-  else if(k==='cats'){window.scrollTo({top:0});toggleMega(true)}
+  else if(k==='cats'){e.stopPropagation();window.scrollTo({top:0});toggleMega(true)}
   else if(k==='search'){window.scrollTo({top:0});$('#q').focus()}
   else if(k==='fav')$('#favBtn').click();
 });
@@ -1466,24 +1466,11 @@ window.addEventListener('popstate',e=>{
   renderRecent();
   loadOptions();
 })();
- @app.get("/icon-512.png", include_in_schema=False)
-def icon_512():
-    file_path = BASE_DIR / "icon-512.png"
-    if not file_path.is_file():
-        raise HTTPException(404, "Fayl tapılmadı")
-    return FileResponse(file_path, media_type="image/png")
 
-
-@app.get("/sw.js", include_in_schema=False)
-def service_worker():
-    file_path = BASE_DIR / "sw.js"
-    if not file_path.is_file():
-        raise HTTPException(404, "Fayl tapılmadı")
-    return FileResponse(
-        file_path,
-        media_type="application/javascript",
-        headers={"Service-Worker-Allowed": "/", "Cache-Control": "no-cache"},
-    )
+/* tətbiq kimi quraşdırma (service worker) */
+if('serviceWorker' in navigator){
+  window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){})});
+}
 </script>
 </body>
 </html>
