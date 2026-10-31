@@ -1278,6 +1278,7 @@ def admin_delete_product(pid: int):
             drop_image(con, old["seller_id"], u)
     return {"ok": True}
 
+
 # ---------------------------------------------------------------
 # Səhifələr və statik fayllar
 # ---------------------------------------------------------------
@@ -1286,6 +1287,13 @@ def page(name: str):
     if not file_path.is_file():
         raise HTTPException(404, "Səhifə tapılmadı")
     return FileResponse(file_path)
+
+
+def asset(name: str, media_type: str, headers: Optional[dict] = None):
+    file_path = BASE_DIR / name
+    if not file_path.is_file():
+        raise HTTPException(404, "Fayl tapılmadı")
+    return FileResponse(file_path, media_type=media_type, headers=headers)
 
 
 @app.get("/")
@@ -1299,38 +1307,32 @@ def admin_page():
     return page("admin.html")
 
 
+@app.get("/seller-register.html")
+def seller_page():
+    return page("seller-register.html")
+
+
 @app.get("/manifest.json", include_in_schema=False)
 def manifest():
-    file_path = BASE_DIR / "manifest.json"
-    if not file_path.is_file():
-        raise HTTPException(404, "Fayl tapılmadı")
-    return FileResponse(file_path, media_type="application/manifest+json")
+    return asset("manifest.json", "application/manifest+json")
 
 
 @app.get("/icon-192.png", include_in_schema=False)
 def icon_192():
-    file_path = BASE_DIR / "icon-192.png"
-    if not file_path.is_file():
-        raise HTTPException(404, "Fayl tapılmadı")
-    return FileResponse(file_path, media_type="image/png")
+    return asset("icon-192.png", "image/png")
+
 
 @app.get("/icon-512.png", include_in_schema=False)
 def icon_512():
-    file_path = BASE_DIR / "icon-512.png"
-    if not file_path.is_file():
-        raise HTTPException(404, "Fayl tapılmadı")
-    return FileResponse(file_path, media_type="image/png")
+    return asset("icon-512.png", "image/png")
 
 
 @app.get("/sw.js", include_in_schema=False)
 def service_worker():
-    file_path = BASE_DIR / "sw.js"
-    if not file_path.is_file():
-        raise HTTPException(404, "Fayl tapılmadı")
-    return FileResponse(
-        file_path,
-        media_type="application/javascript",
-        headers={"Service-Worker-Allowed": "/", "Cache-Control": "no-cache"},
+    return asset(
+        "sw.js",
+        "application/javascript",
+        {"Service-Worker-Allowed": "/", "Cache-Control": "no-cache"},
     )
 
 
