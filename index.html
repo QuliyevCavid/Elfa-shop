@@ -1019,9 +1019,12 @@ function toggleMega(force){
     const was=!ov.classList.contains('hide');
     const open=force===undefined?!was:!!force;
     if(open===was)return;
-    ov.classList.toggle('hide',!open);
-    document.body.style.overflow=open?'hidden':'';
-    if(open){covG=0;renderCov()}
+    if(!open){covClose();return}
+    ov.classList.remove('hide');
+    document.body.style.overflow='hidden';
+    covG=0;renderCov();
+    /* telefonun/brauzerin Geri düyməsi tətbiqdən çıxmasın, yalnız menyunu bağlasın */
+    try{history.pushState({...(history.state||{modal:0,res:null}),cov:1},'')}catch(e){}
     return;
   }
   const open=force===undefined?p.classList.contains('hide'):!!force;
@@ -1061,6 +1064,19 @@ function renderCov(){
   const on=tabs.querySelector('.on');
   if(on)tabs.scrollLeft=on.offsetLeft-(tabs.clientWidth-on.offsetWidth)/2;
 }
+function covHide(){
+  const ov=$('#catOv');
+  if(ov)ov.classList.add('hide');
+  document.body.style.overflow='';
+}
+function covClose(){
+  const ov=$('#catOv');
+  if(!ov||ov.classList.contains('hide'))return;
+  covHide();
+  if(history.state&&history.state.cov)history.back();
+}
+/* Geri düyməsi: tarixçədəki menyu yazısı artıq silinib, menyunu bağlamaq kifayətdir */
+window.addEventListener('popstate',()=>{const ov=$('#catOv');if(ov&&!ov.classList.contains('hide'))covHide()});
 function covClick(e){
   e.stopPropagation();/* menyunun içində basanda "kənara basıldı" sayılmasın */
   if(e.target.closest('[data-cov-x]')){toggleMega(false);return}
@@ -1081,13 +1097,21 @@ function goSub(sub,group){
     if(group&&OPT.categories.includes(group))patch.category=group;
     patch.q=sub;
   }
-  toggleMega(false);
-  openResults(patch);
+  const hadCov=!!(history.state&&history.state.cov);
+  covHide();
+  if(hadCov){
+    /* əvvəlcə menyunun tarixçə yazısını geri qaytarırıq, sonra nəticələr yeni yazı kimi açılır */
+    let done=false;
+    const run=()=>{if(done)return;done=true;openResults(patch)};
+    window.addEventListener('popstate',run,{once:true});
+    setTimeout(run,350);
+    history.back();
+  }else openResults(patch);
 }
 /* ekran böyüyəndə (telefon yan çevriləndə, kompüter) tam ekran menyu bağlansın */
 window.addEventListener('resize',()=>{
   const ov=$('#catOv');
-  if(ov&&!ov.classList.contains('hide')&&!isPhone()){ov.classList.add('hide');document.body.style.overflow=''}
+  if(ov&&!ov.classList.contains('hide')&&!isPhone())covClose();
 });
 $('#megaBtn').onclick=e=>{e.stopPropagation();toggleMega()};
 $('#megaList').addEventListener('click',e=>{
