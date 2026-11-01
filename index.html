@@ -473,26 +473,35 @@ input:not([type=checkbox]):not([type=radio]){-webkit-appearance:none;appearance:
  .modal{max-height:92dvh}
  .pd-main{max-height:76dvh}
  @media(max-width:600px){.modal{max-height:96dvh}}
+ @media(max-width:650px){.megapanel-in{max-height:76dvh}}
  @media(max-width:800px){.pd-main{max-height:none}}
 }
 
-/* ===== mobil mega menyu düzəlişi (Android + iPhone) ===== */
-@media(max-width:650px){
- .megapanel-in{
-  padding:0 0 14px;
-  max-height:calc(100vh - 330px);
-  max-height:calc(100dvh - 330px);
-  overflow-y:auto;
-  -webkit-overflow-scrolling:touch;
-  overscroll-behavior:contain;
-  scrollbar-width:none;
-  -ms-overflow-style:none;
- }
- .megapanel-in::-webkit-scrollbar,
- .mega-side::-webkit-scrollbar{display:none;width:0;height:0}
- .mega-side{scrollbar-width:none;-ms-overflow-style:none}
- .mega-cols{padding-bottom:70px}
-}
+/* ===== telefonda tam ekran kateqoriya menyusu ===== */
+.cov{position:fixed;inset:0;z-index:70;background:#fff;display:flex;flex-direction:column;height:100vh;height:100dvh;padding-top:env(safe-area-inset-top);animation:covIn .18s ease-out}
+@keyframes covIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+:where(.cov) button{border:0;padding:0;font-family:inherit;cursor:pointer;-webkit-appearance:none;appearance:none}
+.cov-top{flex:none;height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;border-bottom:1px solid var(--line)}
+.cov-logo{font-size:24px;font-weight:800;letter-spacing:6px;color:var(--brand)}
+.cov-x{width:38px;height:38px;border-radius:50%;background:var(--soft);display:flex;align-items:center;justify-content:center}
+.cov-x svg{width:16px;height:16px;fill:none;stroke:var(--brand);stroke-width:2.4;stroke-linecap:round}
+.cov-tabs{flex:none;display:flex;overflow-x:auto;padding:0 8px;border-bottom:1px solid var(--line);scrollbar-width:none;-ms-overflow-style:none}
+.cov-tabs::-webkit-scrollbar{display:none}
+.cov-tab{flex:none;padding:15px 12px 12px;background:none;font-size:13px;font-weight:600;color:var(--muted);white-space:nowrap;border-bottom:3px solid transparent}
+.cov-tab.on{color:var(--brand);font-weight:800;border-bottom-color:var(--accent)}
+.cov-body{flex:1;min-height:0;display:flex}
+.cov-side{flex:0 0 108px;width:108px;background:var(--bg);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;padding-bottom:24px}
+.cov-side::-webkit-scrollbar,.cov-grid::-webkit-scrollbar{display:none}
+.cov-g{display:block;width:100%;text-align:left;padding:15px 10px 15px 12px;background:none;font-size:12px;font-weight:600;line-height:1.35;color:#5b574f;border-left:3px solid transparent;overflow-wrap:anywhere}
+.cov-g.on{background:#fff;color:var(--brand);font-weight:800;border-left-color:var(--accent)}
+.cov-grid{flex:1;min-width:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px 10px;align-content:start;padding:16px 12px calc(28px + env(safe-area-inset-bottom))}
+.cov-it{display:flex;flex-direction:column;align-items:center;gap:7px;min-width:0;background:none;text-align:center;color:var(--text)}
+.cov-ic{width:100%;max-width:78px;aspect-ratio:1;border-radius:18px;background:var(--bg);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:var(--brand)}
+.cov-it:active .cov-ic{background:var(--soft)}
+.cov-it span{font-size:10.5px;font-weight:600;line-height:1.3;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.cov-all .cov-ic{background:#FBF1D6;border-color:#F1DDA0}
+.cov-all .cov-ic svg{width:30px;height:30px;fill:var(--accent)}
+@media(prefers-reduced-motion:reduce){.cov{animation:none}}
 </style>
 
 <!-- ============================================================
@@ -1003,10 +1012,83 @@ function renderMega(){
 }
 function toggleMega(force){
   const p=$('#megaPanel');
+  /* telefonda köhnə açılan panel yerinə tam ekran menyu açılır */
+  if(isPhone()){
+    p.classList.add('hide');
+    const ov=covEl();
+    const was=!ov.classList.contains('hide');
+    const open=force===undefined?!was:!!force;
+    if(open===was)return;
+    ov.classList.toggle('hide',!open);
+    document.body.style.overflow=open?'hidden':'';
+    if(open){covG=0;renderCov()}
+    return;
+  }
   const open=force===undefined?p.classList.contains('hide'):!!force;
   p.classList.toggle('hide',!open);
   if(open)renderMega();
 }
+
+/* ---------- telefonda tam ekran kateqoriya menyusu (üstdə şöbələr, solda qruplar, sağda alt kateqoriyalar) ---------- */
+function isPhone(){return window.matchMedia('(max-width:800px)').matches}
+var covG=0;
+function covEl(){
+  let el=$('#catOv');
+  if(el)return el;
+  el=document.createElement('div');
+  el.id='catOv';el.className='cov hide';
+  el.innerHTML='<div class="cov-top"><span class="cov-logo">ELFA</span><button type="button" class="cov-x" data-cov-x aria-label="Bağla"><svg viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></svg></button></div>'
+    +'<div class="cov-tabs" id="covTabs"></div>'
+    +'<div class="cov-body"><div class="cov-side" id="covSide"></div><div class="cov-grid" id="covGrid"></div></div>';
+  document.body.appendChild(el);
+  el.addEventListener('click',covClick);
+  return el;
+}
+function covGroups(){
+  /* "Digər" şöbəsində satıcıların özü yazdığı kateqoriyalar da görünür */
+  return (MENU[menuTab]||[]).map((g,idx)=>menuTab==='Digər'&&idx===0?{...g,i:[...g.i,...customCats()]}:g);
+}
+function renderCov(){
+  const tabs=$('#covTabs');
+  tabs.innerHTML=Object.keys(MENU).map(k=>'<button type="button" class="cov-tab'+(k===menuTab?' on':'')+'" data-cov-tab="'+esc(k)+'">'+esc(k)+'</button>').join('');
+  const gs=covGroups();
+  if(covG>=gs.length)covG=0;
+  $('#covSide').innerHTML=gs.map((g,n)=>'<button type="button" class="cov-g'+(n===covG?' on':'')+'" data-cov-g="'+n+'">'+esc(g.t)+'</button>').join('');
+  const g=gs[covG];
+  const all='<button type="button" class="cov-it cov-all" data-sub="'+esc(g?g.t:'')+'" data-grp=""><b class="cov-ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg></b><span>Hamısını gör</span></button>';
+  $('#covGrid').innerHTML=g?[...g.i,...g.x].map(i=>'<button type="button" class="cov-it" data-sub="'+esc(i)+'" data-grp="'+esc(g.t)+'"><b class="cov-ic">'+esc(String(i).trim().charAt(0).toUpperCase())+'</b><span>'+esc(i)+'</span></button>').join('')+all:'';
+  $('#covGrid').scrollTop=0;
+  const on=tabs.querySelector('.on');
+  if(on)tabs.scrollLeft=on.offsetLeft-(tabs.clientWidth-on.offsetWidth)/2;
+}
+function covClick(e){
+  e.stopPropagation();/* menyunun içində basanda "kənara basıldı" sayılmasın */
+  if(e.target.closest('[data-cov-x]')){toggleMega(false);return}
+  const t=e.target.closest('[data-cov-tab]');
+  if(t){menuTab=t.dataset.covTab;covG=0;renderCov();return}
+  const g=e.target.closest('[data-cov-g]');
+  if(g){covG=+g.dataset.covG;renderCov();return}
+  const it=e.target.closest('[data-sub]');
+  if(it)goSub(it.dataset.sub,it.dataset.grp||'');
+}
+/* alt kateqoriyaya basanda: real kateqoriyadırsa filtr, deyilsə axtarış sözü (köhnə menyu ilə eyni qayda) */
+function goSub(sub,group){
+  const custom=customCats().includes(sub);
+  const patch=custom?{category:sub}:{store_category:menuTab};
+  if(custom){}
+  else if(OPT.categories.includes(sub))patch.category=sub;
+  else{
+    if(group&&OPT.categories.includes(group))patch.category=group;
+    patch.q=sub;
+  }
+  toggleMega(false);
+  openResults(patch);
+}
+/* ekran böyüyəndə (telefon yan çevriləndə, kompüter) tam ekran menyu bağlansın */
+window.addEventListener('resize',()=>{
+  const ov=$('#catOv');
+  if(ov&&!ov.classList.contains('hide')&&!isPhone()){ov.classList.add('hide');document.body.style.overflow=''}
+});
 $('#megaBtn').onclick=e=>{e.stopPropagation();toggleMega()};
 $('#megaList').addEventListener('click',e=>{
   const tab=e.target.closest('[data-menu-tab]');
@@ -1041,7 +1123,7 @@ $('#cats').addEventListener('click',e=>{
   const d=e.target.closest('[data-dept]');
   if(!d)return;
   e.preventDefault();
-  const isOpen=!$('#megaPanel').classList.contains('hide');
+  const isOpen=isPhone()?false:!$('#megaPanel').classList.contains('hide');
   /* eyni kateqoriyaya ikinci dəfə basanda menyu bağlanır */
   if(isOpen&&menuTab===d.dataset.dept){toggleMega(false);return}
   menuTab=d.dataset.dept;
