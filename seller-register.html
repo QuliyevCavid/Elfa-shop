@@ -376,6 +376,7 @@ body.noside .side{display:none}
                 <div class="f"><label for="pBrand">Marka</label><div class="ic"><svg viewBox="0 0 24 24"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1"/></svg><input id="pBrand" maxlength="60" placeholder="Məs: Nike"></div></div>
                 <div class="f"><label for="pGender">Cinsiyyət</label><div class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><select id="pGender"><option value="">Seçin</option></select></div></div>
               </div>
+              <div class="f hide" id="subWrap"><label for="pSub">Alt kateqoriya</label><div class="ic"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h6"/></svg><select id="pSub"><option value="">Seçin</option></select></div></div>
               <div class="f hide" id="ageWrap"><label for="pAge">Yaş aralığı</label><select id="pAge"><option value="">Seçin</option></select></div>
               <div class="f" id="sizeWrap"><label>Ölçülər</label><div class="sizes" id="pSizes"></div>
                 <input class="oth" id="pSizeO" maxlength="80" placeholder="Başqa ölçünü özünüz yazın (vergüllə ayırın): 3XL, 48, 52"></div>
@@ -642,6 +643,76 @@ function rowClick(e){
 $('#plist').addEventListener('click',rowClick);
 $('#rlist').addEventListener('click',rowClick);
 
+/* ---------- Kateqoriya və alt kateqoriyalar (index.html-dəki "Bütün kateqoriyalar" menyusu ilə eyni siyahı) ---------- */
+const G=(t,i,x=[])=>({t,i,x});
+const MENU={
+ 'Qadın':[
+  G('Geyim',['Paltar','T-shirt','Köynək','Cins şalvar','Gödəkçə'],['Ətək','Şort','Sviter']),
+  G('Çanta',['Çiyin çantası','Sırt çantası','Pulqabı'],['Səyahət çantası','Noutbuk çantası']),
+  G('Ayaqqabı',['Hündürdaban ayaqqabı','İdman ayaqqabısı','Gündəlik ayaqqabı','Babet'],['Bot','Çəkmə','Sandalet']),
+  G('İç geyim',['Pijama','Gecə geyimi','Alt paltarı','Corab'],['Korset','Kombinezon']),
+  G('Aksesuar',['Kəmər','Şərf'],['Saç aksesuarları','Bəzək əşyaları']),
+  G('Saat',['Saat'],[]),
+  G('Eynək',['Eynək'],[]),
+  G('Kosmetika',['Makiyaj','Dəriyə qulluq','Saç baxımı'],['Dırnaq qulluğu']),
+  G('Ətir',['Ətir'],['Parfum seti'])
+ ],
+ 'Kişi':[
+  G('Geyim',['Köynək','T-shirt','Şalvar','Kostyum','Gödəkçə'],['Sviter','Şort','İdman geyimi']),
+  G('Ayaqqabı',['İdman ayaqqabısı','Klassik ayaqqabı','Gündəlik ayaqqabı'],['Bot','Sandalet']),
+  G('Aksesuar',['Kəmər','Pulqabı'],['Şərf']),
+  G('Çanta',['Çanta'],[]),
+  G('Saat',['Saat'],[]),
+  G('Eynək',['Eynək'],[]),
+  G('Kosmetika',['Təraş vasitələri','Dəriyə qulluq'],['Dezodorant']),
+  G('Ətir',['Ətir'],[])
+ ],
+ 'Ana & Uşaq':[
+  G('Körpə',['Bədən','Tulum','Bələk','Qidalanma vasitələri'],['Uşaq arabası','Gigiyena']),
+  G('Uşaq geyimi',['T-shirt','Şalvar','Paltar','Gödəkçə'],['Aksesuar']),
+  G('Ayaqqabı',['Ayaqqabı'],[]),
+  G('Oyuncaq',['Konstruktor','Kukla','Təhsil oyuncaqları'],['Yumşaq oyuncaqlar']),
+  G('Ana',['Hamilə geyimi','Əmizdirmə vasitələri'],['Ana çantası'])
+ ],
+ 'Ev & Yaşayış':[
+  G('Mətbəx',['Qab-qacaq','Çaydan','Mətbəx alətləri'],['Saxlama qabları','Məişət texnikası']),
+  G('Ev tekstili',['Yataq dəsti','Yorğan','Xalça','Pərdə'],['Dəsmal','Yastıq']),
+  G('Dekor',['Vaza','Şam','Çərçivə','Güzgü'],['Divar dekoru']),
+  G('Təmizlik',['Təmizlik vasitələri','Səbət'],['Süpürgə','Mop'])
+ ],
+ 'Kosmetika':[
+  G('Ətir',['Qadın ətri','Kişi ətri','Uniseks ətir'],['Dezodorant','Parfum seti']),
+  G('Makiyaj',['Göz makiyajı','Dodaq boyası','Pudra'],['Tonal krem','Tuş']),
+  G('Dəriyə qulluq',['Krem','Maska','Serum','Günəşdən qoruyucu'],['Təmizləyici vasitələr']),
+  G('Saç baxımı',['Şampun','Saç yağı','Saç maskası'],['Fen','Saç düzləşdirici'])
+ ],
+ 'Elektronika':[
+  G('Telefon',['Smartfon','Qoruyucu şüşə','Telefon qabı','Adapter'],['Powerbank','Kabel']),
+  G('Kompüter',['Noutbuk','Klaviatura','Siçan'],['Monitor','Planşet']),
+  G('Audio',['Qulaqlıq','Dinamik','Bluetooth qulaqlıq'],['Mikrofon']),
+  G('Ağıllı cihazlar',['Ağıllı saat','Ağıllı qolbaq'],['Ağıllı ev cihazları'])
+ ],
+ 'Digər':[G('Digər məhsullar',['Digər'])]
+};
+/* bütün qrup adları (Geyim, Ayaqqabı, Çanta...) təkrarsız */
+const MENU_GROUPS=[...new Set(Object.values(MENU).flatMap(gs=>gs.map(g=>g.t)))];
+/* seçilmiş kateqoriyanın bütün şöbələrdəki alt kateqoriyaları, təkrarsız */
+function subsFor(cat){
+  const out=[];
+  Object.values(MENU).forEach(gs=>gs.forEach(g=>{
+    if(g.t===cat)[...g.i,...g.x].forEach(v=>{if(!out.includes(v))out.push(v)});
+  }));
+  return out;
+}
+function syncSub(keep){
+  const cat=$('#pCat').value;
+  const subs=(cat&&cat!==OTHER)?subsFor(cat):[];
+  const cur=keep===undefined?$('#pSub').value:keep;
+  $('#pSub').innerHTML='<option value="">Seçin</option>'+subs.map(v=>'<option>'+esc(v)+'</option>').join('');
+  $('#pSub').value=subs.includes(cur)?cur:'';
+  $('#subWrap').classList.toggle('hide',!subs.length);
+}
+
 /* ---------- Seçimlər ("Özüm yazım" dəstəyi ilə) ---------- */
 let OPT={categories:[],genders:[],age_groups:[],clothing_sizes:[],shoe_sizes:[],colors:[],size_classes:[],storage_enabled:false};
 const OTHERS=[['pCat','pCatO'],['pColor','pColorO'],['pSizeClass','pSizeClassO']];
@@ -674,12 +745,13 @@ function syncKid(){
   $('#sizeWrap').classList.toggle('hide',isKid());
 }
 $('#pCat').addEventListener('change',()=>renderSizeChips(true));
+$('#pCat').addEventListener('change',()=>syncSub(''));
 $('#pGender').addEventListener('change',syncKid);
 async function loadOptions(){
   try{const r=await fetch('/api/options');OPT=Object.assign(OPT,await r.json())}catch(e){}
-  fillSel('pCat',OPT.categories,true);fillSel('pGender',OPT.genders);fillSel('pAge',OPT.age_groups);
+  fillSel('pCat',[...new Set([...OPT.categories,...MENU_GROUPS])],true);fillSel('pGender',OPT.genders);fillSel('pAge',OPT.age_groups);
   fillSel('pColor',OPT.colors,true);fillSel('pSizeClass',OPT.size_classes,true);
-  renderSizeChips(false);syncKid();syncOthers();
+  renderSizeChips(false);syncKid();syncOthers();syncSub();
   syncVideoUI();
 }
 loadOptions();
@@ -792,13 +864,13 @@ $('#vFile').addEventListener('change',()=>{
 
 /* ---------- Məhsul formu: əlavə et / redaktə et ---------- */
 let editId=null,editVideo='';
-const FORM_IDS=['pName','pPrice','pStock','pDesc','pFile','vFile','pBrand','pDim','pMat','pCat','pGender','pAge','pColor','pSizeClass','pCatO','pColorO','pSizeClassO','pSizeO'];
+const FORM_IDS=['pName','pPrice','pStock','pDesc','pFile','vFile','pBrand','pDim','pMat','pCat','pSub','pGender','pAge','pColor','pSizeClass','pCatO','pColorO','pSizeClassO','pSizeO'];
 
 function resetForm(){
   editId=null;editVideo='';imgs=[];
   FORM_IDS.forEach(id=>$('#'+id).value='');
   $('#vBar').classList.add('hide');syncVideoUI();
-  renderSizeChips(false);syncKid();syncOthers();renderImgs();updCnt();
+  renderSizeChips(false);syncKid();syncOthers();syncSub('');renderImgs();updCnt();
   $('#formTitle').textContent='Yeni məhsul əlavə et';
   $('#addTxt').textContent='Məhsulu əlavə et';
   $('#editBar').classList.add('hide');
@@ -811,6 +883,7 @@ function startEdit(id){
   editId=p.id;editVideo=p.video_url||'';
   $('#pName').value=p.name||'';$('#pPrice').value=p.price;$('#pStock').value=p.stock;
   setVal('pCat','pCatO',p.category||'');
+  syncSub(p.subcategory||'');
   $('#pBrand').value=p.brand||'';
   $('#pGender').value=p.gender||'';syncKid();
   renderSizeChips(false);
@@ -847,7 +920,7 @@ $('#addP').onclick=async()=>{
   const p={
     name:$('#pName').value.trim(),price:parseFloat($('#pPrice').value),stock:parseInt($('#pStock').value,10),
     description:$('#pDesc').value.trim(),
-    category:getVal('pCat','pCatO'),brand:$('#pBrand').value.trim(),gender:$('#pGender').value,
+    category:getVal('pCat','pCatO'),subcategory:$('#pSub').value,brand:$('#pBrand').value.trim(),gender:$('#pGender').value,
     age_group:kid?$('#pAge').value:'',
     sizes:kid?[]:[...new Set([...chipSizes,...ownSizes])],
     color:getVal('pColor','pColorO'),size_class:getVal('pSizeClass','pSizeClassO'),
