@@ -587,6 +587,15 @@ input:not([type=checkbox]):not([type=radio]){-webkit-appearance:none;appearance:
       <div class="empty hide" id="homeEmpty"></div>
     </section>
 
+    <section class="section" id="newSec">
+      <div class="section-head">
+        <div><h2>Yeni məhsullar</h2><p>ELFA-ya ən son əlavə olunanlar</p></div>
+        <button class="see" data-act="showAll">Bütün məhsullar →</button>
+      </div>
+      <div class="feat" id="newProducts"></div>
+      <div class="empty hide" id="newEmpty"></div>
+    </section>
+
     <div id="catRows"></div>
 
     <section class="section">
@@ -1243,7 +1252,7 @@ $('main').addEventListener('click',e=>{
   const act=a.dataset.act;
   if(act==='showAll')openResults({},true);
   else if(act==='allStores')view(allStoresView);
-  else if(act==='scrollFeat')$('#featSec').scrollIntoView({behavior:'smooth'});
+  else if(act==='scrollFeat')($('#featSec').classList.contains('hide')?$('#newSec'):$('#featSec')).scrollIntoView({behavior:'smooth'});
   else if(act==='scrollTiles')$('#tilesSec').scrollIntoView({behavior:'smooth'});
 });
 $$('[data-info]').forEach(a=>a.onclick=()=>view(()=>({html:'<h3>'+esc(a.dataset.info)+'</h3><p>'+esc(INFO[a.dataset.info])+'</p>'})));
@@ -1420,26 +1429,26 @@ $('#favBtn').onclick=()=>view(()=>({
 
 /* ---------- ana səhifənin məhsulları ---------- */
 async function loadHome(){
-  const box=$('#homeProducts'),em=$('#homeEmpty');
-  box.innerHTML=skel(6);
-  try{
-    let r=await fetch('/api/products?home=1&limit=12');
-    let rows=r.ok?await r.json():[];
-    if(rows.length){
-      $('#homeTitle').textContent='Seçdiyimiz məhsullar';
-      $('#homeSub').textContent='ELFA-nın və mağazaların ana səhifə üçün seçdiyi məhsullar';
-    }else{
-      r=await fetch('/api/products?limit=12');rows=r.ok?await r.json():[];
-      $('#homeTitle').textContent='Yeni məhsullar';
-      $('#homeSub').textContent='ELFA-ya ən son əlavə olunanlar';
-    }
-    rows.forEach(p=>{cache[p.id]=p});
-    box.innerHTML=rows.map(cardHtml).join('');
-    em.classList.toggle('hide',rows.length>0);
-    if(!rows.length)em.textContent='Hələ məhsul yoxdur. Satıcılar təsdiqləndikdən sonra məhsullar burada görünəcək.';
-  }catch(e){
-    em.classList.remove('hide');em.textContent='Məhsulları yükləmək mümkün olmadı. Bir az sonra yenidən cəhd edin.';
+  const fbox=$('#homeProducts'),fem=$('#homeEmpty'),nbox=$('#newProducts'),nem=$('#newEmpty');
+  fbox.innerHTML=skel(6);nbox.innerHTML=skel(6);
+  /* "Seçdiyimiz məhsullar" və "Yeni məhsullar" ayrı bölmələrdir: biri digərini gizlətmir */
+  const get=async u=>{try{const r=await fetch(u);return r.ok?await r.json():null}catch(e){return null}};
+  const [picked,fresh]=await Promise.all([get('/api/products?home=1&limit=12'),get('/api/products?limit=12')]);
+  if(picked===null&&fresh===null){
+    $('#featSec').classList.add('hide');
+    nbox.innerHTML='';nem.classList.remove('hide');
+    nem.textContent='Məhsulları yükləmək mümkün olmadı. Bir az sonra yenidən cəhd edin.';
+    return;
   }
+  const pk=picked||[],nw=fresh||[];
+  [...pk,...nw].forEach(p=>{cache[p.id]=p});
+  /* seçilmiş məhsul yoxdursa həmin bölmə gizlənir */
+  $('#featSec').classList.toggle('hide',!pk.length);
+  fbox.innerHTML=pk.map(cardHtml).join('');
+  fem.classList.add('hide');
+  nbox.innerHTML=nw.map(cardHtml).join('');
+  nem.classList.toggle('hide',nw.length>0);
+  if(!nw.length)nem.textContent='Hələ məhsul yoxdur. Satıcılar təsdiqləndikdən sonra məhsullar burada görünəcək.';
 }
 
 /* ---------- başlanğıc ---------- */
