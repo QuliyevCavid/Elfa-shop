@@ -79,6 +79,8 @@ PRODUCT_NEW_COLUMNS = [
     ("dimensions", "TEXT NOT NULL DEFAULT ''"),
     ("material", "TEXT NOT NULL DEFAULT ''"),
     ("images", "TEXT NOT NULL DEFAULT ''"),
+    ("department", "TEXT NOT NULL DEFAULT ''"),
+    ("subcategory", "TEXT NOT NULL DEFAULT ''"),
 ]
 
 
@@ -291,6 +293,8 @@ class ProductIn(BaseModel):
     images: List[str] = Field(default_factory=list, max_length=5)
     description: str = Field(default="", max_length=600)
     category: str = Field(default="", max_length=60)
+    department: str = Field(default="", max_length=60)
+    subcategory: str = Field(default="", max_length=60)
     brand: str = Field(default="", max_length=60)
     gender: str = Field(default="", max_length=20)
     age_group: str = Field(default="", max_length=20)
@@ -494,6 +498,8 @@ def clean_product(data: ProductIn, seller_id: int) -> dict:
         "images": json.dumps(images),
         "description": data.description.strip(),
         "category": category,
+        "department": data.department.strip(),
+        "subcategory": data.subcategory.strip(),
         "brand": data.brand.strip(),
         "gender": gender,
         "age_group": age_group,
@@ -509,7 +515,7 @@ def clean_product(data: ProductIn, seller_id: int) -> dict:
 PRODUCT_FIELDS = (
     "name", "price", "stock", "image_url", "images", "description", "category",
     "brand", "gender", "age_group", "sizes", "color", "size_class",
-    "dimensions", "material", "video_url",
+    "dimensions", "material", "video_url", "department", "subcategory",
 )
 
 
@@ -831,6 +837,7 @@ def product_dict(r: sqlite3.Row) -> dict:
             "id", "name", "price", "stock", "image_url", "description",
             "category", "brand", "gender", "age_group", "color",
             "size_class", "dimensions", "material", "video_url",
+            "department", "subcategory",
         )
     }
     data["sizes"] = [x for x in (r["sizes"] or "").split(",") if x]
@@ -1036,12 +1043,23 @@ def filters(category: Optional[str] = None):
                 seen[fold(v)] = v
         return sorted(seen.values(), key=fold)
 
+    menu = {}
+    for r in all_rows:
+        d = (r["department"] or "").strip()
+        c = (r["category"] or "").strip()
+        s = (r["subcategory"] or "").strip()
+        if d and c:
+            menu.setdefault((fold(d), fold(c), fold(s)),
+                            {"department": d, "category": c, "subcategory": s})
+
     prices = [r["price"] for r in rows]
     return {
         "brands": distinct("brand"),
         "materials": distinct("material"),
         # bütün (süzülməmiş) kateqoriyalar: satıcıların özü yazdıqları da daxildir
         "categories": distinct("category", all_rows),
+        # satıcıların yazdığı üst kateqoriya / kateqoriya / alt kateqoriya (menyuya qoşulur)
+        "menu": list(menu.values()),
         "price": {
             "min": min(prices) if prices else None,
             "max": max(prices) if prices else None,
@@ -1104,6 +1122,7 @@ def public_products(
             text = fold(" ".join([
                 r["name"], r["brand"], r["store_name"], r["category"],
                 r["description"], r["material"], r["color"], r["gender"],
+                r["department"], r["subcategory"],
             ]))
             if not all(w in text for w in words):
                 continue
