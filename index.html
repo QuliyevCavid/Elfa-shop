@@ -740,7 +740,10 @@ let F={...EMPTY_F}, showAll=false, SORT='';
 let ALLCATS=[];
 const foldJs=x=>String(x||'').trim().toLocaleLowerCase('az');
 /* satıcının özü yazdığı (standart siyahıda olmayan) kateqoriyalar */
-const customCats=()=>{const std=new Set((OPT.categories||[]).map(foldJs));return ALLCATS.filter(c=>!std.has(foldJs(c)))};
+const extraCats=()=>{const std=new Set((OPT.categories||[]).map(foldJs));return ALLCATS.filter(c=>!std.has(foldJs(c)))};
+const inMenu=c=>Object.values(MENU).some(gs=>gs.some(g=>foldJs(g.t)===foldJs(c)));
+/* "Digər" altında yalnız menyuda yeri olmayan (köhnə) kateqoriyalar qalır */
+const customCats=()=>extraCats().filter(c=>!inMenu(c));
 let OPT={categories:[],genders:[],age_groups:[],clothing_sizes:[],shoe_sizes:[],colors:[],size_classes:[]};
 let list=[],total=0,loadSeq=0;
 const cache={};
@@ -776,9 +779,10 @@ async function loadBrandMaterial(want){
     const f=await getJSON('/api/filters'+(F.category?'?category='+encodeURIComponent(F.category):''));
     fillSelect('#fBrand',f.brands||[],true);
     fillSelect('#fMaterial',f.materials||[],true);
+    if(Array.isArray(f.menu))mergeMenu(f.menu);
     if(Array.isArray(f.categories)){
       ALLCATS=f.categories;
-      customCats().forEach(c=>addOpt('fCategory',c));
+      extraCats().forEach(c=>addOpt('fCategory',c));
       if(!$('#megaPanel').classList.contains('hide'))renderMega();
     }
     if(want){
@@ -1007,6 +1011,32 @@ const MENU={
  'Digər':[G('Digər məhsullar',['Digər'])]
 };
 let menuTab='Qadın';
+const STD_DEPTS=new Set(Object.keys(MENU));
+const AZM={'İ':'i','I':'i','ı':'i','Ə':'e','ə':'e','Ö':'o','ö':'o','Ü':'u','ü':'u','Ş':'s','ş':'s','Ç':'c','ç':'c','Ğ':'g','ğ':'g'};
+const fm=s=>String(s||'').trim().replace(/[İIıƏəÖöÜüŞşÇçĞğ]/g,c=>AZM[c]).toLowerCase().replace(/\s+/g,' ');
+/* satıcıların yazdığı yeni üst/kateqoriya/alt kateqoriyanı menyuya qoşur; artıq varsa heç nə etmir */
+function mergeMenu(items){
+  (items||[]).forEach(it=>{
+    const d=(it.department||'').trim(),c=(it.category||'').trim(),s=(it.subcategory||'').trim();
+    if(!d||!c)return;
+    let dk=Object.keys(MENU).find(k=>fm(k)===fm(d));
+    if(!dk){MENU[d]=[];dk=d}
+    let g=MENU[dk].find(x=>fm(x.t)===fm(c));
+    if(!g){g={t:c,i:[],x:[]};MENU[dk].push(g)}
+    if(s&&![...g.i,...g.x].some(v=>fm(v)===fm(s)))g.i.push(s);
+  });
+}
+/* menyuda alt kateqoriyaya basanda hansı filtr açılsın */
+function subPatch(sub,group){
+  if(extraCats().some(c=>foldJs(c)===foldJs(sub)))return {category:sub};
+  const p=STD_DEPTS.has(menuTab)?{store_category:menuTab}:{};
+  if(OPT.categories.includes(sub))p.category=sub;
+  else{
+    if(group&&(OPT.categories.includes(group)||extraCats().some(c=>foldJs(c)===foldJs(group))))p.category=group;
+    p.q=sub;
+  }
+  return p;
+}
 function renderMega(){
   const side=Object.keys(MENU).map(k=>'<button type="button" class="mega-tab'+(k===menuTab?' on':'')+'" data-menu-tab="'+esc(k)+'">'+esc(k)+' <span>›</span></button>').join('');
   const link=(i,g)=>'<a href="#" data-subcat="'+esc(i)+'" data-group="'+esc(g)+'">'+esc(i)+'</a>';
@@ -1098,14 +1128,7 @@ function covClick(e){
 }
 /* alt kateqoriyaya basanda: real kateqoriyadırsa filtr, deyilsə axtarış sözü (köhnə menyu ilə eyni qayda) */
 function goSub(sub,group){
-  const custom=customCats().includes(sub);
-  const patch=custom?{category:sub}:{store_category:menuTab};
-  if(custom){}
-  else if(OPT.categories.includes(sub))patch.category=sub;
-  else{
-    if(group&&OPT.categories.includes(group))patch.category=group;
-    patch.q=sub;
-  }
+  const patch=subPatch(sub,group);
   const hadCov=!!(history.state&&history.state.cov);
   covHide();
   if(hadCov){
@@ -1139,14 +1162,7 @@ $('#megaList').addEventListener('click',e=>{
   /* Menyu maddəsi serverdəki real kateqoriyadırsa filtr kimi, deyilsə axtarış sözü kimi işləyir.
      Əks halda "Paltar", "Şampun" kimi maddələr həmişə boş nəticə verərdi. */
   const sub=a.dataset.subcat,group=a.dataset.group||'';
-  const custom=customCats().includes(sub);
-  const patch=custom?{category:sub}:{store_category:menuTab};
-  if(custom){/* satıcının özü yazdığı kateqoriya: birbaşa filtr */}
-  else if(OPT.categories.includes(sub))patch.category=sub;
-  else{
-    if(group&&OPT.categories.includes(group))patch.category=group;
-    patch.q=sub;
-  }
+  const patch=subPatch(sub,group);
   toggleMega(false);
   openResults(patch);
 });
