@@ -1043,12 +1043,11 @@ function subPatch(sub,group){
 function renderMega(){
   const side=Object.keys(MENU).map(k=>'<button type="button" class="mega-tab'+(k===menuTab?' on':'')+'" data-menu-tab="'+esc(k)+'">'+esc(k)+' <span>›</span></button>').join('');
   const link=(i,g)=>'<a href="#" data-subcat="'+esc(i)+'" data-group="'+esc(g)+'">'+esc(i)+'</a>';
-  /* "Digər" şöbəsində standart maddənin altına satıcıların yazdığı kateqoriyalar əlavə olunur */
-  const groups=(MENU[menuTab]||[]).map((g,idx)=>menuTab==='Digər'&&idx===0?{...g,i:[...g.i,...customCats()]}:g);
+  /* satıcı formundakı Kateqoriya siyahısı ilə eyni: bütün sözlər görünür, gizlədilən yoxdur */
+  const groups=MENU[menuTab]||[];
   const cols=groups.map(g=>{
-    const links=g.i.map(i=>link(i,g.t)).join('');
-    const extras=g.x.length?'<div class="mega-extra" hidden>'+g.x.map(i=>link(i,g.t)).join('')+'</div><button type="button" class="mega-more">Daha çox göstər ↓</button>':'';
-    return '<div class="mega-group"><h4><a href="#" data-subcat="'+esc(g.t)+'">'+esc(g.t)+' →</a></h4>'+links+extras+'</div>';
+    const links=[...g.i,...g.x].map(i=>link(i,g.t)).join('');
+    return '<div class="mega-group"><h4><a href="#" data-subcat="'+esc(g.t)+'">'+esc(g.t)+' →</a></h4>'+links+'</div>';
   }).join('');
   $('#megaList').innerHTML='<div class="mega-side">'+side+'</div><div class="mega-cols">'+cols+'</div>';
 }
@@ -1091,7 +1090,7 @@ function covEl(){
 }
 function covGroups(){
   /* "Digər" şöbəsində satıcıların özü yazdığı kateqoriyalar da görünür */
-  return (MENU[menuTab]||[]).map((g,idx)=>menuTab==='Digər'&&idx===0?{...g,i:[...g.i,...customCats()]}:g);
+  return MENU[menuTab]||[];
 }
 function renderCov(){
   const tabs=$('#covTabs');
