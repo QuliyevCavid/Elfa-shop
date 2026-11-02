@@ -382,9 +382,9 @@ select:disabled{background:#f4f2ee;color:#9a958b;cursor:not-allowed}
                 <div class="f"><label for="pStock">Stok sayı <i class="rq">*</i></label><div class="ic"><svg viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg><input id="pStock" type="number" min="0" step="1" inputmode="numeric" placeholder="0"></div></div>
               </div>
               <div class="three">
-                <div class="f"><label for="pDept">Üst kateqoriya</label><div class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><select id="pDept"><option value="">Seçin</option></select></div></div>
+                <div class="f"><label for="pDept">Üst kateqoriya</label><div class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><select id="pDept"><option value="">Seçin</option></select></div><input class="oth hide" id="pDeptO" maxlength="60" placeholder="Üst kateqoriyanı özünüz yazın"></div>
                 <div class="f"><label for="pCat">Kateqoriya</label><div class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><select id="pCat" disabled><option value="">Seçin</option></select></div><input class="oth hide" id="pCatO" maxlength="60" placeholder="Kateqoriyanı özünüz yazın"></div>
-                <div class="f"><label for="pSub">Alt kateqoriya</label><div class="ic"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h6"/></svg><select id="pSub" disabled><option value="">Seçin</option></select></div></div>
+                <div class="f"><label for="pSub">Alt kateqoriya</label><div class="ic"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h6"/></svg><select id="pSub" disabled><option value="">Seçin</option></select></div><input class="oth hide" id="pSubO" maxlength="60" placeholder="Alt kateqoriyanı özünüz yazın"></div>
               </div>
               <div class="two">
                 <div class="f"><label for="pBrand">Marka</label><div class="ic"><svg viewBox="0 0 24 24"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1"/></svg><input id="pBrand" maxlength="60" placeholder="Məs: Nike"></div></div>
@@ -716,27 +716,34 @@ function subsFor(d,cat){
   return out;
 }
 const inferDept=cat=>Object.keys(MENU).find(d=>(MENU[d]||[]).some(g=>g.t===cat))||'';
+/* müqayisə üçün: böyük/kiçik hərf, boşluq və ə/ö/ü/ş/ç/ğ/ı fərqi nəzərə alınmır */
+const AZMAP={'İ':'i','I':'i','ı':'i','Ə':'e','ə':'e','Ö':'o','ö':'o','Ü':'u','ü':'u','Ş':'s','ş':'s','Ç':'c','ç':'c','Ğ':'g','ğ':'g'};
+const fk=s=>String(s||'').trim().replace(/[İIıƏəÖöÜüŞşÇçĞğ]/g,c=>AZMAP[c]).toLowerCase().replace(/\s+/g,' ');
+/* siyahıda eyni ad varsa onu (mövcud yazılışı ilə) qaytarır, yoxdursa yazılanı */
+const matchIn=(arr,v)=>arr.find(x=>fk(x)===fk(v))||v;
 function syncCat(keep){
   const d=$('#pDept').value;
   const cur=keep===undefined?$('#pCat').value:keep;
-  const cs=d?catsFor(d):[];
-  $('#pCat').innerHTML='<option value="">Seçin</option>'+cs.map(v=>'<option>'+esc(v)+'</option>').join('')+(d?'<option value="'+OTHER+'">✎ Özüm yazım</option>':'');
+  const known=(d&&d!==OTHER)?catsFor(d):[];
+  $('#pCat').innerHTML='<option value="">Seçin</option>'+known.map(v=>'<option>'+esc(v)+'</option>').join('')+(d?'<option value="'+OTHER+'">✎ Özüm yazım</option>':'');
   $('#pCat').disabled=!d;
-  $('#pCat').value=(cs.includes(cur)||cur===OTHER&&d)?cur:'';
+  $('#pCat').value=(known.includes(cur)||(cur===OTHER&&d))?cur:'';
+  if(d===OTHER)$('#pCat').value=OTHER; /* yeni üst kateqoriyanın hazır kateqoriyası yoxdur */
   syncOther('pCat','pCatO');
 }
 function syncSub(keep){
   const d=$('#pDept').value,cat=$('#pCat').value;
-  const subs=(d&&cat&&cat!==OTHER)?subsFor(d,cat):[];
+  const subs=(d&&d!==OTHER&&cat&&cat!==OTHER)?subsFor(d,cat):[];
   const cur=keep===undefined?$('#pSub').value:keep;
-  $('#pSub').innerHTML='<option value="">Seçin</option>'+subs.map(v=>'<option>'+esc(v)+'</option>').join('');
-  $('#pSub').value=subs.includes(cur)?cur:'';
-  $('#pSub').disabled=!subs.length;
+  $('#pSub').innerHTML='<option value="">Seçin</option>'+subs.map(v=>'<option>'+esc(v)+'</option>').join('')+(cat?'<option value="'+OTHER+'">✎ Özüm yazım</option>':'');
+  $('#pSub').disabled=!cat;
+  $('#pSub').value=(subs.includes(cur)||(cur===OTHER&&cat))?cur:'';
+  syncOther('pSub','pSubO');
 }
 
 /* ---------- Seçimlər ("Özüm yazım" dəstəyi ilə) ---------- */
 let OPT={categories:[],genders:[],age_groups:[],clothing_sizes:[],shoe_sizes:[],colors:[],size_classes:[],storage_enabled:false};
-const OTHERS=[['pCat','pCatO'],['pColor','pColorO'],['pSizeClass','pSizeClassO']];
+const OTHERS=[['pDept','pDeptO'],['pCat','pCatO'],['pSub','pSubO'],['pColor','pColorO'],['pSizeClass','pSizeClassO']];
 function fillSel(id,vals,withOther){
   $('#'+id).innerHTML='<option value="">Seçin</option>'+vals.map(v=>'<option>'+esc(v)+'</option>').join('')+(withOther?'<option value="'+OTHER+'">✎ Özüm yazım</option>':'');
 }
@@ -770,7 +777,7 @@ $('#pDept').addEventListener('change',()=>{syncCat('');syncSub('');renderSizeChi
 $('#pGender').addEventListener('change',syncKid);
 async function loadOptions(){
   try{const r=await fetch('/api/options');OPT=Object.assign(OPT,await r.json())}catch(e){}
-  fillSel('pDept',Object.keys(MENU),false);syncCat('');fillSel('pGender',OPT.genders);fillSel('pAge',OPT.age_groups);
+  fillSel('pDept',Object.keys(MENU),true);syncCat('');fillSel('pGender',OPT.genders);fillSel('pAge',OPT.age_groups);
   fillSel('pColor',OPT.colors,true);fillSel('pSizeClass',OPT.size_classes,true);
   renderSizeChips(false);syncKid();syncOthers();syncSub('');
   syncVideoUI();
@@ -885,7 +892,7 @@ $('#vFile').addEventListener('change',()=>{
 
 /* ---------- Məhsul formu: əlavə et / redaktə et ---------- */
 let editId=null,editVideo='';
-const FORM_IDS=['pName','pPrice','pStock','pDesc','pFile','vFile','pBrand','pDim','pMat','pDept','pCat','pSub','pGender','pAge','pColor','pSizeClass','pCatO','pColorO','pSizeClassO','pSizeO'];
+const FORM_IDS=['pName','pPrice','pStock','pDesc','pFile','vFile','pBrand','pDim','pMat','pDept','pCat','pSub','pGender','pAge','pColor','pSizeClass','pDeptO','pCatO','pSubO','pColorO','pSizeClassO','pSizeO'];
 
 function resetForm(){
   editId=null;editVideo='';imgs=[];
@@ -903,10 +910,11 @@ function startEdit(id){
   resetForm();
   editId=p.id;editVideo=p.video_url||'';
   $('#pName').value=p.name||'';$('#pPrice').value=p.price;$('#pStock').value=p.stock;
-  $('#pDept').value=p.department||inferDept(p.category||'');
+  setVal('pDept','pDeptO',p.department||inferDept(p.category||''));
   syncCat('');
   setVal('pCat','pCatO',p.category||'');
-  syncSub(p.subcategory||'');
+  syncSub('');
+  setVal('pSub','pSubO',p.subcategory||'');
   $('#pBrand').value=p.brand||'';
   $('#pGender').value=p.gender||'';syncKid();
   renderSizeChips(false);
@@ -940,10 +948,17 @@ $('#addP').onclick=async()=>{
   const kid=isKid();
   const chipSizes=[...document.querySelectorAll('#pSizes input:checked')].map(i=>i.value);
   const ownSizes=$('#pSizeO').value.split(',').map(x=>x.trim()).filter(Boolean);
+  /* indexdəki menyuda eyni ad varsa onu götürür (əlavə etmir), yoxdursa yazılanı yeni kimi göndərir */
+  const knownD=Object.keys(MENU);
+  const dept=matchIn(knownD,getVal('pDept','pDeptO'));
+  const knownC=knownD.includes(dept)?catsFor(dept):[];
+  const cat=matchIn(knownC,getVal('pCat','pCatO'));
+  const knownS=knownC.includes(cat)?subsFor(dept,cat):[];
+  const sub=matchIn(knownS,getVal('pSub','pSubO'));
   const p={
     name:$('#pName').value.trim(),price:parseFloat($('#pPrice').value),stock:parseInt($('#pStock').value,10),
     description:$('#pDesc').value.trim(),
-    department:$('#pDept').value,category:getVal('pCat','pCatO'),subcategory:$('#pSub').value,brand:$('#pBrand').value.trim(),gender:$('#pGender').value,
+    department:dept,category:cat,subcategory:sub,brand:$('#pBrand').value.trim(),gender:$('#pGender').value,
     age_group:kid?$('#pAge').value:'',
     sizes:kid?[]:[...new Set([...chipSizes,...ownSizes])],
     color:getVal('pColor','pColorO'),size_class:getVal('pSizeClass','pSizeClassO'),
@@ -952,6 +967,8 @@ $('#addP').onclick=async()=>{
   };
   if(!p.name||isNaN(p.price)||isNaN(p.stock)) return toast('Ad, qiymət və stoku yazın');
   if(p.price<0||p.stock<0) return toast('Qiymət və stok mənfi ola bilməz');
+  if($('#pDept').value===OTHER&&!dept) return toast('Üst kateqoriyanı yazın və ya siyahıdan seçin');
+  if($('#pSub').value===OTHER&&!sub) return toast('Alt kateqoriyanı yazın və ya siyahıdan seçin');
   if($('#pCat').value===OTHER&&!p.category) return toast('Kateqoriyanı yazın və ya siyahıdan seçin');
   if($('#pColor').value===OTHER&&!p.color) return toast('Rəngi yazın və ya siyahıdan seçin');
   if($('#pSizeClass').value===OTHER&&!p.size_class) return toast('Boyutu yazın və ya siyahıdan seçin');
