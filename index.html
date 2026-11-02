@@ -735,7 +735,7 @@ const DEPTS=[
 
 /* ---------- vəziyyət ---------- */
 const PAGE=24;
-const EMPTY_F={q:'',category:'',store_category:'',brand:'',gender:'',age:'',size:'',color:'',material:'',size_class:'',price_min:'',price_max:''};
+const EMPTY_F={q:'',category:'',store_category:'',department:'',subcategory:'',brand:'',gender:'',age:'',size:'',color:'',material:'',size_class:'',price_min:'',price_max:''};
 let F={...EMPTY_F}, showAll=false, SORT='';
 let ALLCATS=[];
 const foldJs=x=>String(x||'').trim().toLocaleLowerCase('az');
@@ -816,10 +816,11 @@ function applyMode(){
   $('#shop').classList.toggle('searching',res);
   $('#fToggle').classList.toggle('show',res);
   if(!res)$('#filters').classList.remove('open');
-  const parts=[F.store_category,F.category].filter(Boolean).join(' › ');
+  const parts=[F.department||F.store_category,F.category,F.subcategory].filter(Boolean).join(' › ');
   $('#prodTitle').textContent='ELFA · '+(parts||'Bütün məhsullar');
   renderSort();
-  $$('#cats a').forEach(a=>a.classList.toggle('active',!!F.store_category&&a.dataset.dept===F.store_category));
+  const sd=F.department||F.store_category;
+  $$('#cats a').forEach(a=>a.classList.toggle('active',!!sd&&a.dataset.dept===sd));
   $$('#bnav [data-bn]').forEach(b=>b.classList.toggle('on',b.dataset.bn==='home'&&!res));
   /* brauzerin "Geri" düyməsi üçün tarixçə: nəticələr səhifəsi ayrıca addım sayılır */
   if(!popping){
@@ -919,7 +920,7 @@ Object.keys(FMAP).forEach(id=>{
   $('#'+id).addEventListener('change',async()=>{
     F[FMAP[id]]=$('#'+id).value.trim();
     if(id==='fGender')syncFilterUI();
-    if(id==='fCategory'){syncFilterUI();await loadBrandMaterial()}
+    if(id==='fCategory'){F.subcategory='';syncFilterUI();await loadBrandMaterial()}
     loadProducts(true);
   });
 });
@@ -927,8 +928,8 @@ Object.keys(FMAP).forEach(id=>{
   clearTimeout(ft);ft=setTimeout(()=>{F[FMAP[id]]=$('#'+id).value.trim();loadProducts(true)},500);
 }));
 $('#clearF').onclick=async()=>{
-  const q=F.q,sc=F.store_category;
-  F={...EMPTY_F,q,store_category:sc};
+  const q=F.q,sc=F.store_category,dp=F.department;
+  F={...EMPTY_F,q,store_category:sc,department:dp};
   Object.keys(FMAP).forEach(id=>$('#'+id).value='');
   syncFilterUI();await loadBrandMaterial();loadProducts(true);
 };
@@ -937,7 +938,7 @@ $('#fToggle').onclick=()=>$('#filters').classList.toggle('open');
 /* axtarış */
 let st;
 function resetPanel(){
-  ['category','store_category','brand','gender','age','size','color','material','size_class','price_min','price_max'].forEach(k=>F[k]='');
+  ['category','store_category','department','subcategory','brand','gender','age','size','color','material','size_class','price_min','price_max'].forEach(k=>F[k]='');
   Object.keys(FMAP).forEach(id=>$('#'+id).value='');
   syncFilterUI();loadBrandMaterial();
 }
@@ -947,7 +948,7 @@ function runSearch(){
   const nextQ=$('#q').value.trim();
   if(nextQ!==F.q){
     F.q=nextQ;
-    F.store_category='';
+    F.store_category='';F.department='';F.subcategory='';
     if(nextQ)showAll=true;
   }
   if(!F.q){resetPanel();showAll=false}
@@ -1026,16 +1027,13 @@ function mergeMenu(items){
     if(s&&![...g.i,...g.x].some(v=>fm(v)===fm(s)))g.i.push(s);
   });
 }
-/* menyuda alt kateqoriyaya basanda hansı filtr açılsın */
+/* menyuda basanda hansı filtr açılsın:
+   - kateqoriya (Geyim): həmin üst kateqoriyada bütün Geyim məhsulları (alt kateqoriyası olanlar da daxil)
+   - alt kateqoriya (Paltar): yalnız alt kateqoriyası Paltar olan məhsullar */
 function subPatch(sub,group){
-  if(extraCats().some(c=>foldJs(c)===foldJs(sub)))return {category:sub};
-  const p=STD_DEPTS.has(menuTab)?{store_category:menuTab}:{};
-  if(OPT.categories.includes(sub))p.category=sub;
-  else{
-    if(group&&(OPT.categories.includes(group)||extraCats().some(c=>foldJs(c)===foldJs(group))))p.category=group;
-    p.q=sub;
-  }
-  return p;
+  if(customCats().some(c=>foldJs(c)===foldJs(sub)))return {category:sub};
+  if(!group)return {department:menuTab,category:sub};
+  return {department:menuTab,category:group,subcategory:sub};
 }
 function renderMega(){
   const side=Object.keys(MENU).map(k=>'<button type="button" class="mega-tab'+(k===menuTab?' on':'')+'" data-menu-tab="'+esc(k)+'">'+esc(k)+' <span>›</span></button>').join('');
@@ -1262,7 +1260,7 @@ $('main').addEventListener('click',e=>{
   const ct=e.target.closest('[data-cat]');
   if(ct){openResults({category:ct.dataset.cat});return}
   const d=e.target.closest('[data-dept]');
-  if(d){openResults({store_category:d.dataset.dept});return}
+  if(d){openResults({department:d.dataset.dept});return}
   const a=e.target.closest('[data-act]');
   if(!a)return;
   const act=a.dataset.act;
