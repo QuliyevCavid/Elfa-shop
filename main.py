@@ -1083,6 +1083,8 @@ def public_products(
     price_max: Optional[float] = None,
     store_id: Optional[int] = None,
     store_category: Optional[str] = None,
+    department: Optional[str] = None,
+    subcategory: Optional[str] = None,
     home: Optional[bool] = None,
     sort: Optional[str] = None,
     limit: int = Query(100, ge=1, le=200),
@@ -1099,6 +1101,15 @@ def public_products(
         if category and fold(r["category"]) != fold(category):
             continue
         if store_category and fold(r["store_category"]) != fold(store_category):
+            continue
+        if department:
+            pd = (r["department"] or "").strip()
+            if pd:
+                if fold(pd) != fold(department):
+                    continue
+            elif fold(r["store_category"]) != fold(department):
+                continue  # köhnə məhsul (üst kateqoriyası yoxdur): mağazanın kateqoriyasına görə
+        if subcategory and fold(r["subcategory"]) != fold(subcategory):
             continue
         if brand and fold(r["brand"]) != fold(brand):
             continue
