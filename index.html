@@ -1024,7 +1024,12 @@ function mergeMenu(items){
     if(!dk){MENU[d]=[];dk=d}
     let g=MENU[dk].find(x=>fm(x.t)===fm(c));
     if(!g){g={t:c,i:[],x:[]};MENU[dk].push(g)}
-    if(s&&![...g.i,...g.x].some(v=>fm(v)===fm(s)))g.i.push(s);
+    if(s){
+      const xi=g.x.findIndex(v=>fm(v)===fm(s));
+      /* "Daha çox göstər"də gizli idisə, məhsulu olduğu üçün görünən siyahıya çıxarılır */
+      if(xi>=0)g.i.push(g.x.splice(xi,1)[0]);
+      else if(!g.i.some(v=>fm(v)===fm(s)))g.i.push(s);
+    }
   });
 }
 /* menyuda basanda hansı filtr açılsın:
