@@ -1307,7 +1307,7 @@ function productView(id){
     const vid=safeVideo(p.video_url);
     const imgs=((p.images&&p.images.length)?p.images:[p.image_url]).map(safeUrl).filter(Boolean).slice(0,5);
     const media=imgs.map(u=>({t:'i',u})).concat(vid?[{t:'v',u:vid}]:[]);
-    const rows=[['Kateqoriya',p.subcategory?(p.category+' › '+p.subcategory):p.category],['Cinsiyyət',p.gender],['Yaş aralığı',p.age_group],['Ölçü',(p.sizes||[]).join(', ')],['Rəng',p.color],['Boyut',p.size_class],['Ölçülər',p.dimensions],['Material',p.material]]
+    const rows=[['Kateqoriya',p.subcategory||p.category],['Cinsiyyət',p.gender],['Yaş aralığı',p.age_group],['Ölçü',(p.sizes||[]).join(', ')],['Rəng',p.color],['Boyut',p.size_class],['Ölçülər',p.dimensions],['Material',p.material]]
       .filter(r=>r[1]);
     const inStock=p.stock>0;
     const thumbs=media.length>1?'<div class="pd-thumbs">'+media.map((m,i)=>'<button type="button" class="pd-th'+(m.t==='v'?' v':'')+(i===0?' on':'')+'" data-gi="'+i+'" aria-label="'+(m.t==='v'?'Video':'Şəkil '+(i+1))+'">'+(m.t==='i'?'<img src="'+esc(m.u)+'" alt="">':'')+'</button>').join('')+'</div>':'';
