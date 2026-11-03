@@ -384,7 +384,7 @@ select:disabled{background:#f4f2ee;color:#9a958b;cursor:not-allowed}
               </div>
               <div class="two">
                 <div class="f"><label for="pDept">Üst kateqoriya</label><div class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><select id="pDept"><option value="">Seçin</option></select></div><input class="oth hide" id="pDeptO" maxlength="60" placeholder="Üst kateqoriyanı özünüz yazın"></div>
-                <div class="f"><label for="pCat">Kateqoriya</label><div class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><select id="pCat" disabled><option value="">Seçin</option></select></div><input class="oth hide" id="pCatO" maxlength="60" placeholder="Kateqoriyanı özünüz yazın"></div>
+                <div class="f"><label for="pCat">Kateqoriya</label><div class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><select id="pCat" disabled><option value="">Seçin</option></select></div><label class="hide" id="pCatGL" for="pCatG" style="margin-top:10px">Hansı başlıq</label><div class="ic hide" id="pCatGW"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h6"/></svg><select id="pCatG"></select></div><input class="oth hide" id="pCatO" maxlength="60" placeholder="Nə yazmaq istəyirsiniz? (məs: Paltar)"></div>
               </div>
               <div class="two">
                 <div class="f"><label for="pBrand">Marka</label><div class="ic"><svg viewBox="0 0 24 24"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1"/></svg><input id="pBrand" maxlength="60" placeholder="Məs: Nike"></div></div>
@@ -744,6 +744,14 @@ function resolveCat(dept){
   const typed=getVal('pCat','pCatO');
   if(!typed) return {category:'',subcategory:''};
   const gs=MENU[dept]||[];
+  if(grpOn()){
+    const g=gs.find(x=>x.t===$('#pCatG').value);
+    if(g){
+      if(fk(typed)===fk(g.t)) return {category:g.t,subcategory:''};
+      const leaf=[...g.i,...g.x].find(x=>fk(x)===fk(typed));
+      return {category:g.t,subcategory:leaf||typed};
+    }
+  }
   const grp=gs.find(g=>fk(g.t)===fk(typed));
   if(grp) return {category:grp.t,subcategory:''};
   for(const g of gs){
@@ -763,6 +771,17 @@ function syncOther(sel,oth){
   const on=$('#'+sel).value===OTHER;
   $('#'+oth).classList.toggle('hide',!on);
   if(!on) $('#'+oth).value='';
+  if(sel==='pCat') syncGrp();
+}
+/* Kateqoriyada "Özüm yazım" seçiləndə: "Hansı başlıq" xanası (seçilmiş üst kateqoriyanın başlıqları) */
+function grpOn(){return $('#pCat').value===OTHER&&!!$('#pDept').value&&$('#pDept').value!==OTHER&&(MENU[$('#pDept').value]||[]).length>0}
+function syncGrp(){
+  const on=grpOn();
+  ['pCatGL','pCatGW'].forEach(id=>$('#'+id).classList.toggle('hide',!on));
+  if(!on){$('#pCatG').innerHTML='';return}
+  const cur=$('#pCatG').value;
+  $('#pCatG').innerHTML='<option value="">Seçin</option>'+(MENU[$('#pDept').value]||[]).map(g=>'<option>'+esc(g.t)+'</option>').join('');
+  $('#pCatG').value=[...$('#pCatG').options].some(o=>o.value===cur)?cur:'';
 }
 function syncOthers(){OTHERS.forEach(([s,o])=>syncOther(s,o))}
 OTHERS.forEach(([s,o])=>$('#'+s).addEventListener('change',()=>{syncOther(s,o);if($('#'+s).value===OTHER)$('#'+o).focus()}));
@@ -904,7 +923,7 @@ $('#vFile').addEventListener('change',()=>{
 
 /* ---------- Məhsul formu: əlavə et / redaktə et ---------- */
 let editId=null,editVideo='';
-const FORM_IDS=['pName','pPrice','pStock','pDesc','pFile','vFile','pBrand','pDim','pMat','pDept','pCat','pGender','pAge','pColor','pSizeClass','pDeptO','pCatO','pColorO','pSizeClassO','pSizeO'];
+const FORM_IDS=['pName','pPrice','pStock','pDesc','pFile','vFile','pBrand','pDim','pMat','pDept','pCat','pGender','pAge','pColor','pSizeClass','pDeptO','pCatO','pCatG','pColorO','pSizeClassO','pSizeO'];
 
 function resetForm(){
   editId=null;editVideo='';imgs=[];
@@ -926,7 +945,11 @@ function startEdit(id){
   syncCat('');
   const want=p.subcategory?(p.category+'||'+p.subcategory):'';
   if(want&&[...$('#pCat').options].some(o=>o.value===want)){$('#pCat').value=want;syncOther('pCat','pCatO')}
-  else setVal('pCat','pCatO',p.subcategory||p.category||'');
+  else if(p.subcategory||p.category){
+    setVal('pCat','pCatO',p.subcategory||p.category);
+    syncGrp();
+    if(p.subcategory&&grpOn())$('#pCatG').value=p.category;
+  }
   $('#pBrand').value=p.brand||'';
   $('#pGender').value=p.gender||'';syncKid();
   renderSizeChips(false);
@@ -977,6 +1000,7 @@ $('#addP').onclick=async()=>{
   if(!p.name||isNaN(p.price)||isNaN(p.stock)) return toast('Ad, qiymət və stoku yazın');
   if(p.price<0||p.stock<0) return toast('Qiymət və stok mənfi ola bilməz');
   if($('#pDept').value===OTHER&&!dept) return toast('Üst kateqoriyanı yazın və ya siyahıdan seçin');
+  if($('#pCat').value===OTHER&&grpOn()&&!$('#pCatG').value) return toast('Hansı başlığın altına əlavə olunacağını seçin');
   if($('#pCat').value===OTHER&&!p.category) return toast('Kateqoriyanı yazın və ya siyahıdan seçin');
   if($('#pColor').value===OTHER&&!p.color) return toast('Rəngi yazın və ya siyahıdan seçin');
   if($('#pSizeClass').value===OTHER&&!p.size_class) return toast('Boyutu yazın və ya siyahıdan seçin');
