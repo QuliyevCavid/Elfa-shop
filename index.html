@@ -847,7 +847,7 @@ function cardHtml(p){
   const msg=encodeURIComponent('Salam, ELFA-da "'+p.name+'" məhsulu ilə maraqlanıram.');
   const href=wa?wa+'?text='+msg:(p.store_phone?telHref(p.store_phone):'');
   const contact=href?'<a class="ccontact" href="'+esc(href)+'"'+(wa?' target="_blank" rel="noopener noreferrer"':'')+' title="Satıcıya yaz" aria-label="Satıcıya yaz">'+ICON_CHAT+'</a>':'';
-  const sub=[p.category,p.gender].filter(Boolean).join(' · ')||p.store_name||'';
+  const sub=[p.subcategory||p.category,p.gender].filter(Boolean).join(' · ')||p.store_name||'';
   const out=p.stock<=0?'<span class="sbadge">Stokda yoxdur</span>':(p.stock<=3?'<span class="sbadge low">Son '+esc(p.stock)+' ədəd</span>':(p.on_home?'<span class="sbadge pick">★ Seçilmiş</span>':''));
   return '<article class="pcard" data-pid="'+esc(p.id)+'">'+photoHtml(p,!!safeVideo(p.video_url)).replace('</div>',out+'</div>')+
     '<button class="heart'+(fav?' on':'')+'" data-heart="'+esc(p.id)+'" aria-label="Sevimlilər">'+(fav?'♥':'♡')+'</button>'+
@@ -1307,7 +1307,7 @@ function productView(id){
     const vid=safeVideo(p.video_url);
     const imgs=((p.images&&p.images.length)?p.images:[p.image_url]).map(safeUrl).filter(Boolean).slice(0,5);
     const media=imgs.map(u=>({t:'i',u})).concat(vid?[{t:'v',u:vid}]:[]);
-    const rows=[['Kateqoriya',p.category],['Cinsiyyət',p.gender],['Yaş aralığı',p.age_group],['Ölçü',(p.sizes||[]).join(', ')],['Rəng',p.color],['Boyut',p.size_class],['Ölçülər',p.dimensions],['Material',p.material]]
+    const rows=[['Kateqoriya',p.subcategory?(p.category+' › '+p.subcategory):p.category],['Cinsiyyət',p.gender],['Yaş aralığı',p.age_group],['Ölçü',(p.sizes||[]).join(', ')],['Rəng',p.color],['Boyut',p.size_class],['Ölçülər',p.dimensions],['Material',p.material]]
       .filter(r=>r[1]);
     const inStock=p.stock>0;
     const thumbs=media.length>1?'<div class="pd-thumbs">'+media.map((m,i)=>'<button type="button" class="pd-th'+(m.t==='v'?' v':'')+(i===0?' on':'')+'" data-gi="'+i+'" aria-label="'+(m.t==='v'?'Video':'Şəkil '+(i+1))+'">'+(m.t==='i'?'<img src="'+esc(m.u)+'" alt="">':'')+'</button>').join('')+'</div>':'';
@@ -1545,12 +1545,12 @@ const heartBtn=p=>'<button type="button" class="hrt'+(favs.includes(String(p.id)
 const miniCard=p=>{
   const u=safeUrl(p.image_url);
   return '<article class="mcard" data-pid="'+esc(p.id)+'"><div class="mph">'+(u?'<img src="'+esc(u)+'" alt="" loading="lazy" onerror="this.style.display=\'none\'">':'')+'</div>'+
-    '<div class="mrow"><div class="mtx"><div class="mname">'+esc(p.name)+'</div><div class="mcat">'+esc(p.category||p.store_name||'')+'</div></div>'+heartBtn(p)+'</div>'+
+    '<div class="mrow"><div class="mtx"><div class="mname">'+esc(p.name)+'</div><div class="mcat">'+esc(p.subcategory||p.category||p.store_name||'')+'</div></div>'+heartBtn(p)+'</div>'+
     '<div class="mprice">'+money(p.price)+'</div></article>';
 };
 const sideCard=p=>{
   const u=safeUrl(p.image_url);
-  return '<article class="hcard" data-pid="'+esc(p.id)+'"><div class="htx"><div class="mname">'+esc(p.name)+'</div><div class="mcat">'+esc(p.category||p.store_name||'')+'</div><div class="mprice">'+money(p.price)+'</div></div>'+
+  return '<article class="hcard" data-pid="'+esc(p.id)+'"><div class="htx"><div class="mname">'+esc(p.name)+'</div><div class="mcat">'+esc(p.subcategory||p.category||p.store_name||'')+'</div><div class="mprice">'+money(p.price)+'</div></div>'+
     '<div class="him">'+(u?'<img src="'+esc(u)+'" alt="" loading="lazy" onerror="this.style.display=\'none\'">':'')+'</div>'+heartBtn(p)+'</article>';
 };
 const storeMini=s=>'<div class="sc2" data-store="'+esc(s.id)+'"><div class="sc2top">'+logoHtml(s)+'<div class="sc2tx"><b>'+esc(s.store_name)+'</b><small>'+esc(s.category||'')+'</small>'+(s.city?'<small>'+ICON_PIN+esc(s.city)+'</small>':'')+'</div></div><span class="sc2btn">Mağazaya bax →</span></div>';
