@@ -502,6 +502,131 @@ input:not([type=checkbox]):not([type=radio]){-webkit-appearance:none;appearance:
 .cov-all .cov-ic{background:#FBF1D6;border-color:#F1DDA0}
 .cov-all .cov-ic svg{width:30px;height:30px;fill:var(--accent)}
 @media(prefers-reduced-motion:reduce){.cov{animation:none}}
+/* ===== ELFA: kompüter (desktop) düzəlişləri =====
+   Bunu index.html-də <style id="imgs"></style> sətrindən ƏVVƏL,
+   əsas </style> teqindən dərhal əvvəl yapışdırın.
+   Yalnız 1024px və yuxarı ekranlara təsir edir, telefon dəyişmir. */
+@media(min-width:1024px){
+ :root{--wrap:min(1320px,92%)}
+
+ /* üst zolaq və başlıq */
+ .topbar{font-size:12.5px;padding:10px 20px}
+ .nav{height:78px;gap:36px}
+ .logo{font-size:32px;letter-spacing:7px;min-width:140px}
+ .search{max-width:640px}
+ .search input{height:48px;font-size:14px;padding:0 64px 0 24px;border-radius:28px}
+ .search button{width:40px;height:40px;top:4px;right:4px}
+ .action{font-size:13.5px;gap:8px}
+ .nav-actions{gap:28px}
+
+ /* kateqoriya zolağı */
+ .cat-inner{height:48px;gap:38px}
+ .megabtn,.cat-inner a{font-size:13.5px}
+ .cat-inner a{height:48px}
+ .mega-tab{font-size:14px;padding:13px 14px}
+ .mega-group h4{font-size:14px}
+ .megapanel .mega-group a{font-size:13px;padding:7px 0}
+
+ /* hero: şəkil olmasa da boş qalmasın */
+ .hero{min-height:380px;border-radius:22px;margin-top:22px}
+ .hero-img{
+  background-image:
+   radial-gradient(circle at 70% 35%,rgba(233,185,73,.55) 0,rgba(233,185,73,0) 38%),
+   radial-gradient(circle at 88% 78%,rgba(38,59,53,.22) 0,rgba(38,59,53,0) 42%);
+  -webkit-mask-image:none;mask-image:none;width:55%}
+ .hero-content{padding:44px 72px;max-width:720px}
+ .eyebrow{font-size:12px}
+ .hero h1{font-size:clamp(52px,5vw,72px);line-height:1;letter-spacing:-2.5px;margin-bottom:18px}
+ .hero p{font-size:16px;max-width:520px}
+ .pill{font-size:14px;padding:15px 30px;border-radius:30px}
+ .pill.ghost{padding:13.5px 28px}
+ .hero-btns{margin-top:24px;gap:14px}
+ .hero-chips span{font-size:12.5px;padding:8px 14px}
+
+ /* bölmələr */
+ .section{margin:56px auto}
+ .section-head{margin-bottom:22px}
+ .section-head h2{font-size:26px}
+ .section-head p{font-size:14px}
+ .see{font-size:13.5px}
+
+ .dept{font-size:14px;gap:12px}
+ .dept i{width:84px;height:84px}
+ .dept svg{width:38px;height:38px}
+ .dept+.dept:before{top:20px;height:60px}
+
+ /* mağazalar */
+ .scroller{gap:18px;grid-auto-columns:calc((100% - 5*18px)/6)}
+ .store{padding:22px 12px 18px}
+ .store-logo{width:72px;height:72px;font-size:18px}
+ .store strong{font-size:14px}
+ .store small{font-size:12px}
+ .arrow{width:40px;height:40px;font-size:18px}
+ .arrow.l{left:-20px}.arrow.r{right:-20px}
+
+ /* məhsul kartları: 5 sütun, oxunaqlı mətn */
+ .feat{grid-template-columns:repeat(5,minmax(0,1fr));gap:18px}
+ .products{grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
+ .photo{aspect-ratio:1/1}
+ .pinfo{padding:14px 16px 16px}
+ .pname{font-size:14px}
+ .psub{font-size:12.5px;margin:5px 0 12px}
+ .price{font-size:15.5px}
+ .ccontact{width:34px;height:34px;border-radius:10px}
+ .heart{width:32px;height:32px;font-size:17px;right:10px;top:10px}
+ .vbadge,.sbadge{font-size:11px;padding:4px 11px}
+ .hscroll{grid-auto-columns:minmax(220px,250px);gap:16px}
+
+ /* bannerlər və mağaza kartları */
+ .banners{gap:20px}
+ .banner{min-height:200px;border-radius:16px}
+ .banner-body{padding:30px 40px}
+ .banner h3{font-size:26px;margin-bottom:8px}
+ .banner p{font-size:13.5px;margin-bottom:18px}
+ .banner .pill{font-size:13px;padding:12px 24px}
+ .tiles{gap:16px;grid-auto-columns:calc((100% - 5*16px)/6)}
+ .tile{height:140px;border-radius:14px}
+ .tile-body strong{font-size:14.5px}
+ .tile-body small{font-size:12px}
+ .tarrow{width:28px;height:28px;font-size:14px}
+
+ /* satıcı çağırışı */
+ .sellcta-in{padding:48px 60px;border-radius:24px}
+ .sellcta h2{font-size:32px}
+ .sellcta p{font-size:15px}
+
+ /* nəticələr səhifəsi və filtrlər */
+ .shop.searching{grid-template-columns:280px 1fr;gap:28px}
+ .shop.searching .products{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .filters{top:104px;max-height:calc(100vh - 124px);padding:22px;border-radius:16px}
+ .filters h3{font-size:16px}
+ .filters label{font-size:13px;margin-bottom:14px}
+ .filters select,.filters input{height:42px;font-size:14px}
+ .sortbtn,.sopt{font-size:14px}
+
+ /* məhsul pəncərələri */
+ .modal h3{font-size:24px}
+ .modal p{font-size:14.5px}
+ .pd-info h2{font-size:32px}
+ .pd-price{font-size:34px}
+ .pd-spec{font-size:12.5px}
+ .pd-spec b{font-size:14px}
+ .modal .pd-desc{font-size:14.5px}
+ .btn{font-size:14.5px;padding:15px}
+ .mname{font-size:14px}.mcat{font-size:12.5px}.mprice{font-size:15px}
+
+ /* footer */
+ footer{padding:56px 0;margin-top:72px}
+ .footer-logo{font-size:28px}
+ .footer-inner p,.footer-links{font-size:14px}
+}
+
+/* çox geniş ekranlar */
+@media(min-width:1500px){
+ :root{--wrap:min(1400px,90%)}
+ .feat{grid-template-columns:repeat(6,minmax(0,1fr))}
+ .shop.searching .products{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
 </style>
 
 <!-- ============================================================
