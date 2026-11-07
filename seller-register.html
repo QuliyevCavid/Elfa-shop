@@ -47,7 +47,11 @@ textarea{min-height:100px;resize:vertical}
 input:focus,select:focus,textarea:focus{border-color:#263B35}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
-.pnr{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px}
+.pnr{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
+.pnr>.f:nth-child(1){grid-column:span 4}
+.pnr>.f:nth-child(2){grid-column:span 2}
+.pnr>.f:nth-child(3),.pnr>.f:nth-child(4){grid-column:span 3}
+.pnr.novs>.f:nth-child(1){grid-column:1/-1}
 .phone-box{display:flex;align-items:center;border:1px solid #ddd;border-radius:10px;background:#fff;overflow:hidden}
 .phone-box:focus-within{border-color:#263B35}
 .phone-box span{padding:0 12px;height:44px;display:flex;align-items:center;background:#f3f3f3;border-right:1px solid #ddd;font-size:14px;color:#444}
@@ -206,6 +210,26 @@ select:disabled{background:#f4f2ee;color:#9a958b;cursor:not-allowed}
 .pwx .eye .off{display:none}
 .pwx .eye.on .off{display:block}
 .pwx .eye.on .see{display:none}
+</style>
+<style>
+.vimg{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px;align-items:center}
+.vimg .vtl{flex-basis:100%;font-size:11px;color:#555;font-weight:700;margin:0}
+.vimg .vi{position:relative;width:56px;height:56px;border-radius:10px;overflow:hidden;border:1px solid var(--line);background:#EAE7DF}
+.vimg .vi img{width:100%;height:100%;object-fit:cover;display:block}
+.vimg .vi button{position:absolute;right:2px;top:2px;width:18px;height:18px;border-radius:50%;background:rgba(38,59,53,.85);color:#fff;font-size:10px;line-height:18px;padding:0}
+.vimg label.vadd-img{width:56px;height:56px;border-radius:10px;border:1.5px dashed #cfc9bf;display:flex;align-items:center;justify-content:center;cursor:pointer;margin:0;font-size:24px;font-weight:400;color:#263B35;background:#faf9f6}
+.vadd{display:flex;gap:8px;align-items:center;max-width:250px;margin-bottom:10px}
+.vadd input{height:40px;padding:6px 12px}
+.vplus{flex:none;width:40px;height:40px;border-radius:10px;background:#263B35;color:#fff;font-size:24px;line-height:1;padding:0 0 3px}
+.vsl{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:6px}
+.vsi{position:relative;width:80px;margin:0;text-align:center}
+.vsi b{display:block;font-size:12px;margin-bottom:4px}
+.vsi input{height:38px;padding:6px;text-align:center}
+.vsi .vsr{position:absolute;right:-6px;top:-8px;width:18px;height:18px;border-radius:50%;background:#fde4e4;color:#b42323;font-size:10px;line-height:18px;padding:0}
+@media(max-width:560px){
+ .pnr>.f:nth-child(n){grid-column:span 3}
+ .pnr>.f:nth-child(1),.pnr>.f:nth-child(2){grid-column:1/-1}
+}
 </style>
 </head>
 <body>
@@ -397,9 +421,9 @@ select:disabled{background:#f4f2ee;color:#9a958b;cursor:not-allowed}
             <div>
               <div class="pnr">
                 <div class="f"><label for="pName">Məhsul adı <i class="rq">*</i></label><div class="ic nm"><svg viewBox="0 0 24 24"><path d="M7 3h8l4 4v14H7z"/><path d="M10 12h6M10 16h6"/></svg><input id="pName" maxlength="80" placeholder="Məhsulun adını daxil edin"><span class="cnt" id="cName">0/80</span></div></div>
+                <div class="f"><label for="pStock">Stok sayı <i class="rq">*</i></label><div class="ic"><svg viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg><input id="pStock" type="number" min="0" step="1" inputmode="numeric" placeholder="0"></div></div>
                 <div class="f"><label for="pPrice">Qiymət (AZN) <i class="rq">*</i></label><div class="ic"><svg viewBox="0 0 24 24"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1"/></svg><input id="pPrice" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00"></div></div>
                 <div class="f"><label for="pOld">Köhnə qiymət (endirim üçün)</label><div class="ic"><svg viewBox="0 0 24 24"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1"/></svg><input id="pOld" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Boş qoy: endirim yoxdur"></div></div>
-                <div class="f"><label for="pStock">Stok sayı <i class="rq">*</i></label><div class="ic"><svg viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg><input id="pStock" type="number" min="0" step="1" inputmode="numeric" placeholder="0"></div></div>
               </div>
               <div class="two">
                 <div class="f"><label for="pDept">Üst kateqoriya</label><div class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><select id="pDept"><option value="">Seçin</option></select></div><input class="oth hide" id="pDeptO" maxlength="60" placeholder="Üst kateqoriyanı özünüz yazın"></div>
@@ -415,8 +439,8 @@ select:disabled{background:#f4f2ee;color:#9a958b;cursor:not-allowed}
                 <div id="varBox" class="hide">
                   <div id="varRows"></div>
                   <button type="button" class="btn alt fit" id="addVar">+ Rəng əlavə et</button>
-                  <input class="oth" id="vSizeO" maxlength="80" placeholder="Başqa ölçülər (vergüllə ayırın): 3XL, 48, 52">
-                  <p class="sub" style="margin:8px 0 0">Boş buraxılan ölçü "yoxdur" sayılır və alıcıya ✕ ilə göstərilir. 0 yazsanız da eyni olur.</p>
+                  <datalist id="vsList"></datalist>
+                  <p class="sub" style="margin:8px 0 0">Hər rəng üçün ölçünü yazıb "+" basın, altındakı xanaya həmin ölçüdən neçə ədəd olduğunu yazın. Stok 0 olan ölçü alıcıya ✕ ilə göstərilir.</p>
                 </div>
               </div>
               <div class="f" id="sizeWrap"><label>Ölçülər</label><div class="sizes" id="pSizes"></div>
@@ -952,31 +976,32 @@ $('#vFile').addEventListener('change',()=>{
 
 const COLOR_HEX={'Qara':'#1E1E1E','Ağ':'#FFFFFF','Qırmızı':'#C73E1D','Mavi':'#2F6FB3','Yaşıl':'#2E7D4F','Sarı':'#E9B949','Çəhrayı':'#E88FB0','Boz':'#8C8C8C','Qəhvəyi':'#7A5230','Bej':'#D8C3A5'};
 const colorHex=c=>COLOR_HEX[c]||'#CFCABD';
-/* ---------- Rəng variantları: hər rəngin öz ölçüləri və stoku ---------- */
+/* ---------- Rəng variantları: hər rəngin öz şəkilləri, ölçüləri və stoku ---------- */
 let VARS=[];
-const newVar=()=>({color:'',o:false,stock:'',sizes:{}});
+const newVar=()=>({color:'',o:false,stock:'',sz:[],imgs:[]});
 const varOn=()=>$('#useVar').checked;
-function varSizeList(){
-  if(isKid())return [];
+function fillSizeHints(){
   const cat=($('#pCat').value||'').split('||')[0];
   const base=[...(cat!=='Ayaqqabı'?OPT.clothing_sizes:[]),...(cat!=='Geyim'?OPT.shoe_sizes:[])];
-  const own=$('#vSizeO').value.split(',').map(z=>z.trim().toUpperCase()).filter(Boolean);
-  const extra=[];
-  VARS.forEach(v=>Object.keys(v.sizes).forEach(k=>{if(!base.includes(k)&&!own.includes(k)&&!extra.includes(k))extra.push(k)}));
-  return [...new Set([...base,...own,...extra])];
+  $('#vsList').innerHTML=base.map(z=>'<option value="'+esc(z)+'">').join('');
 }
 function renderVars(){
-  const sizes=varSizeList(),cols=OPT.colors.filter(c=>c!=='Digər');
+  const cols=OPT.colors.filter(c=>c!=='Digər'),kid=isKid();
+  fillSizeHints();
   $('#varRows').innerHTML=VARS.map((v,i)=>{
-    const std=cols.includes(v.color);
-    const other=v.o||(v.color&&!std);
+    const other=v.o||(v.color&&!cols.includes(v.color));
     const selVal=other?OTHER:(v.color||'');
     return '<div class="vr" data-i="'+i+'"><div class="vr-top"><div class="vsel"><i class="vdot" style="background:'+colorHex(v.color)+'"></i><select class="vc"><option value="">Rəng seçin</option>'+
       cols.map(c=>'<option'+(c===selVal?' selected':'')+'>'+esc(c)+'</option>').join('')+'<option value="'+OTHER+'"'+(selVal===OTHER?' selected':'')+'>✎ Özüm yazım</option></select></div>'+
       '<button type="button" class="vx">Sil</button></div>'+
       (other?'<input class="vco" maxlength="40" placeholder="Rəngi özünüz yazın" value="'+esc(v.color)+'">':'')+
-      (sizes.length?'<div class="vsz">'+sizes.map(z=>'<label class="vs"><span>'+esc(z)+'</span><input type="number" min="0" step="1" inputmode="numeric" placeholder="—" data-sz="'+esc(z)+'" value="'+esc(v.sizes[z]==null?'':v.sizes[z])+'"></label>').join('')+'</div>':'')+
-      '<div class="vns">'+(sizes.length?'Ölçüsüz məhsul üçün stok:':'Bu rəngdə stok:')+'<input type="number" min="0" step="1" inputmode="numeric" class="vstock" placeholder="0" value="'+esc(v.stock)+'"></div></div>';
+      '<div class="vimg"><div class="vtl">Bu rəngin şəkilləri ('+v.imgs.length+'/'+MAXIMG+')</div>'+
+        v.imgs.map((m,k)=>'<div class="vi"><img src="'+esc(m.src)+'" alt=""><button type="button" class="vir" data-k="'+k+'" aria-label="Sil">✕</button></div>').join('')+
+        (v.imgs.length<MAXIMG?'<label class="vadd-img" title="Şəkil əlavə et">+<input type="file" class="vfile" accept="image/*" multiple hidden></label>':'')+'</div>'+
+      (kid?'':'<div class="vadd"><input class="vsn" list="vsList" maxlength="20" placeholder="Ölçü (məs: M)" autocomplete="off"><button type="button" class="vplus" aria-label="Ölçü əlavə et">+</button></div>')+
+      (!kid&&v.sz.length?'<div class="vsl">'+v.sz.map((z,k)=>'<label class="vsi"><b>'+esc(z.s)+'</b><button type="button" class="vsr" data-k="'+k+'" aria-label="Sil">✕</button><input type="number" min="0" step="1" inputmode="numeric" class="vsq" data-k="'+k+'" placeholder="Stok" value="'+esc(z.q)+'"></label>').join('')+'</div>':'')+
+      ((kid||!v.sz.length)?'<div class="vns">Bu rəngdə stok:<input type="number" min="0" step="1" inputmode="numeric" class="vstock" placeholder="0" value="'+esc(v.stock)+'"></div>':'')+
+      '</div>';
   }).join('');
 }
 function syncVarMode(){
@@ -984,18 +1009,31 @@ function syncVarMode(){
   $('#varBox').classList.toggle('hide',!on);
   $('#pStock').closest('.f').classList.toggle('hide',on);
   $('#pColor').closest('.f').classList.toggle('hide',on);
+  $('.pnr').classList.toggle('novs',on);
   $('#sizeWrap').classList.toggle('hide',on||isKid());
   if(on){if(!VARS.length)VARS.push(newVar());renderVars()}
 }
+function addVarSize(row){
+  const v=VARS[+row.dataset.i];if(!v)return;
+  const inp=row.querySelector('.vsn');
+  const z=inp.value.trim().toUpperCase().replace(/,/g,' ');
+  if(!z)return toast('Əvvəl ölçünü yazın');
+  if(v.sz.some(x=>x.s===z))return toast('Bu ölçü artıq əlavə olunub');
+  if(v.sz.length>=30)return toast('Ən çox 30 ölçü əlavə etmək olar');
+  v.sz.push({s:z,q:''});
+  renderVars();
+  const q=$('#varRows').querySelector('.vr[data-i="'+row.dataset.i+'"] .vsq[data-k="'+(v.sz.length-1)+'"]');
+  if(q)q.focus();
+}
 $('#useVar').addEventListener('change',syncVarMode);
 $('#addVar').onclick=()=>{if(VARS.length>=10)return toast('Ən çox 10 rəng əlavə etmək olar');VARS.push(newVar());renderVars()};
-$('#vSizeO').addEventListener('change',renderVars);
 $('#varRows').addEventListener('input',e=>{
   const row=e.target.closest('.vr');if(!row)return;
   const v=VARS[+row.dataset.i];if(!v)return;
-  if(e.target.dataset.sz)v.sizes[e.target.dataset.sz]=e.target.value;
-  else if(e.target.classList.contains('vstock'))v.stock=e.target.value;
-  else if(e.target.classList.contains('vco')){v.color=e.target.value.trim();row.querySelector('.vdot').style.background=colorHex(v.color)}
+  const t=e.target;
+  if(t.classList.contains('vsq'))v.sz[+t.dataset.k].q=t.value;
+  else if(t.classList.contains('vstock'))v.stock=t.value;
+  else if(t.classList.contains('vco')){v.color=t.value.trim();row.querySelector('.vdot').style.background=colorHex(v.color)}
 });
 $('#varRows').addEventListener('change',e=>{
   const row=e.target.closest('.vr');if(!row)return;
@@ -1003,21 +1041,39 @@ $('#varRows').addEventListener('change',e=>{
   if(e.target.classList.contains('vc')){
     if(e.target.value===OTHER){v.o=true;v.color=''}else{v.o=false;v.color=e.target.value}
     renderVars();
+  }else if(e.target.classList.contains('vfile')){
+    let skipped=false;
+    [...e.target.files].forEach(f=>{if(v.imgs.length>=MAXIMG){skipped=true;return}v.imgs.push({file:f,src:URL.createObjectURL(f)})});
+    if(skipped)toast('Hər rəng üçün ən çox '+MAXIMG+' şəkil');
+    renderVars();
   }
 });
 $('#varRows').addEventListener('click',e=>{
-  if(!e.target.closest('.vx'))return;
-  const row=e.target.closest('.vr');
-  VARS.splice(+row.dataset.i,1);
-  if(!VARS.length)VARS.push(newVar());
-  renderVars();
+  const row=e.target.closest('.vr');if(!row)return;
+  const v=VARS[+row.dataset.i];if(!v)return;
+  if(e.target.closest('.vx')){VARS.splice(+row.dataset.i,1);if(!VARS.length)VARS.push(newVar());renderVars();return}
+  const ir=e.target.closest('.vir');if(ir){v.imgs.splice(+ir.dataset.k,1);renderVars();return}
+  const sr=e.target.closest('.vsr');if(sr){e.preventDefault();v.sz.splice(+sr.dataset.k,1);renderVars();return}
+  if(e.target.closest('.vplus'))addVarSize(row);
+});
+$('#varRows').addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&e.target.classList.contains('vsn')){e.preventDefault();addVarSize(e.target.closest('.vr'))}
 });
 function collectVariants(){
+  const kid=isKid();
   return VARS.filter(v=>v.color).map(v=>({
     color:v.color,
     stock:Math.max(0,parseInt(v.stock,10)||0),
-    sizes:Object.entries(v.sizes).filter(([k,q])=>q!==''&&q!=null&&!isNaN(parseInt(q,10))).map(([k,q])=>({size:k,stock:Math.max(0,parseInt(q,10))}))
+    sizes:kid?[]:v.sz.map(z=>({size:z.s,stock:Math.max(0,parseInt(z.q,10)||0)})),
+    images:v.imgs.filter(m=>m.url).map(m=>m.url)
   }));
+}
+async function uploadVarImages(txt){
+  for(const v of VARS){
+    for(const m of v.imgs){
+      if(m.file){txt.textContent='Rəng şəkli yüklənir...';m.url=await uploadImageSmart(m.file);m.file=null}
+    }
+  }
 }
 
 /* ---------- Məhsul formu: əlavə et / redaktə et ---------- */
@@ -1027,7 +1083,7 @@ const FORM_IDS=['pName','pPrice','pOld','pStock','pDesc','pFile','vFile','pBrand
 function resetForm(){
   editId=null;editVideo='';imgs=[];
   FORM_IDS.forEach(id=>$('#'+id).value='');
-  VARS=[];$('#useVar').checked=false;$('#vSizeO').value='';syncVarMode();
+  VARS=[];$('#useVar').checked=false;syncVarMode();
   $('#vBar').classList.add('hide');syncVideoUI();
   renderSizeChips(false);syncKid();syncOthers();syncCat('');renderImgs();updCnt();
   $('#formTitle').textContent='Yeni məhsul əlavə et';
@@ -1072,7 +1128,7 @@ function startEdit(id){
   $('#addTxt').textContent='Dəyişiklikləri saxla';
   $('#editBar').classList.remove('hide');
   if(p.variants&&p.variants.length){
-    VARS=p.variants.map(v=>({color:v.color,o:false,stock:v.stock||'',sizes:Object.fromEntries((v.sizes||[]).map(q=>[q.size,String(q.stock)]))}));
+    VARS=p.variants.map(v=>({color:v.color,o:false,stock:v.stock||'',sz:(v.sizes||[]).map(q=>({s:q.size,q:String(q.stock)})),imgs:(v.images||[]).map(u=>({src:bu(u),url:u}))}));
     $('#useVar').checked=true;
   }else{VARS=[];$('#useVar').checked=false}
   syncVarMode();
@@ -1131,6 +1187,7 @@ $('#addP').onclick=async()=>{
     }
     p.images=urls;
     p.image_url=urls[0]||'';
+    if(varOn()){await uploadVarImages(txt);p.variants=collectVariants()}
     if(vfile){
       txt.textContent='Video yüklənir... 0%';showBar(0);
       p.video_url=await storageUpload('video',vfile,videoType(vfile),pct=>{txt.textContent='Video yüklənir... '+pct+'%';showBar(pct)});
