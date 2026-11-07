@@ -421,7 +421,8 @@ input:disabled{background:#f4f2ee;color:#6b665c;cursor:not-allowed}
 
             <div>
               <div class="pnr">
-                <div class="f"><label for="pName">Məhsul adı <i class="rq">*</i></label><div class="ic nm"><svg viewBox="0 0 24 24"><path d="M7 3h8l4 4v14H7z"/><path d="M10 12h6M10 16h6"/></svg><input id="pName" maxlength="80" placeholder="Məhsulun adını daxil edin"><span class="cnt" id="cName">0/80</span></div></div>
+                <div class="f"><label for="pName">Məhsul adı <i class="rq">*</i></label><div class="ic nm"><svg viewBox="0 0 24 24"><path d="M7 3h8l4 4v14H7z"/><path d="M10 12h6M10 16h6"/></svg><input id="pName" maxlength="150" placeholder="Ad, rəng, marka, cinsiyyət, ölçü və s. yazın"><span class="cnt" id="cName">0/150</span></div></div>
+                <div class="f"><label for="pBold">Başdan neçə söz qalın yazılsın? <small style="font-weight:500;color:var(--muted)">(qalan sözlər sadə yazılır, 0 = hamısı qalın)</small></label><input id="pBold" type="number" min="0" max="30" value="0" placeholder="məs. 3" style="max-width:140px"><div id="pBoldPv" style="margin-top:8px;font-size:14px"></div></div>
                 <div class="f"><label for="pStock">Stok sayı <i class="rq">*</i></label><div class="ic"><svg viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg><input id="pStock" type="number" min="0" step="1" inputmode="numeric" placeholder="0"></div></div>
                 <div class="f"><label for="pPrice">Qiymət (AZN) <i class="rq">*</i></label><div class="ic"><svg viewBox="0 0 24 24"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1"/></svg><input id="pPrice" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00"></div></div>
                 <div class="f"><label for="pOld">Köhnə qiymət (endirim üçün)</label><div class="ic"><svg viewBox="0 0 24 24"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1"/></svg><input id="pOld" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Boş qoy: endirim yoxdur"></div></div>
@@ -532,8 +533,13 @@ function setPrev(src){
   if(src){p.src=src;p.classList.remove('hide');$('#pNone').classList.add('hide');$('#pClear').classList.remove('hide')}
   else{p.classList.add('hide');p.removeAttribute('src');$('#pNone').classList.remove('hide');$('#pClear').classList.add('hide')}
 }
-function updCnt(){$('#cName').textContent=$('#pName').value.length+'/80';$('#cDesc').textContent=$('#pDesc').value.length+'/600'}
-$('#pName').addEventListener('input',updCnt);
+function updCnt(){$('#cName').textContent=$('#pName').value.length+'/150';boldPv();$('#cDesc').textContent=$('#pDesc').value.length+'/600'}
+function boldPv(){
+  const w=$('#pName').value.trim().split(/\s+/).filter(Boolean),n=Math.max(0,parseInt($('#pBold').value,10)||0);
+  const e=x=>String(x).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  $('#pBoldPv').innerHTML=w.length?(n>0?'<b>'+e(w.slice(0,n).join(' '))+'</b> '+e(w.slice(n).join(' ')):'<b>'+e(w.join(' '))+'</b>'):'';
+}
+$('#pName').addEventListener('input',updCnt);$('#pBold').addEventListener('input',boldPv);
 $('#pDesc').addEventListener('input',updCnt);
 
 /* ---------- API ---------- */
@@ -1150,7 +1156,7 @@ async function uploadVarImages(txt){
 
 /* ---------- Məhsul formu: əlavə et / redaktə et ---------- */
 let editId=null,editVideo='';
-const FORM_IDS=['pName','pPrice','pOld','pStock','pDesc','pFile','vFile','pBrand','pDim','pMat','pDept','pCat','pGender','pAge','pColor','pSizeClass','pDeptO','pCatO','pCatG','pColorO','pSizeClassO','pSizeO','pSzIn'];
+const FORM_IDS=['pName','pBold','pPrice','pOld','pStock','pDesc','pFile','vFile','pBrand','pDim','pMat','pDept','pCat','pGender','pAge','pColor','pSizeClass','pDeptO','pCatO','pCatG','pColorO','pSizeClassO','pSizeO','pSzIn'];
 
 function resetForm(){
   editId=null;editVideo='';imgs=[];
@@ -1169,7 +1175,7 @@ function startEdit(id){
   if(!p) return;
   resetForm();
   editId=p.id;editVideo=p.video_url||'';
-  $('#pName').value=p.name||'';$('#pPrice').value=p.price;$('#pOld').value=p.old_price||'';$('#pStock').value=p.stock;
+  $('#pName').value=p.name||'';$('#pBold').value=p.name_bold||0;$('#pPrice').value=p.price;$('#pOld').value=p.old_price||'';$('#pStock').value=p.stock;
   setVal('pDept','pDeptO',p.department||inferDept(p.category||''));
   syncCat('');
   const want=p.subcategory?(p.category+'||'+p.subcategory):'';
@@ -1231,7 +1237,7 @@ $('#addP').onclick=async()=>{
   const variants=varOn()?collectVariants():[];
   if(varOn()&&!variants.length) return toast('Ən azı bir rəng seçin');
   const p={
-    name:$('#pName').value.trim(),price:parseFloat($('#pPrice').value),old_price:parseFloat($('#pOld').value)||0,stock:parseInt($('#pStock').value,10),
+    name:$('#pName').value.trim(),name_bold:Math.max(0,Math.min(30,parseInt($('#pBold').value,10)||0)),price:parseFloat($('#pPrice').value),old_price:parseFloat($('#pOld').value)||0,stock:parseInt($('#pStock').value,10),
     description:$('#pDesc').value.trim(),
     department:dept,category:cat,subcategory:sub,brand:$('#pBrand').value.trim(),gender:$('#pGender').value,
     age_group:kid?$('#pAge').value:'',
