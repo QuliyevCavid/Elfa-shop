@@ -297,6 +297,7 @@ class VariantIn(BaseModel):
     color: str = Field(max_length=40)
     stock: int = Field(default=0, ge=0, le=1_000_000)
     sizes: List[VarSizeIn] = Field(default_factory=list, max_length=30)
+    images: List[str] = Field(default_factory=list, max_length=5)
 
 
 class ProductIn(BaseModel):
@@ -360,6 +361,11 @@ _AZ = str.maketrans({
 
 def fold(s) -> str:
     return (s or "").strip().translate(_AZ).casefold()
+
+
+def multi(v) -> list:
+    """Filtrdə bir neçə dəyər: 'Qara|Ağ' -> ['qara', 'ag']"""
+    return [fold(x) for x in (v or "").split("|") if x.strip()]
 
 
 # ---------------------------------------------------------------
@@ -520,7 +526,13 @@ def clean_product(data: ProductIn, seller_id: int) -> dict:
                 if z and z not in used:
                     used.add(z)
                     vs.append({"size": z, "stock": it.stock})
-        variants.append({"color": c, "stock": sum(x["stock"] for x in vs) if vs else v.stock, "sizes": vs})
+        vimgs = []
+        for u in v.images:
+            u = clean_image_url(u, "Şəkil linki")
+            if u and len(u) <= 500 and u not in vimgs:
+                vimgs.append(u)
+        variants.append({"color": c, "stock": sum(x["stock"] for x in vs) if vs else v.stock,
+                         "sizes": vs, "images": vimgs[:5]})
     stock_val = data.stock
     if variants:
         color = variants[0]["color"]
@@ -531,6 +543,11 @@ def clean_product(data: ProductIn, seller_id: int) -> dict:
                 if x["stock"] > 0 and x["size"] not in sizes:
                     sizes.append(x["size"])
     colors = ",".join(v["color"] for v in variants) if variants else color.replace(",", " ")
+    if not images:  # ümumi şəkil yoxdursa, ilk rəngin şəkilləri əsas şəkil olur
+        for v in variants:
+            if v["images"]:
+                images = v["images"][:5]
+                break
 
     # Köhnə qiymət yalnız yeni qiymətdən böyükdürsə endirim sayılır
     old_price = data.old_price if data.old_price > data.price else 0
@@ -578,6 +595,14 @@ def row_image_urls(row) -> set:
                 urls.add(u)
     except ValueError:
         pass
+    try:
+        if "variants" in row.keys():
+            for v in json.loads(row["variants"] or "[]"):
+                for u in v.get("images", []):
+                    if isinstance(u, str) and u:
+                        urls.add(u)
+    except ValueError:
+        pass
     return urls
 
 
@@ -588,9 +613,9 @@ def drop_image(con, seller_id: int, url: str):
         return
     iid = int(m.group(1))
     used = con.execute(
-        """SELECT (SELECT COUNT(*) FROM products WHERE image_url = ? OR images LIKE ?)
+        """SELECT (SELECT COUNT(*) FROM products WHERE image_url = ? OR images LIKE ? OR variants LIKE ?)
                 + (SELECT COUNT(*) FROM sellers WHERE logo_url = ?)""",
-        (url, '%' + json.dumps(url) + '%', url),
+        (url, '%' + json.dumps(url) + '%', '%' + json.dumps(url) + '%', url),
     ).fetchone()[0]
     if used == 0:
         con.execute("DELETE FROM images WHERE id = ? AND seller_id = ?", (iid, seller_id))
@@ -1013,7 +1038,7 @@ def update_product(pid: int, data: ProductIn, s: sqlite3.Row = Depends(current_s
     f = clean_product(data, s["id"])
     with db() as con:
         old = con.execute(
-            "SELECT image_url, images FROM products WHERE id = ? AND seller_id = ?", (pid, s["id"])
+            "SELECT image_url, images, variants FROM products WHERE id = ? AND seller_id = ?", (pid, s["id"])
         ).fetchone()
         if not old:
             raise HTTPException(404, "Məhsul tapılmadı")
@@ -1022,7 +1047,8 @@ def update_product(pid: int, data: ProductIn, s: sqlite3.Row = Depends(current_s
                 WHERE id = ? AND seller_id = ?""",
             (*[f[k] for k in PRODUCT_FIELDS], pid, s["id"]),
         )
-        new_urls = {f["image_url"], *json.loads(f["images"])}
+        new_urls = {f["image_url"], *json.loads(f["images"]),
+                    *[u for v in json.loads(f["variants"] or "[]") for u in v.get("images", [])]}
         for u in row_image_urls(old) - new_urls:
             drop_image(con, s["id"], u)
         row = con.execute("SELECT * FROM products WHERE id = ?", (pid,)).fetchone()
@@ -1033,7 +1059,7 @@ def update_product(pid: int, data: ProductIn, s: sqlite3.Row = Depends(current_s
 def delete_product(pid: int, s: sqlite3.Row = Depends(current_seller)):
     with db() as con:
         old = con.execute(
-            "SELECT image_url, images FROM products WHERE id = ? AND seller_id = ?", (pid, s["id"])
+            "SELECT image_url, images, variants FROM products WHERE id = ? AND seller_id = ?", (pid, s["id"])
         ).fetchone()
         if not old:
             raise HTTPException(404, "Məhsul tapılmadı")
@@ -1087,7 +1113,7 @@ def filters(category: Optional[str] = None):
         all_rows = approved_rows(con)
     rows = all_rows
     if category:
-        rows = [r for r in rows if fold(r["category"]) == fold(category)]
+        rows = [r for r in rows if fold(r["category"]) in multi(category)]
 
     def distinct(col, src=None):
         seen = {}
@@ -1155,7 +1181,7 @@ def public_products(
             continue
         if sale and not (r["old_price"] and r["old_price"] > r["price"]):
             continue
-        if category and fold(r["category"]) != fold(category):
+        if category and fold(r["category"]) not in multi(category):
             continue
         if store_category and fold(r["store_category"]) != fold(store_category):
             continue
@@ -1168,21 +1194,21 @@ def public_products(
                 continue  # köhnə məhsul (üst kateqoriyası yoxdur): mağazanın kateqoriyasına görə
         if subcategory and fold(r["subcategory"]) != fold(subcategory):
             continue
-        if brand and fold(r["brand"]) != fold(brand):
+        if brand and fold(r["brand"]) not in multi(brand):
             continue
-        if gender and fold(r["gender"]) != fold(gender):
+        if gender and fold(r["gender"]) not in multi(gender):
             continue
-        if age and (r["age_group"] or "") != age.strip():
+        if age and (r["age_group"] or "") not in [x.strip() for x in age.split("|")]:
             continue
-        if size and size.strip().upper() not in (r["sizes"] or "").split(","):
+        if size and not ({x.strip().upper() for x in size.split("|") if x.strip()} & set((r["sizes"] or "").split(","))):
             continue
         if color:
             cs = [fold(x) for x in (r["colors"] or "").split(",") if x] or [fold(r["color"])]
-            if fold(color) not in cs:
+            if not (set(multi(color)) & set(cs)):
                 continue
-        if material and fold(r["material"]) != fold(material):
+        if material and fold(r["material"]) not in multi(material):
             continue
-        if size_class and fold(r["size_class"]) != fold(size_class):
+        if size_class and fold(r["size_class"]) not in multi(size_class):
             continue
         if price_min is not None and r["price"] < price_min:
             continue
@@ -1205,7 +1231,8 @@ def public_products(
     elif sort == "price_desc":
         result.sort(key=lambda r: (r["stock"] <= 0, -r["price"]))
     elif sort == "newest":
-        result.sort(key=lambda r: r["stock"] <= 0)
+        # Ən yenilər: mağazaların əlavə etdiyi vaxta görə təzədən köhnəyə
+        result.sort(key=lambda r: (r["created_at"] or "", r["id"]), reverse=True)
     elif sort == "discount":
         def _disc(r):
             return (r["old_price"] - r["price"]) / r["old_price"] if r["old_price"] and r["old_price"] > r["price"] else 0
@@ -1388,7 +1415,7 @@ def admin_products():
 def admin_delete_product(pid: int):
     with db() as con:
         old = con.execute(
-            "SELECT seller_id, image_url, images FROM products WHERE id = ?", (pid,)
+            "SELECT seller_id, image_url, images, variants FROM products WHERE id = ?", (pid,)
         ).fetchone()
         if not old:
             raise HTTPException(404, "Məhsul tapılmadı")
