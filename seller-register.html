@@ -379,6 +379,7 @@ select:disabled{background:#f4f2ee;color:#9a958b;cursor:not-allowed}
               <div class="pnr">
                 <div class="f"><label for="pName">Məhsul adı <i class="rq">*</i></label><div class="ic nm"><svg viewBox="0 0 24 24"><path d="M7 3h8l4 4v14H7z"/><path d="M10 12h6M10 16h6"/></svg><input id="pName" maxlength="80" placeholder="Məhsulun adını daxil edin"><span class="cnt" id="cName">0/80</span></div></div>
                 <div class="f"><label for="pPrice">Qiymət (AZN) <i class="rq">*</i></label><div class="ic"><svg viewBox="0 0 24 24"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1"/></svg><input id="pPrice" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00"></div></div>
+                <div class="f"><label for="pOld">Köhnə qiymət (endirim üçün)</label><div class="ic"><svg viewBox="0 0 24 24"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1"/></svg><input id="pOld" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Boş qoy: endirim yoxdur"></div></div>
                 <div class="f"><label for="pStock">Stok sayı <i class="rq">*</i></label><div class="ic"><svg viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg><input id="pStock" type="number" min="0" step="1" inputmode="numeric" placeholder="0"></div></div>
               </div>
               <div class="two">
@@ -625,7 +626,7 @@ const EMPTY='<div class="empty"><svg viewBox="0 0 24 24"><rect x="3" y="3" width
 const rowHtml=p=>`
     <div class="pi">
       <div class="im">${p.image_url?`<img src="${esc(bu(p.image_url))}" alt="" onerror="this.remove()">`:'ELFA'}</div>
-      <div class="mid"><b>${esc(p.name)}</b><small>${money(p.price)} · Stok: ${esc(p.stock)}${p.video_url?' · ▶ video':''}${p.on_home?' · ana səhifədə':''}</small></div>
+      <div class="mid"><b>${esc(p.name)}</b><small>${p.old_price>p.price?'<s>'+money(p.old_price)+'</s> ':''}${money(p.price)} · Stok: ${esc(p.stock)}${p.video_url?' · ▶ video':''}${p.on_home?' · ana səhifədə':''}</small></div>
       <div class="pact">
         <button class="del b" data-edit="${esc(p.id)}">Redaktə</button>
         <button class="del g" data-home="${esc(p.id)}" data-on="${p.on_home?'1':'0'}">${p.on_home?'Ana səhifədən çıxar':'Ana səhifəyə qoy'}</button>
@@ -922,7 +923,7 @@ $('#vFile').addEventListener('change',()=>{
 
 /* ---------- Məhsul formu: əlavə et / redaktə et ---------- */
 let editId=null,editVideo='';
-const FORM_IDS=['pName','pPrice','pStock','pDesc','pFile','vFile','pBrand','pDim','pMat','pDept','pCat','pGender','pAge','pColor','pSizeClass','pDeptO','pCatO','pCatG','pColorO','pSizeClassO','pSizeO'];
+const FORM_IDS=['pName','pPrice','pOld','pStock','pDesc','pFile','vFile','pBrand','pDim','pMat','pDept','pCat','pGender','pAge','pColor','pSizeClass','pDeptO','pCatO','pCatG','pColorO','pSizeClassO','pSizeO'];
 
 function resetForm(){
   editId=null;editVideo='';imgs=[];
@@ -939,7 +940,7 @@ function startEdit(id){
   if(!p) return;
   resetForm();
   editId=p.id;editVideo=p.video_url||'';
-  $('#pName').value=p.name||'';$('#pPrice').value=p.price;$('#pStock').value=p.stock;
+  $('#pName').value=p.name||'';$('#pPrice').value=p.price;$('#pOld').value=p.old_price||'';$('#pStock').value=p.stock;
   setVal('pDept','pDeptO',p.department||inferDept(p.category||''));
   syncCat('');
   const want=p.subcategory?(p.category+'||'+p.subcategory):'';
@@ -987,7 +988,7 @@ $('#addP').onclick=async()=>{
   const dept=matchIn(knownD,getVal('pDept','pDeptO'));
   const {category:cat,subcategory:sub}=resolveCat(dept);
   const p={
-    name:$('#pName').value.trim(),price:parseFloat($('#pPrice').value),stock:parseInt($('#pStock').value,10),
+    name:$('#pName').value.trim(),price:parseFloat($('#pPrice').value),old_price:parseFloat($('#pOld').value)||0,stock:parseInt($('#pStock').value,10),
     description:$('#pDesc').value.trim(),
     department:dept,category:cat,subcategory:sub,brand:$('#pBrand').value.trim(),gender:$('#pGender').value,
     age_group:kid?$('#pAge').value:'',
