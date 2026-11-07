@@ -219,6 +219,15 @@ input:disabled{background:#f4f2ee;color:#6b665c;cursor:not-allowed}
 .vimg .vi img{width:100%;height:100%;object-fit:cover;display:block}
 .vimg .vi button{position:absolute;right:2px;top:2px;width:18px;height:18px;border-radius:50%;background:rgba(38,59,53,.85);color:#fff;font-size:10px;line-height:18px;padding:0}
 .vimg label.vadd-img{width:56px;height:56px;border-radius:10px;border:1.5px dashed #cfc9bf;display:flex;align-items:center;justify-content:center;cursor:pointer;margin:0;font-size:24px;font-weight:400;color:#263B35;background:#faf9f6}
+.bw{display:flex;align-items:center;gap:10px;margin:2px 0 4px;font-size:13px;font-weight:600}
+.bw label{margin:0;font-weight:600}
+.bw input{width:56px;height:30px;padding:2px 6px;text-align:center;border-radius:15px;background:var(--soft,#F4EBDD);font-weight:700}
+.bwpv{font-size:13px;color:var(--muted);margin:0 0 6px}.bwpv:empty{display:none}
+.szh{display:flex!important;align-items:center;gap:9px;background:#243B36;color:#fff!important;border-radius:10px;padding:10px 14px;margin-bottom:10px!important;font-weight:700}
+.szh svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2.4;stroke-linecap:round}
+.vsi{border:1px solid #D9D5CA;border-radius:8px;overflow:visible;background:#fff}
+.vsi b{background:#F4F2EC;margin:0!important;padding:8px 0 6px;border-radius:7px 7px 0 0}
+.vsi input{border:0!important;border-top:1px solid #E7E3D8!important;border-radius:0 0 7px 7px;font-weight:700}
 .vadd{display:flex;gap:8px;align-items:center;max-width:340px;margin-bottom:10px}
 .vadd input{height:40px;padding:6px 12px}
 .vplus{flex:none;width:40px;height:40px;border-radius:10px;background:#263B35;color:#fff;font-size:24px;line-height:1;padding:0 0 3px}
@@ -422,7 +431,7 @@ input:disabled{background:#f4f2ee;color:#6b665c;cursor:not-allowed}
             <div>
               <div class="pnr">
                 <div class="f"><label for="pName">Məhsul adı <i class="rq">*</i></label><div class="ic nm"><svg viewBox="0 0 24 24"><path d="M7 3h8l4 4v14H7z"/><path d="M10 12h6M10 16h6"/></svg><input id="pName" maxlength="150" placeholder="Ad, rəng, marka, cinsiyyət, ölçü və s. yazın"><span class="cnt" id="cName">0/150</span></div></div>
-                <div class="f"><label for="pBold">Başdan neçə söz qalın yazılsın? <small style="font-weight:500;color:var(--muted)">(qalan sözlər sadə yazılır, 0 = hamısı qalın)</small></label><input id="pBold" type="number" min="0" max="30" value="0" placeholder="məs. 3" style="max-width:140px"><div id="pBoldPv" style="margin-top:8px;font-size:14px"></div></div>
+                <div class="bw"><label for="pBold">Başdan neçə söz qalın:</label><input id="pBold" type="number" min="0" max="30" value="0" inputmode="numeric" title="0 = hamısı qalın"></div><div id="pBoldPv" class="bwpv"></div>
                 <div class="f"><label for="pStock">Stok sayı <i class="rq">*</i></label><div class="ic"><svg viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg><input id="pStock" type="number" min="0" step="1" inputmode="numeric" placeholder="0"></div></div>
                 <div class="f"><label for="pPrice">Qiymət (AZN) <i class="rq">*</i></label><div class="ic"><svg viewBox="0 0 24 24"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1"/></svg><input id="pPrice" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00"></div></div>
                 <div class="f"><label for="pOld">Köhnə qiymət (endirim üçün)</label><div class="ic"><svg viewBox="0 0 24 24"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1"/></svg><input id="pOld" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Boş qoy: endirim yoxdur"></div></div>
@@ -437,7 +446,7 @@ input:disabled{background:#f4f2ee;color:#6b665c;cursor:not-allowed}
               </div>
               <div class="f hide" id="ageWrap"><label for="pAge">Yaş aralığı</label><select id="pAge"><option value="">Seçin</option></select></div>
               <div class="f vwrap">
-                <label class="chk" for="useVar"><input type="checkbox" id="useVar"> <span>Hər rəngin öz ölçüsü və stoku var (tövsiyə olunur)</span></label>
+                <label class="chk" for="useVar"><input type="checkbox" id="useVar"> <span>Hər rəngin öz ölçüsü və stoku var</span></label>
                 <div id="varBox" class="hide">
                   <div id="varRows"></div>
                   <button type="button" class="btn alt fit" id="addVar">+ Rəng əlavə et</button>
@@ -448,7 +457,7 @@ input:disabled{background:#f4f2ee;color:#6b665c;cursor:not-allowed}
 
               <!-- Ölçülər və stok (rəngsiz rejim) -->
               <div class="f" id="sizeWrap">
-                <label>Ölçülər və stok</label>
+                <label class="szh"><svg viewBox="0 0 24 24"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>Ölçülər və stok</label>
                 <div class="vadd"><input class="vsn" id="pSzIn" list="vsList" maxlength="120" placeholder="Ölçü(lər): 15 20 14 19 32" autocomplete="off"><button type="button" class="vplus" id="pSzAdd" aria-label="Ölçü əlavə et">+</button></div>
                 <div class="vsl" id="pSzList"></div>
                 <p class="hint">Bir neçə ölçünü qarışıq yaza bilərsiniz (boşluq və ya vergüllə ayırın: <b>15 20 14 19 32</b>), "+" basın: ölçülər avtomatik artan sırada düzülür və hər biri ayrıca stok xanası ilə görünür. Stok 0 olan ölçü alıcıya ✕ ilə göstərilir. Ümumi stok avtomatik hesablanır.</p>
