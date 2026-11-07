@@ -625,7 +625,8 @@ input:not([type=checkbox]):not([type=radio]){-webkit-appearance:none;appearance:
 /* ===== Mərhələ 2: məhsul başlığı yanında etiket, sola sıxılmış nəticələr, çoxlu seçimli filtrlər ===== */
 .pd-title{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:0 0 4px}
 .pd-title h2{margin:0}
-.pd-tx{font-size:.6em;font-weight:600;color:var(--muted)}
+.pd-nr{font-weight:500;font-size:.72em;line-height:1.35}
+.pd-title h2{line-height:1.25;word-break:break-word}
 .pd-tags span{background:var(--soft);color:var(--brand);border-radius:12px;padding:4px 11px;font-size:11px;font-weight:700}
 #resultsView{width:auto;margin:-8px 12px 0}
 #chips{display:none!important}
@@ -1510,6 +1511,12 @@ function contactHtml(p){
     (p.store_phone?'<a class="btn alt" href="'+esc(telHref(p.store_phone))+'">'+ICON_PHONE+'<span>'+esc(fmtPhone(p.store_phone))+'</span></a>':'');
   return parts||'<p style="margin-top:10px">Satıcının əlaqə məlumatı əlavə olunmayıb.</p>';
 }
+/* ad: satıcının seçdiyi sayda ilk sözlər qalın, qalanı sadə */
+function nameHtml(p){
+  const n=Math.max(0,parseInt(p.name_bold,10)||0),w=String(p.name||'').trim().split(/\s+/).filter(Boolean);
+  if(!n||n>=w.length)return esc(w.join(' '));
+  return '<b>'+esc(w.slice(0,n).join(' '))+'</b> <span class="pd-nr">'+esc(w.slice(n).join(' '))+'</span>';
+}
 function productView(id){
   return()=>{
     const p=cache[id];
@@ -1526,8 +1533,7 @@ function productView(id){
       return (vi.length?vi:baseImgs).map(u=>({t:'i',u})).concat(vid?[{t:'v',u:vid}]:[]);
     };
     let media=mediaFor(0);
-    const tags=[p.subcategory||p.category,p.gender,p.size_class].filter(Boolean);
-    const rows=[['Yaş aralığı',p.age_group],['Ölçü',(p.sizes||[]).join(', ')],['Rəng',p.color],['Ölçülər',p.dimensions],['Material',p.material]]
+    const rows=[['Yaş aralığı',p.age_group],['Ölçü',(p.sizes||[]).join(', ')],['Rəng',p.color]]
       .filter(r=>r[1]&&r[0]!=='Rəng'&&r[0]!=='Ölçü');
     const inStock=p.stock>0;
     const thumbs0=media.length>1?'<div class="pd-thumbs">'+media.map((m,i)=>'<button type="button" class="pd-th'+(m.t==='v'?' v':'')+(i===0?' on':'')+'" data-gi="'+i+'" aria-label="'+(m.t==='v'?'Video':'Şəkil '+(i+1))+'">'+(m.t==='i'?'<img src="'+esc(m.u)+'" alt="">':'')+'</button>').join('')+'</div>':'';
@@ -1535,8 +1541,7 @@ function productView(id){
     return {full:true,html:
       '<div class="pdp">'+crumbs(p)+'<div class="pd"><div class="pd-gal"><div class="pd-main"><div class="pd-stage" id="pdStage"></div>'+nav+'</div><div id="pdThumbs"></div></div>'+
       '<div class="pd-info">'+
-        (p.brand?'<span class="pd-brand">'+esc(p.brand)+'</span>':'')+
-        '<div class="pd-title"><h2>'+esc(p.name)+(tags.length?'<span class="pd-tx">, '+tags.map(esc).join(', ')+'</span>':'')+'</h2></div>'+
+        '<div class="pd-title"><h2>'+nameHtml(p)+'</h2></div>'+
         '<div class="pd-price'+(disc(p)?' sale':'')+'">'+money(p.price)+(disc(p)?'<s class="oldp big">'+money(p.old_price)+'</s><span class="dpill">-'+disc(p)+'%</span>':'')+'</div>'+
         '<span class="pd-stock'+(inStock?'':' out')+'" id="pdStock">'+(inStock?'Stokda var • '+esc(p.stock)+' ədəd':'Stokda yoxdur')+'</span>'+((hasVar||hasSzStock||p.color||(p.sizes||[]).length)?'<div class="pd-var" id="pdVar"></div>':'')+
         (p.description?'<p class="pd-desc">'+esc(p.description)+'</p>':'')+
