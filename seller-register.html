@@ -201,6 +201,7 @@ body.noside .side{display:none}
 .mb{grid-template-columns:1fr}.stats{grid-template-columns:1fr}.logoRow{grid-template-columns:1fr}.hu .nm{display:none}.logo{letter-spacing:6px}}
 @media(max-width:560px){.pnr{grid-template-columns:1fr 1fr}.pnr .f:first-child{grid-column:1/-1}.two,.three{grid-template-columns:1fr}.panel{padding:20px}.md{padding:18px}.sec{padding:18px}.pi{flex-wrap:wrap}.pact{justify-content:flex-start}.welcome{font-size:21px}}
 select:disabled{background:#f4f2ee;color:#9a958b;cursor:not-allowed}
+input:disabled{background:#f4f2ee;color:#6b665c;cursor:not-allowed}
 /* şifrə sahəsində göz düyməsi */
 .pwx{position:relative}
 .pwx input{padding-right:48px}
@@ -443,9 +444,18 @@ select:disabled{background:#f4f2ee;color:#9a958b;cursor:not-allowed}
                   <p class="sub" style="margin:8px 0 0">Hər rəng üçün ölçünü yazıb "+" basın, altındakı xanaya həmin ölçüdən neçə ədəd olduğunu yazın. Stok 0 olan ölçü alıcıya ✕ ilə göstərilir.</p>
                 </div>
               </div>
-              <div class="f" id="sizeWrap"><label>Ölçülər</label><div class="sizes" id="pSizes"></div>
-                <input class="oth" id="pSizeO" maxlength="80" placeholder="Başqa ölçünü özünüz yazın (vergüllə ayırın): 3XL, 48, 52"></div>
-              <div class="two">
+
+              <!-- Ölçülər və stok (rəngsiz rejim) -->
+              <div class="f" id="sizeWrap">
+                <label>Ölçülər və stok</label>
+                <div class="vadd"><input class="vsn" id="pSzIn" list="vsList" maxlength="20" placeholder="Ölçü (məs: 50ML)" autocomplete="off"><button type="button" class="vplus" id="pSzAdd" aria-label="Ölçü əlavə et">+</button></div>
+                <div class="vsl" id="pSzList"></div>
+                <p class="hint">Ölçünü yazıb "+" basın, altındakı xanaya həmin ölçünün stokunu yazın. Stok 0 olan ölçü alıcıya ✕ ilə göstərilir. Ölçü əlavə edəndə ümumi stok avtomatik hesablanır.</p>
+                <div style="display:none"><div class="sizes" id="pSizes"></div><input id="pSizeO"></div>
+              </div>
+
+              <!-- Rəng / Boyut: gizlədilib (JS sınmasın deyə silinməyib) -->
+              <div class="two hide">
                 <div class="f"><label for="pColor">Rəng</label><div class="ic"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18c1.5 0 2-1 1.5-2s0-2 1.5-2h2a3 3 0 0 0 3-3c0-6-3.6-11-8-11z"/><circle cx="8" cy="11" r="1"/><circle cx="12" cy="7.5" r="1"/><circle cx="16" cy="11" r="1"/></svg><select id="pColor"><option value="">Seçin</option></select></div><input class="oth hide" id="pColorO" maxlength="40" placeholder="Rəngi özünüz yazın"></div>
                 <div class="f"><label for="pSizeClass">Boyut</label><div class="ic"><svg viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg><select id="pSizeClass"><option value="">Seçin</option></select></div><input class="oth hide" id="pSizeClassO" maxlength="40" placeholder="Boyutu özünüz yazın"></div>
               </div>
@@ -855,17 +865,55 @@ function syncKid(){
   $('#ageWrap').classList.toggle('hide',!isKid());
   $('#sizeWrap').classList.toggle('hide',isKid()||$('#useVar').checked);
   if($('#useVar').checked)renderVars();
+  syncSZStock();
 }
-$('#pCat').addEventListener('change',()=>{renderSizeChips(true);if($('#useVar').checked)renderVars()});
-$('#pDept').addEventListener('change',()=>{syncCat('');renderSizeChips(true);if($('#useVar').checked)renderVars()});
+$('#pCat').addEventListener('change',()=>{renderSizeChips(true);if($('#useVar').checked)renderVars();else fillSizeHints()});
+$('#pDept').addEventListener('change',()=>{syncCat('');renderSizeChips(true);if($('#useVar').checked)renderVars();else fillSizeHints()});
 $('#pGender').addEventListener('change',syncKid);
 async function loadOptions(){
   try{const r=await fetch('/api/options');OPT=Object.assign(OPT,await r.json())}catch(e){}
   fillSel('pDept',Object.keys(MENU),true);syncCat('');fillSel('pGender',OPT.genders);fillSel('pAge',OPT.age_groups);
   fillSel('pColor',OPT.colors,true);fillSel('pSizeClass',OPT.size_classes,true);
-  renderSizeChips(false);syncKid();syncOthers();
+  renderSizeChips(false);syncKid();syncOthers();fillSizeHints();
   syncVideoUI();
 }
+
+/* ---------- Ölçü + stok (rəngsiz rejim) ---------- */
+let SZ=[]; // {s: ölçü, q: stok}
+function renderSZ(){
+  fillSizeHints();
+  $('#pSzList').innerHTML=SZ.map((z,k)=>'<label class="vsi"><b>'+esc(z.s)+'</b><button type="button" class="vsr" data-k="'+k+'" aria-label="Sil">✕</button><input type="number" min="0" step="1" inputmode="numeric" class="vsq" data-k="'+k+'" placeholder="Stok" value="'+esc(z.q)+'"></label>').join('');
+  syncSZStock();
+}
+/* Ölçü varsa ümumi stok avtomatik hesablanır və əl ilə dəyişdirilmir */
+function syncSZStock(){
+  const st=$('#pStock');
+  const has=SZ.length>0&&!isKid()&&!$('#useVar').checked;
+  st.disabled=has;
+  if(has) st.value=SZ.reduce((a,z)=>a+(parseInt(z.q,10)||0),0);
+}
+function addSZ(){
+  const inp=$('#pSzIn');
+  const z=inp.value.trim().toUpperCase().replace(/,/g,' ');
+  if(!z) return toast('Əvvəl ölçünü yazın');
+  if(SZ.some(x=>x.s===z)) return toast('Bu ölçü artıq əlavə olunub');
+  if(SZ.length>=30) return toast('Ən çox 30 ölçü əlavə etmək olar');
+  SZ.push({s:z,q:''});
+  inp.value='';
+  renderSZ();
+  const q=$('#pSzList').querySelector('.vsq[data-k="'+(SZ.length-1)+'"]');
+  if(q) q.focus();
+}
+$('#pSzAdd').onclick=addSZ;
+$('#pSzIn').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addSZ()}});
+$('#pSzList').addEventListener('input',e=>{
+  if(e.target.classList.contains('vsq')){SZ[+e.target.dataset.k].q=e.target.value;syncSZStock()}
+});
+$('#pSzList').addEventListener('click',e=>{
+  const r=e.target.closest('.vsr');
+  if(r){e.preventDefault();SZ.splice(+r.dataset.k,1);renderSZ()}
+});
+
 loadOptions();
 
 /* ---------- Şəkil və video yükləmə ---------- */
@@ -1012,6 +1060,7 @@ function syncVarMode(){
   $('.pnr').classList.toggle('novs',on);
   $('#sizeWrap').classList.toggle('hide',on||isKid());
   if(on){if(!VARS.length)VARS.push(newVar());renderVars()}
+  syncSZStock();
 }
 function addVarSize(row){
   const v=VARS[+row.dataset.i];if(!v)return;
@@ -1078,11 +1127,12 @@ async function uploadVarImages(txt){
 
 /* ---------- Məhsul formu: əlavə et / redaktə et ---------- */
 let editId=null,editVideo='';
-const FORM_IDS=['pName','pPrice','pOld','pStock','pDesc','pFile','vFile','pBrand','pDim','pMat','pDept','pCat','pGender','pAge','pColor','pSizeClass','pDeptO','pCatO','pCatG','pColorO','pSizeClassO','pSizeO'];
+const FORM_IDS=['pName','pPrice','pOld','pStock','pDesc','pFile','vFile','pBrand','pDim','pMat','pDept','pCat','pGender','pAge','pColor','pSizeClass','pDeptO','pCatO','pCatG','pColorO','pSizeClassO','pSizeO','pSzIn'];
 
 function resetForm(){
   editId=null;editVideo='';imgs=[];
   FORM_IDS.forEach(id=>$('#'+id).value='');
+  SZ=[];renderSZ();
   VARS=[];$('#useVar').checked=false;syncVarMode();
   $('#vBar').classList.add('hide');syncVideoUI();
   renderSizeChips(false);syncKid();syncOthers();syncCat('');renderImgs();updCnt();
@@ -1115,6 +1165,12 @@ function startEdit(id){
     if(i)i.checked=true;else extra.push(sz);
   });
   $('#pSizeO').value=extra.join(', ');
+  /* ölçü + stok */
+  SZ=(p.size_stock&&p.size_stock.length)
+    ? p.size_stock.map(z=>({s:z.size,q:String(z.stock)}))
+    : (p.sizes||[]).map(s=>({s:String(s).toUpperCase(),q:''}));
+  renderSZ();
+  if(!SZ.length) $('#pStock').value=p.stock;
   $('#pAge').value=p.age_group||'';
   setVal('pColor','pColorO',p.color||'');
   setVal('pSizeClass','pSizeClassO',p.size_class||'');
@@ -1161,6 +1217,12 @@ $('#addP').onclick=async()=>{
     video_url:editVideo,variants
   };
   if(variants.length){p.stock=variants.reduce((a,v)=>a+(v.sizes.length?v.sizes.reduce((q,z)=>q+z.stock,0):v.stock),0);p.color=variants[0].color;p.sizes=[]}
+  /* rəngsiz rejim: hər ölçünün öz stoku */
+  if(!varOn()&&!kid&&SZ.length){
+    p.size_stock=SZ.map(z=>({size:z.s,stock:Math.max(0,parseInt(z.q,10)||0)}));
+    p.sizes=p.size_stock.filter(z=>z.stock>0).map(z=>z.size);
+    p.stock=p.size_stock.reduce((a,z)=>a+z.stock,0);
+  }
   if(!p.name||isNaN(p.price)||isNaN(p.stock)) return toast('Ad, qiymət və stoku yazın');
   if(p.price<0||p.stock<0) return toast('Qiymət və stok mənfi ola bilməz');
   if($('#pDept').value===OTHER&&!dept) return toast('Üst kateqoriyanı yazın və ya siyahıdan seçin');
