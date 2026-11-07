@@ -1148,14 +1148,21 @@ def public_products(
     with db() as con:
         rows = approved_rows(con, store_id)
 
+    def multi(v):
+        return [fold(x) for x in (v or "").split("|") if x.strip()]
+
     words = fold(q).split() if q else []
+    cats, brands, genders = multi(category), multi(brand), multi(gender)
+    colors_f, mats, scls = multi(color), multi(material), multi(size_class)
+    ages = [x.strip() for x in (age or "").split("|") if x.strip()]
+    sizes_f = {x.strip().upper() for x in (size or "").split("|") if x.strip()}
     result = []
     for r in rows:
         if home and not (r["on_home"] or r["store_home_all"]):
             continue
         if sale and not (r["old_price"] and r["old_price"] > r["price"]):
             continue
-        if category and fold(r["category"]) != fold(category):
+        if cats and fold(r["category"]) not in cats:
             continue
         if store_category and fold(r["store_category"]) != fold(store_category):
             continue
@@ -1168,21 +1175,21 @@ def public_products(
                 continue  # köhnə məhsul (üst kateqoriyası yoxdur): mağazanın kateqoriyasına görə
         if subcategory and fold(r["subcategory"]) != fold(subcategory):
             continue
-        if brand and fold(r["brand"]) != fold(brand):
+        if brands and fold(r["brand"]) not in brands:
             continue
-        if gender and fold(r["gender"]) != fold(gender):
+        if genders and fold(r["gender"]) not in genders:
             continue
-        if age and (r["age_group"] or "") != age.strip():
+        if ages and (r["age_group"] or "") not in ages:
             continue
-        if size and size.strip().upper() not in (r["sizes"] or "").split(","):
+        if sizes_f and not sizes_f & set((r["sizes"] or "").split(",")):
             continue
-        if color:
+        if colors_f:
             cs = [fold(x) for x in (r["colors"] or "").split(",") if x] or [fold(r["color"])]
-            if fold(color) not in cs:
+            if not set(colors_f) & set(cs):
                 continue
-        if material and fold(r["material"]) != fold(material):
+        if mats and fold(r["material"]) not in mats:
             continue
-        if size_class and fold(r["size_class"]) != fold(size_class):
+        if scls and fold(r["size_class"]) not in scls:
             continue
         if price_min is not None and r["price"] < price_min:
             continue
@@ -1205,7 +1212,7 @@ def public_products(
     elif sort == "price_desc":
         result.sort(key=lambda r: (r["stock"] <= 0, -r["price"]))
     elif sort == "newest":
-        result.sort(key=lambda r: r["stock"] <= 0)
+        result.sort(key=lambda r: -r["id"])
     elif sort == "discount":
         def _disc(r):
             return (r["old_price"] - r["price"]) / r["old_price"] if r["old_price"] and r["old_price"] > r["price"] else 0
