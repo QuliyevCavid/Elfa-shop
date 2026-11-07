@@ -631,7 +631,9 @@ input:not([type=checkbox]):not([type=radio]){-webkit-appearance:none;appearance:
 #resultsView{width:auto;margin:-8px 12px 0}
 #chips{display:none!important}
 #resultsView .section-head{justify-content:flex-start}
-#resultsView .section-head>div:first-child{flex:1}
+#resultsView .section-head{gap:18px;flex-wrap:wrap;align-items:center}
+#resultsView .section-head>div:first-child{flex:none}
+#resultsView .head-tools{margin-left:0}
 #resultsView #prodTitle{font-size:15px;letter-spacing:0;text-align:left}
 .shop.searching{grid-template-columns:230px 1fr;gap:16px}
 .shop.searching .products{grid-template-columns:repeat(4,minmax(0,1fr))}
