@@ -639,8 +639,10 @@ input:not([type=checkbox]):not([type=radio]){-webkit-appearance:none;appearance:
 #prodTitle i{font-style:normal;color:var(--muted);font-weight:500}
 /* sıralama: başlığın altında, məhsulların üstündə, sol tərəfdə */
 #resultsView .section-head{flex-direction:column;align-items:flex-start;gap:14px}
-#resultsView .head-tools{margin-left:250px}
-@media(max-width:800px){#resultsView .head-tools{margin-left:0}}
+#resultsView .section-head{margin-bottom:10px}
+#resultsView .head-tools:not(:has(.show)){display:none}
+@media(max-width:800px){#resultsView .head-tools{display:flex}}
+#sortBox{max-width:280px}
 /* filtr başlıqlarında ikonlar */
 .fl-t{display:flex!important;align-items:center;gap:9px}
 .fl-t svg,.pr-t svg{width:17px;height:17px;flex:none;stroke:var(--brand);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
@@ -816,10 +818,6 @@ input:not([type=checkbox]):not([type=radio]){-webkit-appearance:none;appearance:
       </div>
       <div class="head-tools">
         <button class="filter-toggle" id="fToggle">Filtrlər</button>
-        <div class="sortbox" id="sortBox">
-          <button type="button" class="sortbtn" id="sortBtn" aria-haspopup="listbox" aria-expanded="false"><span id="sortLabel">Tövsiyə olunan sıralama</span><svg viewBox="0 0 24 24"><path d="M5 15l7-7 7 7"/></svg></button>
-          <div class="sortlist hide" id="sortList" role="listbox" aria-label="Sıralama"></div>
-        </div>
       </div>
     </div>
 
@@ -841,6 +839,10 @@ input:not([type=checkbox]):not([type=radio]){-webkit-appearance:none;appearance:
         </label>
       </aside>
       <div>
+        <div class="sortbox" id="sortBox" style="margin-bottom:14px">
+          <button type="button" class="sortbtn" id="sortBtn" aria-haspopup="listbox" aria-expanded="false"><span id="sortLabel">Tövsiyə olunan sıralama</span><svg viewBox="0 0 24 24"><path d="M5 15l7-7 7 7"/></svg></button>
+          <div class="sortlist hide" id="sortList" role="listbox" aria-label="Sıralama"></div>
+        </div>
         <div class="products" id="products"></div>
         <div class="empty hide" id="empty"></div>
         <button class="more hide" id="moreBtn">Daha çox göstər</button>
@@ -1090,8 +1092,7 @@ async function loadProducts(reset){
       e.classList.remove('hide');
       if(activeCount()){
         e.classList.add('nores');
-        e.innerHTML='<svg class="bag" viewBox="0 0 24 24"><path d="M6 8h12l1 12H5z"/><path d="M9 8V6a3 3 0 0 1 6 0v2" fill="none" stroke="#243B36" stroke-width="1.8"/></svg><b>Bu seçimlərə uyğun məhsul tapılmadı.</b>Filtrləri dəyişin.<br><button type="button" id="resetF"><svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round"><path d="M20 11a8 8 0 0 0-14-4M4 4v4h4M4 13a8 8 0 0 0 14 4M20 20v-4h-4"/></svg>Filtrləri sıfırlayın</button>';
-        const rb=$('#resetF');if(rb)rb.onclick=()=>{$('#clearF')?$('#clearF').click():clearAll()};
+        e.innerHTML='<svg class="bag" viewBox="0 0 24 24"><path d="M6 8h12l1 12H5z"/><path d="M9 8V6a3 3 0 0 1 6 0v2" fill="none" stroke="#243B36" stroke-width="1.8"/></svg><b>Bu seçimlərə uyğun məhsul tapılmadı.</b>Filtrləri dəyişin.';
       }else{e.classList.remove('nores');e.textContent='Hələ məhsul yoxdur. Satıcılar təsdiqləndikdən sonra məhsullar burada görünəcək.'}
     }else e.classList.add('hide');
     const hasMore=total!==null?list.length<total:rows.length===PAGE;
