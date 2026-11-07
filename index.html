@@ -625,7 +625,7 @@ input:not([type=checkbox]):not([type=radio]){-webkit-appearance:none;appearance:
 /* ===== Mərhələ 2: məhsul başlığı yanında etiket, sola sıxılmış nəticələr, çoxlu seçimli filtrlər ===== */
 .pd-title{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:0 0 4px}
 .pd-title h2{margin:0}
-.pd-tags{display:flex;flex-wrap:wrap;gap:6px}
+.pd-tx{font-size:.6em;font-weight:600;color:var(--muted)}
 .pd-tags span{background:var(--soft);color:var(--brand);border-radius:12px;padding:4px 11px;font-size:11px;font-weight:700}
 #resultsView{width:auto;margin:-8px 12px 0}
 #chips{display:none!important}
@@ -1516,7 +1516,7 @@ function productView(id){
     let media=mediaFor(0);
     const tags=[p.subcategory||p.category,p.gender,p.size_class].filter(Boolean);
     const rows=[['Yaş aralığı',p.age_group],['Ölçü',(p.sizes||[]).join(', ')],['Rəng',p.color],['Ölçülər',p.dimensions],['Material',p.material]]
-      .filter(r=>r[1]&&!(hasVar&&(r[0]==='Rəng'||r[0]==='Ölçü')));
+      .filter(r=>r[1]&&r[0]!=='Rəng'&&r[0]!=='Ölçü');
     const inStock=p.stock>0;
     const thumbs0=media.length>1?'<div class="pd-thumbs">'+media.map((m,i)=>'<button type="button" class="pd-th'+(m.t==='v'?' v':'')+(i===0?' on':'')+'" data-gi="'+i+'" aria-label="'+(m.t==='v'?'Video':'Şəkil '+(i+1))+'">'+(m.t==='i'?'<img src="'+esc(m.u)+'" alt="">':'')+'</button>').join('')+'</div>':'';
     const nav='<button type="button" class="pd-nav l" data-pd="-1" aria-label="Əvvəlki">‹</button><button type="button" class="pd-nav r" data-pd="1" aria-label="Növbəti">›</button><span class="pd-count" id="pdCount"></span>';
@@ -1524,9 +1524,9 @@ function productView(id){
       '<div class="pdp">'+crumbs(p)+'<div class="pd"><div class="pd-gal"><div class="pd-main"><div class="pd-stage" id="pdStage"></div>'+nav+'</div><div id="pdThumbs"></div></div>'+
       '<div class="pd-info">'+
         (p.brand?'<span class="pd-brand">'+esc(p.brand)+'</span>':'')+
-        '<div class="pd-title"><h2>'+esc(p.name)+'</h2>'+(tags.length?'<div class="pd-tags">'+tags.map(t=>'<span>'+esc(t)+'</span>').join('')+'</div>':'')+'</div>'+
+        '<div class="pd-title"><h2>'+esc(p.name)+(tags.length?'<span class="pd-tx">, '+tags.map(esc).join(', ')+'</span>':'')+'</h2></div>'+
         '<div class="pd-price'+(disc(p)?' sale':'')+'">'+money(p.price)+(disc(p)?'<s class="oldp big">'+money(p.old_price)+'</s><span class="dpill">-'+disc(p)+'%</span>':'')+'</div>'+
-        '<span class="pd-stock'+(inStock?'':' out')+'" id="pdStock">'+(inStock?'Stokda var • '+esc(p.stock)+' ədəd':'Stokda yoxdur')+'</span>'+(hasVar?'<div class="pd-var" id="pdVar"></div>':'')+
+        '<span class="pd-stock'+(inStock?'':' out')+'" id="pdStock">'+(inStock?'Stokda var • '+esc(p.stock)+' ədəd':'Stokda yoxdur')+'</span>'+((hasVar||p.color||(p.sizes||[]).length)?'<div class="pd-var" id="pdVar"></div>':'')+
         (p.description?'<p class="pd-desc">'+esc(p.description)+'</p>':'')+
         (rows.length?'<div class="pd-specs">'+rows.map(r=>'<div class="pd-spec"><span>'+esc(r[0])+'</span><b>'+esc(r[1])+'</b></div>').join('')+'</div>':'')+
         '<div class="pd-store" data-store="'+esc(p.store_id)+'"><div class="av">'+esc(initials(p.store_name))+'</div><div><b>'+esc(p.store_name)+'</b><small>'+esc(p.store_city||'Mağazaya bax')+'</small></div><i>›</i></div>'+
@@ -1554,7 +1554,7 @@ function productView(id){
         let curColor=-1;
         const setColor=k=>{if(k===curColor)return;curColor=k;media=mediaFor(k);i=0;drawThumbs();show(0)};
         setColor(0);
-        if(hasVar)initVariants(p,setColor);
+        if(hasVar)initVariants(p,setColor);else initPlain(p);
         stage.addEventListener('click',e=>{if(e.target.tagName==='IMG')openLightbox(e.target.currentSrc||e.target.src)});
         $('#pdThumbs').addEventListener('click',e=>{const b=e.target.closest('.pd-th');if(b){e.stopPropagation();show(+b.dataset.gi)}});
         $$('.pd-nav').forEach(b=>b.onclick=e=>{e.stopPropagation();show(i+(+b.dataset.pd))});
@@ -1884,6 +1884,22 @@ function initVariants(p,onColor){
     if(s.classList.contains('x')){toast('Bu rəngdə '+s.dataset.vs+' ölçüsü yoxdur');return}
     sz=sz===s.dataset.vs?'':s.dataset.vs;draw();
   };
+  draw();
+}
+
+/* variantı olmayan məhsul: rəng və ölçü eyni görünüşdə */
+function initPlain(p){
+  const box=$('#pdVar');if(!box)return;
+  const cols=(p.colors&&p.colors.length?p.colors:String(p.color||'').split(',')).map(x=>String(x).trim()).filter(Boolean);
+  const szs=(p.sizes||[]).filter(Boolean);
+  let sz='';
+  function draw(){
+    box.innerHTML=(cols.length?'<div><div class="pv-l">Rəng: <b>'+esc(cols.join(', '))+'</b></div><div class="pv-row">'+cols.map(c=>'<span class="pd-col on"><i style="background:'+colorHex(c)+'"></i>'+esc(c)+'</span>').join('')+'</div></div>':'')+
+      (szs.length?'<div><div class="pv-l">Ölçü: <b>'+(sz?esc(sz):'seçin')+'</b></div><div class="pv-row">'+szs.map(x=>'<button type="button" class="pd-sz'+(x===sz?' on':'')+'" data-vs="'+esc(x)+'">'+esc(x)+'</button>').join('')+'</div></div>':'');
+    const msg=encodeURIComponent('Salam, ELFA-da "'+p.name+'" məhsulu ilə maraqlanıram.'+(cols.length?' Rəng: '+cols.join(', ')+'.':'')+(sz?' Ölçü: '+sz+'.':''));
+    $$('[data-wa]').forEach(a=>{a.href=a.dataset.wa+'?text='+msg});
+  }
+  box.onclick=e=>{const b=e.target.closest('[data-vs]');if(!b)return;sz=sz===b.dataset.vs?'':b.dataset.vs;draw()};
   draw();
 }
 
