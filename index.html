@@ -647,6 +647,11 @@ input:not([type=checkbox]):not([type=radio]){-webkit-appearance:none;appearance:
 .ms-i:hover{background:var(--bg)}
 .ms-i input{width:16px;height:16px;margin:0;flex:none;accent-color:var(--brand);-webkit-appearance:auto;appearance:auto}
 .ms-e{padding:10px;font-size:11.5px;color:var(--muted)}
+
+/* ===== Mərhələ 3: ölçünün altında stok sayı ===== */
+.pd-sz{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;height:auto;min-height:46px;padding:6px 14px}
+.pd-sz small{font-size:10px;font-weight:600;opacity:.7}
+.pd-sz.on small{opacity:.85}
 </style>
 </head>
 <body>
@@ -1411,15 +1416,21 @@ function renderView(){
   if(v.bind)v.bind();
 }
 /* "Geri" və bağlama düymələri brauzerin tarixçəsi ilə işləyir: popstate hadisəsi pəncərəni özü bağlayır/dəyişir */
-/* tam ekran məhsul səhifəsi saytın başlığının (və menyunun) altından açılır, başlıq həmişə görünür */
+/* Tam ekran məhsul səhifəsi: səhifə yuxarı qaytarılır ki, üst zolaq, axtarış və kateqoriya menyusu həmişə görünsün.
+   Bağlananda səhifə əvvəlki yerinə qayıdır. */
+let prevScroll=0;
 function positionOv(){
   const ov=$('#ov'),full=ov.classList.contains('full')&&ov.classList.contains('open');
+  const was=document.body.classList.contains('pfull');
   if(full){
+    if(!was)prevScroll=window.scrollY;
+    window.scrollTo(0,0);
     const top=Math.max(0,$('header').getBoundingClientRect().bottom,$('#catnav').getBoundingClientRect().bottom);
     ov.style.top=top+'px';
   }else ov.style.top='';
   document.body.style.overflow=full?'hidden':'';
   document.body.classList.toggle('pfull',full);
+  if(!full&&was)window.scrollTo(0,prevScroll);
 }
 window.addEventListener('resize',()=>{if($('#ov').classList.contains('open'))positionOv()});
 function closeModalDom(){stack=[];$('#ov').classList.remove('open','full');$('.modal').classList.remove('full');$('#mb').innerHTML='';positionOv();renderRecent()}
@@ -1507,6 +1518,7 @@ function productView(id){
     const fav=favs.includes(String(p.id));
     const vid=safeVideo(p.video_url);
     const hasVar=!!(p.variants&&p.variants.length);
+    const hasSzStock=!!(p.size_stock&&p.size_stock.length);
     const baseImgs=((p.images&&p.images.length)?p.images:[p.image_url]).map(safeUrl).filter(Boolean).slice(0,5);
     /* rəngin öz şəkli varsa o göstərilir, yoxdursa məhsulun ümumi şəkilləri */
     const mediaFor=k=>{
@@ -1526,7 +1538,7 @@ function productView(id){
         (p.brand?'<span class="pd-brand">'+esc(p.brand)+'</span>':'')+
         '<div class="pd-title"><h2>'+esc(p.name)+(tags.length?'<span class="pd-tx">, '+tags.map(esc).join(', ')+'</span>':'')+'</h2></div>'+
         '<div class="pd-price'+(disc(p)?' sale':'')+'">'+money(p.price)+(disc(p)?'<s class="oldp big">'+money(p.old_price)+'</s><span class="dpill">-'+disc(p)+'%</span>':'')+'</div>'+
-        '<span class="pd-stock'+(inStock?'':' out')+'" id="pdStock">'+(inStock?'Stokda var • '+esc(p.stock)+' ədəd':'Stokda yoxdur')+'</span>'+((hasVar||p.color||(p.sizes||[]).length)?'<div class="pd-var" id="pdVar"></div>':'')+
+        '<span class="pd-stock'+(inStock?'':' out')+'" id="pdStock">'+(inStock?'Stokda var • '+esc(p.stock)+' ədəd':'Stokda yoxdur')+'</span>'+((hasVar||hasSzStock||p.color||(p.sizes||[]).length)?'<div class="pd-var" id="pdVar"></div>':'')+
         (p.description?'<p class="pd-desc">'+esc(p.description)+'</p>':'')+
         (rows.length?'<div class="pd-specs">'+rows.map(r=>'<div class="pd-spec"><span>'+esc(r[0])+'</span><b>'+esc(r[1])+'</b></div>').join('')+'</div>':'')+
         '<div class="pd-store" data-store="'+esc(p.store_id)+'"><div class="av">'+esc(initials(p.store_name))+'</div><div><b>'+esc(p.store_name)+'</b><small>'+esc(p.store_city||'Mağazaya bax')+'</small></div><i>›</i></div>'+
@@ -1851,26 +1863,39 @@ window.addEventListener('popstate',e=>{
 const COLOR_HEX={'Qara':'#1E1E1E','Ağ':'#FFFFFF','Qırmızı':'#C73E1D','Mavi':'#2F6FB3','Yaşıl':'#2E7D4F','Sarı':'#E9B949','Çəhrayı':'#E88FB0','Boz':'#8C8C8C','Qəhvəyi':'#7A5230','Bej':'#D8C3A5'};
 const colorHex=c=>COLOR_HEX[c]||'#CFCABD';
 const dotsHtml=p=>(p.colors&&p.colors.length>1)?'<div class="cdots">'+p.colors.slice(0,5).map(c=>'<i title="'+esc(c)+'" style="background:'+colorHex(c)+'"></i>').join('')+(p.colors.length>5?'<em>+'+(p.colors.length-5)+'</em>':'')+'</div>':'';
-/* məhsul səhifəsi: rəng seçəndə ölçülər dəyişir, o rəngdə olmayan ölçünün üstündə ✕ görünür */
+
+/* ölçü sıralaması: əvvəl rəqəmlər (artan), sonra XS..XXL, sonra qalanı əlifba ilə */
+const SIZE_ORDER=['XXXS','XXS','XS','S','M','L','XL','XXL','2XL','XXXL','3XL','4XL','5XL'];
+function sizeCmp(a,b){
+  a=String(a);b=String(b);
+  const da=/^\d/.test(a),db=/^\d/.test(b);
+  if(da&&db){const d=parseFloat(a.replace(',','.'))-parseFloat(b.replace(',','.'));return d||a.localeCompare(b,undefined,{numeric:true})}
+  if(da!==db)return da?-1:1;
+  const ia=SIZE_ORDER.indexOf(a),ib=SIZE_ORDER.indexOf(b);
+  if(ia>=0&&ib>=0)return ia-ib;
+  if((ia>=0)!==(ib>=0))return ia>=0?-1:1;
+  return a.localeCompare(b,undefined,{numeric:true});
+}
+
+/* məhsul səhifəsi: rəng seçəndə ölçülər dəyişir, o rəngdə olmayan ölçünün üstündə ✕ görünür, hər ölçünün altında stok sayı yazılır */
 function initVariants(p,onColor){
   const box=$('#pdVar');if(!box)return;
-  const V=p.variants,ord=[...(OPT.clothing_sizes||[]),...(OPT.shoe_sizes||[])];
+  const V=p.variants;
   const all=[];
   V.forEach(v=>(v.sizes||[]).forEach(s=>{if(!all.includes(s.size))all.push(s.size)}));
-  all.sort((a,b)=>{const ia=ord.indexOf(a),ib=ord.indexOf(b);return (ia<0?999:ia)-(ib<0?999:ib)});
+  all.sort(sizeCmp);
   const vstock=v=>(v.sizes&&v.sizes.length)?v.sizes.reduce((a,s)=>a+s.stock,0):(+v.stock||0);
   let ci=Math.max(0,V.findIndex(v=>vstock(v)>0)),sz='';
   function draw(){
     const v=V[ci],has=all.length>0&&(v.sizes||[]).length>0;
     const avail=s=>{const f=(v.sizes||[]).find(q=>q.size===s);return f?f.stock:0};
-    /* stokda olan ölçülər əvvəl, olmayanlar (✕) sonda */
     const shown=all;
     if(onColor)onColor(ci);
     if(sz&&avail(sz)<=0)sz='';
     box.innerHTML='<div><div class="pv-l">Rəng: <b>'+esc(v.color)+'</b></div><div class="pv-row">'+
       V.map((q,k)=>'<button type="button" class="pd-col'+(k===ci?' on':'')+(vstock(q)<=0?' out':'')+'" data-vc="'+k+'"><i style="background:'+colorHex(q.color)+'"></i>'+esc(q.color)+'</button>').join('')+'</div></div>'+
       (has?'<div><div class="pv-l">Ölçü: <b>'+(sz?esc(sz):'seçin')+'</b></div><div class="pv-row">'+
-        shown.map(s=>{const n=avail(s);return '<button type="button" class="pd-sz'+(n<=0?' x':'')+(s===sz?' on':'')+'" data-vs="'+esc(s)+'"'+(n<=0?' title="Bu rəngdə yoxdur"':'')+'>'+esc(s)+'</button>'}).join('')+'</div></div>':'');
+        shown.map(s=>{const n=avail(s);return '<button type="button" class="pd-sz'+(n<=0?' x':'')+(s===sz?' on':'')+'" data-vs="'+esc(s)+'"'+(n<=0?' title="Bu rəngdə yoxdur"':'')+'>'+esc(s)+'<small>'+(n>0?n+' ədəd':'yoxdur')+'</small></button>'}).join('')+'</div></div>':'');
     const n=has?(sz?avail(sz):vstock(v)):vstock(v),st=$('#pdStock');
     if(st){st.className='pd-stock'+(n>0?'':' out');st.textContent=n>0?'Stokda var • '+n+' ədəd':'Stokda yoxdur'}
     const msg=encodeURIComponent('Salam, ELFA-da "'+p.name+'" məhsulu ilə maraqlanıram. Rəng: '+v.color+(sz?', Ölçü: '+sz:'')+'.');
@@ -1887,19 +1912,34 @@ function initVariants(p,onColor){
   draw();
 }
 
-/* variantı olmayan məhsul: rəng və ölçü eyni görünüşdə */
+/* variantı olmayan məhsul: rəng və ölçü eyni görünüşdə; hər ölçünün altında stok sayı, stoku 0 olan ölçü ✕ ilə */
 function initPlain(p){
   const box=$('#pdVar');if(!box)return;
   const cols=(p.colors&&p.colors.length?p.colors:String(p.color||'').split(',')).map(x=>String(x).trim()).filter(Boolean);
-  const szs=(p.sizes||[]).filter(Boolean);
+  /* size_stock varsa hər ölçünün stoku bilinir; yoxdursa yalnız ölçü adları göstərilir */
+  const items=(p.size_stock&&p.size_stock.length)
+    ?p.size_stock.map(z=>({s:String(z.size),n:Math.max(0,+z.stock||0)}))
+    :(p.sizes||[]).filter(Boolean).map(s=>({s:String(s),n:null}));
+  items.sort((a,b)=>sizeCmp(a.s,b.s));
+  const find=s=>items.find(x=>x.s===s);
   let sz='';
   function draw(){
     box.innerHTML=(cols.length?'<div><div class="pv-l">Rəng: <b>'+esc(cols.join(', '))+'</b></div><div class="pv-row">'+cols.map(c=>'<span class="pd-col on"><i style="background:'+colorHex(c)+'"></i>'+esc(c)+'</span>').join('')+'</div></div>':'')+
-      (szs.length?'<div><div class="pv-l">Ölçü: <b>'+(sz?esc(sz):'seçin')+'</b></div><div class="pv-row">'+szs.map(x=>'<button type="button" class="pd-sz'+(x===sz?' on':'')+'" data-vs="'+esc(x)+'">'+esc(x)+'</button>').join('')+'</div></div>':'');
+      (items.length?'<div><div class="pv-l">Ölçü: <b>'+(sz?esc(sz):'seçin')+'</b></div><div class="pv-row">'+items.map(x=>{
+        const out=x.n!==null&&x.n<=0;
+        return '<button type="button" class="pd-sz'+(out?' x':'')+(x.s===sz?' on':'')+'" data-vs="'+esc(x.s)+'"'+(out?' title="Stokda yoxdur"':'')+'>'+esc(x.s)+(x.n===null?'':'<small>'+(x.n>0?x.n+' ədəd':'yoxdur')+'</small>')+'</button>';
+      }).join('')+'</div></div>':'');
+    const cur=sz?find(sz):null,st=$('#pdStock');
+    if(st&&cur&&cur.n!==null){st.className='pd-stock'+(cur.n>0?'':' out');st.textContent=cur.n>0?'Stokda var • '+cur.n+' ədəd':'Stokda yoxdur'}
+    else if(st){const t=+p.stock>0;st.className='pd-stock'+(t?'':' out');st.textContent=t?'Stokda var • '+p.stock+' ədəd':'Stokda yoxdur'}
     const msg=encodeURIComponent('Salam, ELFA-da "'+p.name+'" məhsulu ilə maraqlanıram.'+(cols.length?' Rəng: '+cols.join(', ')+'.':'')+(sz?' Ölçü: '+sz+'.':''));
     $$('[data-wa]').forEach(a=>{a.href=a.dataset.wa+'?text='+msg});
   }
-  box.onclick=e=>{const b=e.target.closest('[data-vs]');if(!b)return;sz=sz===b.dataset.vs?'':b.dataset.vs;draw()};
+  box.onclick=e=>{
+    const b=e.target.closest('[data-vs]');if(!b)return;
+    if(b.classList.contains('x')){toast(b.dataset.vs+' ölçüsü stokda yoxdur');return}
+    sz=sz===b.dataset.vs?'':b.dataset.vs;draw();
+  };
   draw();
 }
 
