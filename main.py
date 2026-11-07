@@ -82,6 +82,8 @@ PRODUCT_NEW_COLUMNS = [
     ("department", "TEXT NOT NULL DEFAULT ''"),
     ("subcategory", "TEXT NOT NULL DEFAULT ''"),
     ("old_price", "REAL NOT NULL DEFAULT 0"),
+    ("variants", "TEXT NOT NULL DEFAULT ''"),
+    ("colors", "TEXT NOT NULL DEFAULT ''"),
 ]
 
 
@@ -286,6 +288,17 @@ class LoginIn(BaseModel):
     password: str = Field(max_length=100)
 
 
+class VarSizeIn(BaseModel):
+    size: str = Field(max_length=20)
+    stock: int = Field(default=0, ge=0, le=1_000_000)
+
+
+class VariantIn(BaseModel):
+    color: str = Field(max_length=40)
+    stock: int = Field(default=0, ge=0, le=1_000_000)
+    sizes: List[VarSizeIn] = Field(default_factory=list, max_length=30)
+
+
 class ProductIn(BaseModel):
     name: str = Field(min_length=1, max_length=80)
     price: float = Field(ge=0, le=1_000_000)
@@ -306,6 +319,7 @@ class ProductIn(BaseModel):
     dimensions: str = Field(default="", max_length=60)
     material: str = Field(default="", max_length=60)
     video_url: str = Field(default="", max_length=500)
+    variants: List[VariantIn] = Field(default_factory=list, max_length=10)
 
 
 class ProfileIn(BaseModel):
@@ -492,6 +506,32 @@ def clean_product(data: ProductIn, seller_id: int) -> dict:
         images = [clean_image_url(data.image_url, "Şəkil linki")]
     images = images[:5]
 
+    # Rəng variantları: hər rəngin öz ölçüləri və stoku. Ümumi stok, rəng və ölçülər buradan hesablanır.
+    variants, seen = [], set()
+    for v in data.variants:
+        c = v.color.strip().replace(",", " ")
+        if not c or fold(c) in seen:
+            continue
+        seen.add(fold(c))
+        vs, used = [], set()
+        if gender not in KID_GENDERS:
+            for it in v.sizes:
+                z = it.size.strip().upper().replace(",", " ")
+                if z and z not in used:
+                    used.add(z)
+                    vs.append({"size": z, "stock": it.stock})
+        variants.append({"color": c, "stock": sum(x["stock"] for x in vs) if vs else v.stock, "sizes": vs})
+    stock_val = data.stock
+    if variants:
+        color = variants[0]["color"]
+        stock_val = sum(v["stock"] for v in variants)
+        sizes = []
+        for v in variants:
+            for x in v["sizes"]:
+                if x["stock"] > 0 and x["size"] not in sizes:
+                    sizes.append(x["size"])
+    colors = ",".join(v["color"] for v in variants) if variants else color.replace(",", " ")
+
     # Köhnə qiymət yalnız yeni qiymətdən böyükdürsə endirim sayılır
     old_price = data.old_price if data.old_price > data.price else 0
 
@@ -499,7 +539,9 @@ def clean_product(data: ProductIn, seller_id: int) -> dict:
         "name": name,
         "price": data.price,
         "old_price": old_price,
-        "stock": data.stock,
+        "stock": stock_val,
+        "variants": json.dumps(variants, ensure_ascii=False) if variants else "",
+        "colors": colors,
         "image_url": images[0] if images else "",
         "images": json.dumps(images),
         "description": data.description.strip(),
@@ -519,7 +561,7 @@ def clean_product(data: ProductIn, seller_id: int) -> dict:
 
 
 PRODUCT_FIELDS = (
-    "name", "price", "old_price", "stock", "image_url", "images", "description", "category",
+    "name", "price", "old_price", "stock", "variants", "colors", "image_url", "images", "description", "category",
     "brand", "gender", "age_group", "sizes", "color", "size_class",
     "dimensions", "material", "video_url", "department", "subcategory",
 )
@@ -847,6 +889,12 @@ def product_dict(r: sqlite3.Row) -> dict:
         )
     }
     data["sizes"] = [x for x in (r["sizes"] or "").split(",") if x]
+    try:
+        data["variants"] = json.loads(r["variants"] or "[]") if "variants" in keys else []
+    except ValueError:
+        data["variants"] = []
+    cols = [x for x in ((r["colors"] if "colors" in keys else "") or "").split(",") if x]
+    data["colors"] = cols or ([r["color"]] if r["color"] else [])
     imgs = []
     if "images" in keys:
         try:
@@ -1128,8 +1176,10 @@ def public_products(
             continue
         if size and size.strip().upper() not in (r["sizes"] or "").split(","):
             continue
-        if color and fold(r["color"]) != fold(color):
-            continue
+        if color:
+            cs = [fold(x) for x in (r["colors"] or "").split(",") if x] or [fold(r["color"])]
+            if fold(color) not in cs:
+                continue
         if material and fold(r["material"]) != fold(material):
             continue
         if size_class and fold(r["size_class"]) != fold(size_class):
@@ -1141,7 +1191,7 @@ def public_products(
         if words:
             text = fold(" ".join([
                 r["name"], r["brand"], r["store_name"], r["category"],
-                r["description"], r["material"], r["color"], r["gender"],
+                r["description"], r["material"], r["color"], r["colors"], r["gender"],
                 r["department"], r["subcategory"],
             ]))
             if not all(w in text for w in words):
