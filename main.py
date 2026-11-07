@@ -81,6 +81,7 @@ PRODUCT_NEW_COLUMNS = [
     ("images", "TEXT NOT NULL DEFAULT ''"),
     ("department", "TEXT NOT NULL DEFAULT ''"),
     ("subcategory", "TEXT NOT NULL DEFAULT ''"),
+    ("old_price", "REAL NOT NULL DEFAULT 0"),
 ]
 
 
@@ -288,6 +289,7 @@ class LoginIn(BaseModel):
 class ProductIn(BaseModel):
     name: str = Field(min_length=1, max_length=80)
     price: float = Field(ge=0, le=1_000_000)
+    old_price: float = Field(default=0, ge=0, le=1_000_000)
     stock: int = Field(default=0, ge=0, le=1_000_000)
     image_url: str = Field(default="", max_length=500)
     images: List[str] = Field(default_factory=list, max_length=5)
@@ -490,9 +492,13 @@ def clean_product(data: ProductIn, seller_id: int) -> dict:
         images = [clean_image_url(data.image_url, "Şəkil linki")]
     images = images[:5]
 
+    # Köhnə qiymət yalnız yeni qiymətdən böyükdürsə endirim sayılır
+    old_price = data.old_price if data.old_price > data.price else 0
+
     return {
         "name": name,
         "price": data.price,
+        "old_price": old_price,
         "stock": data.stock,
         "image_url": images[0] if images else "",
         "images": json.dumps(images),
@@ -513,7 +519,7 @@ def clean_product(data: ProductIn, seller_id: int) -> dict:
 
 
 PRODUCT_FIELDS = (
-    "name", "price", "stock", "image_url", "images", "description", "category",
+    "name", "price", "old_price", "stock", "image_url", "images", "description", "category",
     "brand", "gender", "age_group", "sizes", "color", "size_class",
     "dimensions", "material", "video_url", "department", "subcategory",
 )
@@ -834,7 +840,7 @@ def product_dict(r: sqlite3.Row) -> dict:
     data = {
         k: r[k]
         for k in (
-            "id", "name", "price", "stock", "image_url", "description",
+            "id", "name", "price", "old_price", "stock", "image_url", "description",
             "category", "brand", "gender", "age_group", "color",
             "size_class", "dimensions", "material", "video_url",
             "department", "subcategory",
@@ -1086,6 +1092,7 @@ def public_products(
     department: Optional[str] = None,
     subcategory: Optional[str] = None,
     home: Optional[bool] = None,
+    sale: Optional[bool] = None,
     sort: Optional[str] = None,
     limit: int = Query(100, ge=1, le=200),
     offset: int = Query(0, ge=0),
@@ -1097,6 +1104,8 @@ def public_products(
     result = []
     for r in rows:
         if home and not (r["on_home"] or r["store_home_all"]):
+            continue
+        if sale and not (r["old_price"] and r["old_price"] > r["price"]):
             continue
         if category and fold(r["category"]) != fold(category):
             continue
@@ -1147,12 +1156,42 @@ def public_products(
         result.sort(key=lambda r: (r["stock"] <= 0, -r["price"]))
     elif sort == "newest":
         result.sort(key=lambda r: r["stock"] <= 0)
+    elif sort == "discount":
+        def _disc(r):
+            return (r["old_price"] - r["price"]) / r["old_price"] if r["old_price"] and r["old_price"] > r["price"] else 0
+        result.sort(key=lambda r: (r["stock"] <= 0, -_disc(r)))
     else:
         # Tövsiyə olunan: ana səhifə üçün seçilmiş məhsullar əvvəl
         result.sort(key=lambda r: (r["stock"] <= 0, 0 if (r["on_home"] or r["store_home_all"]) else 1))
     response.headers["X-Total-Count"] = str(len(result))
     response.headers["Access-Control-Expose-Headers"] = "X-Total-Count"
     return [public_product_dict(r) for r in result[offset:offset + limit]]
+
+
+@app.get("/api/suggest")
+def suggest(q: str = Query("", max_length=60)):
+    """Axtarış qutusu üçün sürətli təkliflər: məhsul, mağaza, kateqoriya."""
+    w = fold(q)
+    if len(w) < 2:
+        return {"products": [], "stores": [], "categories": []}
+    words = w.split()
+    with db() as con:
+        rows = approved_rows(con)
+        stores = con.execute("SELECT id, store_name, logo_url, category FROM sellers WHERE status = 'approved'").fetchall()
+    prods, cats = [], {}
+    for r in rows:
+        text = fold(" ".join([r["name"], r["brand"], r["category"], r["subcategory"]]))
+        if all(x in text for x in words):
+            if len(prods) < 6:
+                prods.append({"id": r["id"], "name": r["name"], "price": r["price"],
+                              "image_url": r["image_url"], "category": r["subcategory"] or r["category"]})
+        for c in (r["category"], r["subcategory"]):
+            c = (c or "").strip()
+            if c and w in fold(c) and fold(c) not in cats:
+                cats[fold(c)] = c
+    st = [{"id": s["id"], "store_name": s["store_name"], "logo_url": s["logo_url"], "category": s["category"]}
+          for s in stores if w in fold(s["store_name"])][:3]
+    return {"products": prods, "stores": st, "categories": list(cats.values())[:4]}
 
 
 @app.get("/api/products/{pid}")
