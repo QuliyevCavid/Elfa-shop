@@ -628,13 +628,28 @@ input:not([type=checkbox]):not([type=radio]){-webkit-appearance:none;appearance:
 .pd-nr{font-weight:500;font-size:.72em;line-height:1.35}
 .pd-title h2{line-height:1.25;word-break:break-word}
 .pd-tags span{background:var(--soft);color:var(--brand);border-radius:12px;padding:4px 11px;font-size:11px;font-weight:700}
-#resultsView{width:auto;margin:-8px 12px 0}
+#resultsView{width:auto;margin:16px 12px 0}
 #chips{display:none!important}
 #resultsView .section-head{justify-content:flex-start}
 #resultsView .section-head{gap:18px;flex-wrap:wrap;align-items:center}
 #resultsView .section-head>div:first-child{flex:none}
 #resultsView .head-tools{margin-left:0}
-#resultsView #prodTitle{font-size:15px;letter-spacing:0;text-align:left}
+#resultsView #prodTitle{font-size:15px;letter-spacing:0;text-align:left;display:flex;align-items:center;flex-wrap:wrap;gap:8px;font-weight:700}
+#prodTitle .bc-h{width:20px;height:20px;fill:var(--brand);stroke:none}
+#prodTitle i{font-style:normal;color:var(--muted);font-weight:500}
+/* sıralama: başlığın altında, məhsulların üstündə, sol tərəfdə */
+#resultsView .section-head{flex-direction:column;align-items:flex-start;gap:14px}
+#resultsView .head-tools{margin-left:250px}
+@media(max-width:800px){#resultsView .head-tools{margin-left:0}}
+/* filtr başlıqlarında ikonlar */
+.fl-t{display:flex!important;align-items:center;gap:9px}
+.fl-t svg,.pr-t svg{width:17px;height:17px;flex:none;stroke:var(--brand);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.pr-t{display:flex;align-items:center;gap:9px}
+/* boş nəticə */
+.empty.nores{padding:60px 12px}
+.nores svg.bag{width:84px;height:84px;margin:0 auto 14px;fill:var(--brand);display:block}
+.nores b{display:block;font-size:20px;color:var(--brand);margin-bottom:6px}
+.nores button{margin-top:16px;display:inline-flex;align-items:center;gap:9px;border:1.5px solid var(--brand);border-radius:24px;padding:11px 22px;font-weight:700;font-size:13px;color:var(--text);background:#fff}
 .shop.searching{grid-template-columns:230px 1fr;gap:16px}
 .shop.searching .products{grid-template-columns:repeat(4,minmax(0,1fr))}
 @media(max-width:1100px){.shop.searching .products{grid-template-columns:repeat(3,minmax(0,1fr))}}
@@ -813,15 +828,15 @@ input:not([type=checkbox]):not([type=radio]){-webkit-appearance:none;appearance:
     <div class="shop" id="shop">
       <aside class="filters" id="filters">
         <h3>Filtrlər <button id="clearF">Təmizlə</button></h3>
-        <div class="fl"><span class="fl-t">Kateqoriya</span><div class="ms" id="fCategory"></div></div>
-        <div class="fl"><span class="fl-t">Marka</span><div class="ms" id="fBrand"></div></div>
-        <div class="fl"><span class="fl-t">Cinsiyyət</span><div class="ms" id="fGender"></div></div>
-        <div class="fl hide" id="ageWrap"><span class="fl-t">Yaş aralığı</span><div class="ms" id="fAge"></div></div>
-        <div class="fl" id="sizeWrap"><span class="fl-t">Ölçü</span><div class="ms" id="fSize"></div></div>
-        <div class="fl"><span class="fl-t">Rəng</span><div class="ms" id="fColor"></div></div>
-        <div class="fl"><span class="fl-t">Boyut</span><div class="ms" id="fSizeClass"></div></div>
-        <div class="fl"><span class="fl-t">Material</span><div class="ms" id="fMaterial"></div></div>
-        <label>Qiymət (AZN)
+        <div class="fl"><span class="fl-t"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Kateqoriya</span><div class="ms" id="fCategory"></div></div>
+        <div class="fl"><span class="fl-t"><svg viewBox="0 0 24 24"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1"/></svg>Marka</span><div class="ms" id="fBrand"></div></div>
+        <div class="fl"><span class="fl-t"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2 20c0-3.5 3-6 7-6s7 2.5 7 6"/><circle cx="17.5" cy="9" r="2.5"/><path d="M18 14c2.5.3 4 2 4 4"/></svg>Cinsiyyət</span><div class="ms" id="fGender"></div></div>
+        <div class="fl hide" id="ageWrap"><span class="fl-t"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Yaş aralığı</span><div class="ms" id="fAge"></div></div>
+        <div class="fl" id="sizeWrap"><span class="fl-t"><svg viewBox="0 0 24 24"><path d="M3 17L17 3l4 4L7 21z"/><path d="M8 12l2 2M11 9l2 2M14 6l2 2"/></svg>Ölçü</span><div class="ms" id="fSize"></div></div>
+        <div class="fl"><span class="fl-t"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18c1.5 0 2-1 1.5-2s0-2 1.5-2h2a3 3 0 0 0 3-3c0-6-3.6-11-8-11z"/><circle cx="8" cy="11" r="1"/><circle cx="12" cy="7.5" r="1"/></svg>Rəng</span><div class="ms" id="fColor"></div></div>
+        <div class="fl"><span class="fl-t"><svg viewBox="0 0 24 24"><path d="M3 4h2l3 11h10l2-8H7"/><circle cx="9" cy="19" r="1.5"/><circle cx="17" cy="19" r="1.5"/></svg>Boyut</span><div class="ms" id="fSizeClass"></div></div>
+        <div class="fl"><span class="fl-t"><svg viewBox="0 0 24 24"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/></svg>Material</span><div class="ms" id="fMaterial"></div></div>
+        <label><span class="pr-t"><svg viewBox="0 0 24 24"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1"/></svg>Qiymət (AZN)</span>
           <div class="price-row"><input id="fMin" type="number" min="0" placeholder="Min"><input id="fMax" type="number" min="0" placeholder="Max"></div>
         </label>
       </aside>
@@ -1014,8 +1029,9 @@ function applyMode(){
   $('#shop').classList.toggle('searching',res);
   $('#fToggle').classList.toggle('show',res);
   if(!res)$('#filters').classList.remove('open');
-  const parts=[F.department||F.store_category,F.category,F.subcategory].filter(Boolean).map(x=>String(x).replace(/\|/g,', ')).join(' › ');
-  $('#prodTitle').textContent='ELFA · '+(parts||(F.sale?'Endirimlər':'Bütün məhsullar'));
+  const segs=[F.department||F.store_category,F.category,F.subcategory].filter(Boolean).map(x=>String(x).replace(/\|/g,', '));
+  if(!segs.length)segs.push(F.sale?'Endirimlər':'Bütün məhsullar');
+  $('#prodTitle').innerHTML='<svg class="bc-h" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span>ELFA</span>'+segs.map(x=>'<i>›</i><span>'+esc(x)+'</span>').join('');
   renderChips();
   renderSort();
   const sd=F.department||F.store_category;
@@ -1072,7 +1088,11 @@ async function loadProducts(reset){
     const e=$('#empty');
     if(!list.length){
       e.classList.remove('hide');
-      e.textContent=activeCount()?'Bu seçimlərə uyğun məhsul tapılmadı. Filtrləri dəyişin.':'Hələ məhsul yoxdur. Satıcılar təsdiqləndikdən sonra məhsullar burada görünəcək.';
+      if(activeCount()){
+        e.classList.add('nores');
+        e.innerHTML='<svg class="bag" viewBox="0 0 24 24"><path d="M6 8h12l1 12H5z"/><path d="M9 8V6a3 3 0 0 1 6 0v2" fill="none" stroke="#243B36" stroke-width="1.8"/></svg><b>Bu seçimlərə uyğun məhsul tapılmadı.</b>Filtrləri dəyişin.<br><button type="button" id="resetF"><svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round"><path d="M20 11a8 8 0 0 0-14-4M4 4v4h4M4 13a8 8 0 0 0 14 4M20 20v-4h-4"/></svg>Filtrləri sıfırlayın</button>';
+        const rb=$('#resetF');if(rb)rb.onclick=()=>{$('#clearF')?$('#clearF').click():clearAll()};
+      }else{e.classList.remove('nores');e.textContent='Hələ məhsul yoxdur. Satıcılar təsdiqləndikdən sonra məhsullar burada görünəcək.'}
     }else e.classList.add('hide');
     const hasMore=total!==null?list.length<total:rows.length===PAGE;
     $('#moreBtn').classList.toggle('hide',!hasMore);
