@@ -642,7 +642,9 @@ input:not([type=checkbox]):not([type=radio]){-webkit-appearance:none;appearance:
 #resultsView .section-head{margin-bottom:10px}
 #resultsView .head-tools:not(:has(.show)){display:none}
 @media(max-width:800px){#resultsView .head-tools{display:flex}}
-#sortBox{max-width:280px}
+#resultsView{position:relative}
+#sortBox{width:260px;position:absolute;top:-6px;right:0;margin:0!important;z-index:20}
+@media(max-width:800px){#sortBox{position:relative;top:0;width:100%;margin-bottom:12px!important}}
 /* filtr başlıqlarında ikonlar */
 .fl-t{display:flex!important;align-items:center;gap:9px}
 .fl-t svg,.pr-t svg{width:17px;height:17px;flex:none;stroke:var(--brand);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
