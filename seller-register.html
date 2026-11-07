@@ -4,56 +4,59 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>ELFA — Satıcı ol</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#f7f6f3;--text:#171717;--muted:#777;--line:#e8e6e1;--red:#d22;--sand:#f3ece3}
-body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
+:root{--bg:#F8F6F2;--text:#242424;--muted:#777;--line:#EAE7DF;--red:#d22;--sand:#f3ece3}
+body{font-family:'Montserrat',Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
 button,input,select,textarea{font:inherit}
 button{cursor:pointer;border:0}
 a{text-decoration:none;color:inherit;cursor:pointer}
-.topbar{background:#171717;color:#fff;text-align:center;padding:9px 20px;font-size:12px;letter-spacing:.4px}
+.topbar{background:#263B35;color:#fff;text-align:center;padding:9px 20px;font-size:12px;letter-spacing:.4px}
 header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
 .nav{width:min(1240px,94%);height:70px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:16px}
 .nl{display:flex;align-items:center;gap:18px}
-.logo{font-size:26px;font-weight:400;letter-spacing:8px}
+.logo{font-size:26px;font-weight:800;letter-spacing:6px}
 .burger{display:none;background:none;width:38px;height:38px;border-radius:10px;align-items:center;justify-content:center}
-.burger:hover{background:#f3f2ee}
-.burger svg{width:22px;height:22px;stroke:#171717;fill:none;stroke-width:1.7;stroke-linecap:round}
+.burger:hover{background:#EAE7DF}
+.burger svg{width:22px;height:22px;stroke:#263B35;fill:none;stroke-width:1.7;stroke-linecap:round}
 .hu{display:none;align-items:center;gap:10px;font-size:14px;font-weight:700;max-width:260px}
 .hu span.nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .wrap{width:min(1100px,94%);margin:34px auto 60px;display:grid;grid-template-columns:1fr 1.2fr;gap:28px;align-items:start}
-.intro{background:#171717;color:#fff;border-radius:22px;padding:42px;position:sticky;top:96px}
-.intro .eyebrow{font-size:11px;letter-spacing:3px;text-transform:uppercase;opacity:.7;margin-bottom:16px}
+.intro{background:#263B35;color:#fff;border-radius:22px;padding:42px;position:sticky;top:96px}
+.intro .eyebrow{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#E9B949;margin-bottom:16px;font-weight:700}
 .intro h1{font-size:40px;line-height:1.08;letter-spacing:-1.5px;margin-bottom:16px}
 .intro p{color:#ddd;line-height:1.7;font-size:14px}
 .intro ul{list-style:none;margin-top:24px;display:grid;gap:14px}
 .intro li{display:flex;gap:12px;font-size:14px;color:#eee;line-height:1.5}
-.intro li b{flex:none;width:26px;height:26px;border-radius:50%;background:#fff;color:#171717;display:flex;align-items:center;justify-content:center;font-size:12px}
+.intro li b{flex:none;width:26px;height:26px;border-radius:50%;background:#E9B949;color:#263B35;display:flex;align-items:center;justify-content:center;font-size:12px}
 .panel{background:#fff;border-radius:22px;padding:30px;border:1px solid var(--line)}
-.tabs{display:flex;gap:6px;background:#f3f2ee;border-radius:24px;padding:5px;margin-bottom:24px}
+.tabs{display:flex;gap:6px;background:#EAE7DF;border-radius:24px;padding:5px;margin-bottom:24px}
 .tab{flex:1;padding:11px;border-radius:20px;background:none;font-size:14px;font-weight:700;color:#777}
-.tab.on{background:#171717;color:#fff}
+.tab.on{background:#263B35;color:#fff}
 h2{font-size:24px;letter-spacing:-.5px;margin-bottom:6px}
 .sub{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.5}
 label{display:block;font-size:12px;font-weight:700;margin:0 0 6px;color:#444}
 label i.rq{color:var(--red);font-style:normal}
 .f{margin-bottom:14px}
-input,select,textarea{width:100%;border:1px solid #ddd;border-radius:10px;padding:12px 14px;background:#fff;color:#171717;outline:none;font-size:14px}
+input,select,textarea{width:100%;border:1px solid #ddd;border-radius:10px;padding:12px 14px;background:#fff;color:#263B35;outline:none;font-size:14px}
 input,select{height:46px}
 textarea{min-height:100px;resize:vertical}
-input:focus,select:focus,textarea:focus{border-color:#171717}
+input:focus,select:focus,textarea:focus{border-color:#263B35}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
 .pnr{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px}
 .phone-box{display:flex;align-items:center;border:1px solid #ddd;border-radius:10px;background:#fff;overflow:hidden}
-.phone-box:focus-within{border-color:#171717}
+.phone-box:focus-within{border-color:#263B35}
 .phone-box span{padding:0 12px;height:44px;display:flex;align-items:center;background:#f3f3f3;border-right:1px solid #ddd;font-size:14px;color:#444}
 .phone-box input{border:0;border-radius:0;height:44px}
 .chk{display:flex;gap:10px;align-items:flex-start;font-size:13px;color:#444;line-height:1.5;margin:6px 0 4px}
 .chk input{width:18px;height:18px;margin-top:2px;flex:none}
-.btn{width:100%;margin-top:16px;background:#171717;color:#fff;padding:14px;border-radius:24px;font-weight:700;font-size:14px;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn{width:100%;margin-top:16px;background:#263B35;color:#fff;padding:14px;border-radius:24px;font-weight:700;font-size:14px;display:inline-flex;align-items:center;justify-content:center;gap:8px}
 .btn:hover{background:#333}
-.btn.alt{background:#eee;color:#171717}
+.btn.alt{background:#eee;color:#263B35}
 .btn.alt:hover{background:#e3e3e3}
 .btn.fit{width:auto;margin-top:0;padding:12px 22px}
 .btn:disabled{opacity:.6;cursor:not-allowed}
@@ -69,14 +72,14 @@ input:focus,select:focus,textarea:focus{border-color:#171717}
 .badge.wait{background:#fff3d6;color:#8a6200}
 .badge.red{background:#fde4e4;color:#b42323}
 .bar{height:8px;border-radius:6px;background:#eee;overflow:hidden;margin-top:8px}
-.bar i{display:block;height:100%;width:0;background:#171717;transition:width .15s}
+.bar i{display:block;height:100%;width:0;background:#263B35;transition:width .15s}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chips label{display:flex;align-items:center;gap:6px;border:1px solid #ddd;border-radius:18px;padding:6px 12px;font-size:12px;font-weight:700;margin:0;cursor:pointer;background:#fff}
-.chips label:has(input:checked){background:#171717;color:#fff;border-color:#171717}
+.chips label:has(input:checked){background:#263B35;color:#fff;border-color:#263B35}
 .chips input{position:absolute;opacity:0;width:0;height:0}
-.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);background:#171717;color:#fff;padding:11px 20px;border-radius:24px;font-size:13px;opacity:0;pointer-events:none;transition:.25s;z-index:80;max-width:90%;text-align:center}
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);background:#263B35;color:#fff;padding:11px 20px;border-radius:24px;font-size:13px;opacity:0;pointer-events:none;transition:.25s;z-index:80;max-width:90%;text-align:center}
 .toast.show{opacity:1;transform:translateX(-50%)}
-footer{background:#171717;color:#aaa;padding:30px 0;text-align:center;font-size:12px}
+footer{background:#263B35;color:#aaa;padding:30px 0;text-align:center;font-size:12px}
 
 /* ikonlu sahələr */
 .ic{position:relative}
@@ -121,8 +124,8 @@ body.noside .side{display:none}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:18px 0 20px}
 .stat{display:flex;gap:14px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;font-size:12px;color:#777}
 .stat i{width:44px;height:44px;border-radius:12px;background:var(--sand);display:flex;align-items:center;justify-content:center;flex:none}
-.stat i svg{width:22px;height:22px;stroke:#171717;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
-.stat b{display:block;font-size:22px;color:#171717;margin-top:2px}
+.stat i svg{width:22px;height:22px;stroke:#263B35;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.stat b{display:block;font-size:22px;color:#263B35;margin-top:2px}
 .drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;border:1.5px dashed #cfc9bf;border-radius:14px;background:#faf9f6;padding:18px 12px;cursor:pointer;font-size:13px;font-weight:700;color:#333;position:relative;margin:0}
 .drop small{font-weight:400;color:#888;font-size:11px;line-height:1.4}
 .drop input{position:absolute;inset:0;opacity:0;cursor:pointer;height:100%;padding:0}
@@ -147,31 +150,47 @@ body.noside .side{display:none}
 .empty b{display:block;color:#444;font-size:14px;margin-bottom:4px}
 
 /* modal */
-.ov{position:fixed;inset:0;background:rgba(23,23,23,.5);z-index:50;display:flex;align-items:flex-start;justify-content:center;padding:max(16px,4vh) 16px;overflow:auto}
+.ov{position:fixed;inset:0;background:rgba(38,59,53,.5);z-index:50;display:flex;align-items:flex-start;justify-content:center;padding:max(16px,4vh) 16px;overflow:auto}
 .md{background:#fff;border-radius:22px;width:min(1080px,100%);padding:26px;position:relative}
 .mh{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}
 .mt{display:flex;gap:14px;align-items:center}
-.mt .pl{width:44px;height:44px;border-radius:50%;background:#171717;display:flex;align-items:center;justify-content:center;flex:none}
+.mt .pl{width:44px;height:44px;border-radius:50%;background:#263B35;display:flex;align-items:center;justify-content:center;flex:none}
 .mt .pl svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round}
 .mh h2{font-size:20px;margin:0 0 2px}
-.mx{background:#f3f2ee;width:36px;height:36px;border-radius:50%;font-size:18px;flex:none}
+.mx{background:#EAE7DF;width:36px;height:36px;border-radius:50%;font-size:18px;flex:none}
 .mb{display:grid;grid-template-columns:340px 1fr;gap:24px;align-items:start}
 .gal{background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:14px;display:grid;gap:12px}
 .main-img{aspect-ratio:1;border-radius:12px;background:#ece9e4;display:flex;align-items:center;justify-content:center;color:#999;font-size:13px;overflow:hidden;position:relative}
 .main-img img{width:100%;height:100%;object-fit:cover}
-.main-img span.tg{position:absolute;left:10px;top:10px;background:rgba(23,23,23,.75);color:#fff;font-size:11px;padding:4px 9px;border-radius:12px;z-index:2}
+.main-img span.tg{position:absolute;left:10px;top:10px;background:rgba(38,59,53,.75);color:#fff;font-size:11px;padding:4px 9px;border-radius:12px;z-index:2}
 .trash{position:absolute;right:10px;top:10px;width:32px;height:32px;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;z-index:2;box-shadow:0 1px 4px rgba(0,0,0,.15)}
 .trash svg{width:16px;height:16px;stroke:#444;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .thumbs{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
 .th{position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;background:#ece9e4;border:2px solid transparent;cursor:pointer}
-.th.on{border-color:#171717}
+.th.on{border-color:#263B35}
 .th.ph{border:1.5px dashed #cfc9bf;background:#faf9f6;cursor:default}
 .th img{width:100%;height:100%;object-fit:cover;display:block}
-.th .rm{position:absolute;right:2px;top:2px;width:18px;height:18px;border-radius:50%;background:rgba(23,23,23,.8);color:#fff;font-size:10px;line-height:18px;padding:0}
+.th .rm{position:absolute;right:2px;top:2px;width:18px;height:18px;border-radius:50%;background:rgba(38,59,53,.8);color:#fff;font-size:10px;line-height:18px;padding:0}
 .sizes{display:flex;flex-direction:column;gap:16px;align-items:flex-start}
 .sgt{font-size:12px;color:#555;margin-bottom:8px}
 .mfoot{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:6px}
 .sizes:empty{display:none}
+.vwrap{background:#F8F6F2;border:1px solid var(--line);border-radius:14px;padding:14px}
+.vr{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;margin:12px 0}
+.vr-top{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.vr-top .vsel{position:relative;flex:1;min-width:0}
+.vr-top .vdot{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:20px;height:20px;border-radius:50%;border:1px solid rgba(0,0,0,.2);pointer-events:none}
+.vr-top select{padding-left:42px}
+.vr .vco{margin:0 0 10px}
+.vx{flex:none;background:#fde4e4;color:#b42323;border-radius:10px;height:46px;padding:0 14px;font-size:12px;font-weight:700}
+.vsz{display:grid;grid-template-columns:repeat(auto-fill,minmax(66px,1fr));gap:8px}
+.vs{margin:0;text-align:center;font-size:11px}
+.vs span{display:block;margin-bottom:4px}
+.vs input{height:38px;padding:6px 6px;text-align:center}
+.vns{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:12px;color:#555}
+.vns input{width:90px;height:38px;padding:6px 8px;text-align:center}
+.vchip{display:inline-flex;align-items:center;gap:5px}
+.vchip i{width:10px;height:10px;border-radius:50%;border:1px solid rgba(0,0,0,.2)}
 
 @media(max-width:860px){.wrap{grid-template-columns:1fr}.intro{position:static;padding:30px}.intro h1{font-size:32px}
 .dg{grid-template-columns:1fr}.side{position:static}.menu{grid-auto-flow:column;overflow-x:auto}.menu button{white-space:nowrap}
@@ -391,6 +410,15 @@ select:disabled{background:#f4f2ee;color:#9a958b;cursor:not-allowed}
                 <div class="f"><label for="pGender">Cinsiyyət</label><div class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><select id="pGender"><option value="">Seçin</option></select></div></div>
               </div>
               <div class="f hide" id="ageWrap"><label for="pAge">Yaş aralığı</label><select id="pAge"><option value="">Seçin</option></select></div>
+              <div class="f vwrap">
+                <label class="chk" for="useVar"><input type="checkbox" id="useVar"> <span>Hər rəngin öz ölçüsü və stoku var (tövsiyə olunur)</span></label>
+                <div id="varBox" class="hide">
+                  <div id="varRows"></div>
+                  <button type="button" class="btn alt fit" id="addVar">+ Rəng əlavə et</button>
+                  <input class="oth" id="vSizeO" maxlength="80" placeholder="Başqa ölçülər (vergüllə ayırın): 3XL, 48, 52">
+                  <p class="sub" style="margin:8px 0 0">Boş buraxılan ölçü "yoxdur" sayılır və alıcıya ✕ ilə göstərilir. 0 yazsanız da eyni olur.</p>
+                </div>
+              </div>
               <div class="f" id="sizeWrap"><label>Ölçülər</label><div class="sizes" id="pSizes"></div>
                 <input class="oth" id="pSizeO" maxlength="80" placeholder="Başqa ölçünü özünüz yazın (vergüllə ayırın): 3XL, 48, 52"></div>
               <div class="two">
@@ -801,10 +829,11 @@ function renderSizeChips(keepChecked=true){
 const isKid=()=>$('#pGender').value==='Qız'||$('#pGender').value==='Oğlan';
 function syncKid(){
   $('#ageWrap').classList.toggle('hide',!isKid());
-  $('#sizeWrap').classList.toggle('hide',isKid());
+  $('#sizeWrap').classList.toggle('hide',isKid()||$('#useVar').checked);
+  if($('#useVar').checked)renderVars();
 }
-$('#pCat').addEventListener('change',()=>{renderSizeChips(true)});
-$('#pDept').addEventListener('change',()=>{syncCat('');renderSizeChips(true)});
+$('#pCat').addEventListener('change',()=>{renderSizeChips(true);if($('#useVar').checked)renderVars()});
+$('#pDept').addEventListener('change',()=>{syncCat('');renderSizeChips(true);if($('#useVar').checked)renderVars()});
 $('#pGender').addEventListener('change',syncKid);
 async function loadOptions(){
   try{const r=await fetch('/api/options');OPT=Object.assign(OPT,await r.json())}catch(e){}
@@ -921,6 +950,76 @@ $('#vFile').addEventListener('change',()=>{
   if(!videoType(f)) toast('Dəstəklənən formatlar: MP4, MOV, WEBM');
 });
 
+const COLOR_HEX={'Qara':'#1E1E1E','Ağ':'#FFFFFF','Qırmızı':'#C73E1D','Mavi':'#2F6FB3','Yaşıl':'#2E7D4F','Sarı':'#E9B949','Çəhrayı':'#E88FB0','Boz':'#8C8C8C','Qəhvəyi':'#7A5230','Bej':'#D8C3A5'};
+const colorHex=c=>COLOR_HEX[c]||'#CFCABD';
+/* ---------- Rəng variantları: hər rəngin öz ölçüləri və stoku ---------- */
+let VARS=[];
+const newVar=()=>({color:'',o:false,stock:'',sizes:{}});
+const varOn=()=>$('#useVar').checked;
+function varSizeList(){
+  if(isKid())return [];
+  const cat=($('#pCat').value||'').split('||')[0];
+  const base=[...(cat!=='Ayaqqabı'?OPT.clothing_sizes:[]),...(cat!=='Geyim'?OPT.shoe_sizes:[])];
+  const own=$('#vSizeO').value.split(',').map(z=>z.trim().toUpperCase()).filter(Boolean);
+  const extra=[];
+  VARS.forEach(v=>Object.keys(v.sizes).forEach(k=>{if(!base.includes(k)&&!own.includes(k)&&!extra.includes(k))extra.push(k)}));
+  return [...new Set([...base,...own,...extra])];
+}
+function renderVars(){
+  const sizes=varSizeList(),cols=OPT.colors.filter(c=>c!=='Digər');
+  $('#varRows').innerHTML=VARS.map((v,i)=>{
+    const std=cols.includes(v.color);
+    const other=v.o||(v.color&&!std);
+    const selVal=other?OTHER:(v.color||'');
+    return '<div class="vr" data-i="'+i+'"><div class="vr-top"><div class="vsel"><i class="vdot" style="background:'+colorHex(v.color)+'"></i><select class="vc"><option value="">Rəng seçin</option>'+
+      cols.map(c=>'<option'+(c===selVal?' selected':'')+'>'+esc(c)+'</option>').join('')+'<option value="'+OTHER+'"'+(selVal===OTHER?' selected':'')+'>✎ Özüm yazım</option></select></div>'+
+      '<button type="button" class="vx">Sil</button></div>'+
+      (other?'<input class="vco" maxlength="40" placeholder="Rəngi özünüz yazın" value="'+esc(v.color)+'">':'')+
+      (sizes.length?'<div class="vsz">'+sizes.map(z=>'<label class="vs"><span>'+esc(z)+'</span><input type="number" min="0" step="1" inputmode="numeric" placeholder="—" data-sz="'+esc(z)+'" value="'+esc(v.sizes[z]==null?'':v.sizes[z])+'"></label>').join('')+'</div>':'')+
+      '<div class="vns">'+(sizes.length?'Ölçüsüz məhsul üçün stok:':'Bu rəngdə stok:')+'<input type="number" min="0" step="1" inputmode="numeric" class="vstock" placeholder="0" value="'+esc(v.stock)+'"></div></div>';
+  }).join('');
+}
+function syncVarMode(){
+  const on=varOn();
+  $('#varBox').classList.toggle('hide',!on);
+  $('#pStock').closest('.f').classList.toggle('hide',on);
+  $('#pColor').closest('.f').classList.toggle('hide',on);
+  $('#sizeWrap').classList.toggle('hide',on||isKid());
+  if(on){if(!VARS.length)VARS.push(newVar());renderVars()}
+}
+$('#useVar').addEventListener('change',syncVarMode);
+$('#addVar').onclick=()=>{if(VARS.length>=10)return toast('Ən çox 10 rəng əlavə etmək olar');VARS.push(newVar());renderVars()};
+$('#vSizeO').addEventListener('change',renderVars);
+$('#varRows').addEventListener('input',e=>{
+  const row=e.target.closest('.vr');if(!row)return;
+  const v=VARS[+row.dataset.i];if(!v)return;
+  if(e.target.dataset.sz)v.sizes[e.target.dataset.sz]=e.target.value;
+  else if(e.target.classList.contains('vstock'))v.stock=e.target.value;
+  else if(e.target.classList.contains('vco')){v.color=e.target.value.trim();row.querySelector('.vdot').style.background=colorHex(v.color)}
+});
+$('#varRows').addEventListener('change',e=>{
+  const row=e.target.closest('.vr');if(!row)return;
+  const v=VARS[+row.dataset.i];if(!v)return;
+  if(e.target.classList.contains('vc')){
+    if(e.target.value===OTHER){v.o=true;v.color=''}else{v.o=false;v.color=e.target.value}
+    renderVars();
+  }
+});
+$('#varRows').addEventListener('click',e=>{
+  if(!e.target.closest('.vx'))return;
+  const row=e.target.closest('.vr');
+  VARS.splice(+row.dataset.i,1);
+  if(!VARS.length)VARS.push(newVar());
+  renderVars();
+});
+function collectVariants(){
+  return VARS.filter(v=>v.color).map(v=>({
+    color:v.color,
+    stock:Math.max(0,parseInt(v.stock,10)||0),
+    sizes:Object.entries(v.sizes).filter(([k,q])=>q!==''&&q!=null&&!isNaN(parseInt(q,10))).map(([k,q])=>({size:k,stock:Math.max(0,parseInt(q,10))}))
+  }));
+}
+
 /* ---------- Məhsul formu: əlavə et / redaktə et ---------- */
 let editId=null,editVideo='';
 const FORM_IDS=['pName','pPrice','pOld','pStock','pDesc','pFile','vFile','pBrand','pDim','pMat','pDept','pCat','pGender','pAge','pColor','pSizeClass','pDeptO','pCatO','pCatG','pColorO','pSizeClassO','pSizeO'];
@@ -928,6 +1027,7 @@ const FORM_IDS=['pName','pPrice','pOld','pStock','pDesc','pFile','vFile','pBrand
 function resetForm(){
   editId=null;editVideo='';imgs=[];
   FORM_IDS.forEach(id=>$('#'+id).value='');
+  VARS=[];$('#useVar').checked=false;$('#vSizeO').value='';syncVarMode();
   $('#vBar').classList.add('hide');syncVideoUI();
   renderSizeChips(false);syncKid();syncOthers();syncCat('');renderImgs();updCnt();
   $('#formTitle').textContent='Yeni məhsul əlavə et';
@@ -971,6 +1071,11 @@ function startEdit(id){
   $('#formTitle').textContent='Məhsulu redaktə et';
   $('#addTxt').textContent='Dəyişiklikləri saxla';
   $('#editBar').classList.remove('hide');
+  if(p.variants&&p.variants.length){
+    VARS=p.variants.map(v=>({color:v.color,o:false,stock:v.stock||'',sizes:Object.fromEntries((v.sizes||[]).map(q=>[q.size,String(q.stock)]))}));
+    $('#useVar').checked=true;
+  }else{VARS=[];$('#useVar').checked=false}
+  syncVarMode();
   $('#cancelEdit').classList.remove('hide');
   updCnt();
   openM();
@@ -987,6 +1092,8 @@ $('#addP').onclick=async()=>{
   const knownD=Object.keys(MENU);
   const dept=matchIn(knownD,getVal('pDept','pDeptO'));
   const {category:cat,subcategory:sub}=resolveCat(dept);
+  const variants=varOn()?collectVariants():[];
+  if(varOn()&&!variants.length) return toast('Ən azı bir rəng seçin');
   const p={
     name:$('#pName').value.trim(),price:parseFloat($('#pPrice').value),old_price:parseFloat($('#pOld').value)||0,stock:parseInt($('#pStock').value,10),
     description:$('#pDesc').value.trim(),
@@ -995,14 +1102,15 @@ $('#addP').onclick=async()=>{
     sizes:kid?[]:[...new Set([...chipSizes,...ownSizes])],
     color:getVal('pColor','pColorO'),size_class:getVal('pSizeClass','pSizeClassO'),
     dimensions:$('#pDim').value.trim(),material:$('#pMat').value.trim(),
-    video_url:editVideo
+    video_url:editVideo,variants
   };
+  if(variants.length){p.stock=variants.reduce((a,v)=>a+(v.sizes.length?v.sizes.reduce((q,z)=>q+z.stock,0):v.stock),0);p.color=variants[0].color;p.sizes=[]}
   if(!p.name||isNaN(p.price)||isNaN(p.stock)) return toast('Ad, qiymət və stoku yazın');
   if(p.price<0||p.stock<0) return toast('Qiymət və stok mənfi ola bilməz');
   if($('#pDept').value===OTHER&&!dept) return toast('Üst kateqoriyanı yazın və ya siyahıdan seçin');
   if($('#pCat').value===OTHER&&grpOn()&&!$('#pCatG').value) return toast('Hansı başlığın altına əlavə olunacağını seçin');
   if($('#pCat').value===OTHER&&!p.category) return toast('Kateqoriyanı yazın və ya siyahıdan seçin');
-  if($('#pColor').value===OTHER&&!p.color) return toast('Rəngi yazın və ya siyahıdan seçin');
+  if(!varOn()&&$('#pColor').value===OTHER&&!p.color) return toast('Rəngi yazın və ya siyahıdan seçin');
   if($('#pSizeClass').value===OTHER&&!p.size_class) return toast('Boyutu yazın və ya siyahıdan seçin');
   const vfile=OPT.storage_enabled?$('#vFile').files[0]:null;
   if(vfile&&!videoType(vfile)) return toast('Video formatı dəstəklənmir (MP4, MOV, WEBM)');
