@@ -85,6 +85,7 @@ PRODUCT_NEW_COLUMNS = [
     ("variants", "TEXT NOT NULL DEFAULT ''"),
     ("colors", "TEXT NOT NULL DEFAULT ''"),
     ("size_stock", "TEXT NOT NULL DEFAULT ''"),
+    ("name_bold", "INTEGER NOT NULL DEFAULT 0"),
 ]
 
 
@@ -302,7 +303,8 @@ class VariantIn(BaseModel):
 
 
 class ProductIn(BaseModel):
-    name: str = Field(min_length=1, max_length=80)
+    name: str = Field(min_length=1, max_length=150)
+    name_bold: int = Field(default=0, ge=0, le=30)
     price: float = Field(ge=0, le=1_000_000)
     old_price: float = Field(default=0, ge=0, le=1_000_000)
     stock: int = Field(default=0, ge=0, le=1_000_000)
@@ -567,6 +569,7 @@ def clean_product(data: ProductIn, seller_id: int) -> dict:
 
     return {
         "name": name,
+        "name_bold": data.name_bold,
         "price": data.price,
         "old_price": old_price,
         "stock": stock_val,
@@ -592,7 +595,7 @@ def clean_product(data: ProductIn, seller_id: int) -> dict:
 
 
 PRODUCT_FIELDS = (
-    "name", "price", "old_price", "stock", "variants", "colors", "size_stock", "image_url", "images", "description", "category",
+    "name", "name_bold", "price", "old_price", "stock", "variants", "colors", "size_stock", "image_url", "images", "description", "category",
     "brand", "gender", "age_group", "sizes", "color", "size_class",
     "dimensions", "material", "video_url", "department", "subcategory",
 )
@@ -927,6 +930,7 @@ def product_dict(r: sqlite3.Row) -> dict:
             "department", "subcategory",
         )
     }
+    data["name_bold"] = r["name_bold"] if "name_bold" in r.keys() else 0
     data["sizes"] = [x for x in (r["sizes"] or "").split(",") if x]
     try:
         data["variants"] = json.loads(r["variants"] or "[]") if "variants" in keys else []
