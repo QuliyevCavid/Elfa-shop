@@ -219,7 +219,7 @@ input:disabled{background:#f4f2ee;color:#6b665c;cursor:not-allowed}
 .vimg .vi img{width:100%;height:100%;object-fit:cover;display:block}
 .vimg .vi button{position:absolute;right:2px;top:2px;width:18px;height:18px;border-radius:50%;background:rgba(38,59,53,.85);color:#fff;font-size:10px;line-height:18px;padding:0}
 .vimg label.vadd-img{width:56px;height:56px;border-radius:10px;border:1.5px dashed #cfc9bf;display:flex;align-items:center;justify-content:center;cursor:pointer;margin:0;font-size:24px;font-weight:400;color:#263B35;background:#faf9f6}
-.vadd{display:flex;gap:8px;align-items:center;max-width:250px;margin-bottom:10px}
+.vadd{display:flex;gap:8px;align-items:center;max-width:340px;margin-bottom:10px}
 .vadd input{height:40px;padding:6px 12px}
 .vplus{flex:none;width:40px;height:40px;border-radius:10px;background:#263B35;color:#fff;font-size:24px;line-height:1;padding:0 0 3px}
 .vsl{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:6px}
@@ -448,9 +448,9 @@ input:disabled{background:#f4f2ee;color:#6b665c;cursor:not-allowed}
               <!-- Ölçülər və stok (rəngsiz rejim) -->
               <div class="f" id="sizeWrap">
                 <label>Ölçülər və stok</label>
-                <div class="vadd"><input class="vsn" id="pSzIn" list="vsList" maxlength="20" placeholder="Ölçü (məs: 50ML)" autocomplete="off"><button type="button" class="vplus" id="pSzAdd" aria-label="Ölçü əlavə et">+</button></div>
+                <div class="vadd"><input class="vsn" id="pSzIn" list="vsList" maxlength="120" placeholder="Ölçü(lər): 15 20 14 19 32" autocomplete="off"><button type="button" class="vplus" id="pSzAdd" aria-label="Ölçü əlavə et">+</button></div>
                 <div class="vsl" id="pSzList"></div>
-                <p class="hint">Ölçünü yazıb "+" basın, altındakı xanaya həmin ölçünün stokunu yazın. Stok 0 olan ölçü alıcıya ✕ ilə göstərilir. Ölçü əlavə edəndə ümumi stok avtomatik hesablanır.</p>
+                <p class="hint">Bir neçə ölçünü qarışıq yaza bilərsiniz (boşluq və ya vergüllə ayırın: <b>15 20 14 19 32</b>), "+" basın: ölçülər avtomatik artan sırada düzülür və hər biri ayrıca stok xanası ilə görünür. Stok 0 olan ölçü alıcıya ✕ ilə göstərilir. Ümumi stok avtomatik hesablanır.</p>
                 <div style="display:none"><div class="sizes" id="pSizes"></div><input id="pSizeO"></div>
               </div>
 
@@ -881,6 +881,7 @@ async function loadOptions(){
 /* ---------- Ölçü + stok (rəngsiz rejim) ---------- */
 let SZ=[]; // {s: ölçü, q: stok}
 function renderSZ(){
+  SZ.sort((x,y)=>sizeCmp(x.s,y.s));
   fillSizeHints();
   $('#pSzList').innerHTML=SZ.map((z,k)=>'<label class="vsi"><b>'+esc(z.s)+'</b><button type="button" class="vsr" data-k="'+k+'" aria-label="Sil">✕</button><input type="number" min="0" step="1" inputmode="numeric" class="vsq" data-k="'+k+'" placeholder="Stok" value="'+esc(z.q)+'"></label>').join('');
   syncSZStock();
@@ -892,16 +893,38 @@ function syncSZStock(){
   st.disabled=has;
   if(has) st.value=SZ.reduce((a,z)=>a+(parseInt(z.q,10)||0),0);
 }
+/* ölçüləri sıralama: əvvəl rəqəmlər (artan), sonra XS..XXL, sonra qalanı əlifba ilə */
+const SIZE_ORDER=['XXXS','XXS','XS','S','M','L','XL','XXL','2XL','XXXL','3XL','4XL','5XL'];
+function sizeCmp(a,b){
+  const da=/^\d/.test(a),db=/^\d/.test(b);
+  if(da&&db){const d=parseFloat(a.replace(',','.'))-parseFloat(b.replace(',','.'));return d||a.localeCompare(b,undefined,{numeric:true})}
+  if(da!==db) return da?-1:1;
+  const ia=SIZE_ORDER.indexOf(a),ib=SIZE_ORDER.indexOf(b);
+  if(ia>=0&&ib>=0) return ia-ib;
+  if(ia>=0!==ib>=0) return ia>=0?-1:1;
+  return a.localeCompare(b,undefined,{numeric:true});
+}
+const parseSizes=str=>String(str||'').split(/[\s,;]+/).map(x=>x.trim().toUpperCase()).filter(Boolean);
+/* list-ə yeni ölçüləri əlavə edir (təkrarsız), sıralayır; {added,dup,full} qaytarır */
+function mergeSizes(list,raw){
+  let added=0,dup=0,full=false;
+  parseSizes(raw).forEach(z=>{
+    if(list.some(x=>x.s===z)){dup++;return}
+    if(list.length>=30){full=true;return}
+    list.push({s:z,q:''});added++;
+  });
+  list.sort((a,b)=>sizeCmp(a.s,b.s));
+  return {added,dup,full};
+}
 function addSZ(){
   const inp=$('#pSzIn');
-  const z=inp.value.trim().toUpperCase().replace(/,/g,' ');
-  if(!z) return toast('Əvvəl ölçünü yazın');
-  if(SZ.some(x=>x.s===z)) return toast('Bu ölçü artıq əlavə olunub');
-  if(SZ.length>=30) return toast('Ən çox 30 ölçü əlavə etmək olar');
-  SZ.push({s:z,q:''});
+  if(!parseSizes(inp.value).length) return toast('Əvvəl ölçünü yazın');
+  const r=mergeSizes(SZ,inp.value);
   inp.value='';
   renderSZ();
-  const q=$('#pSzList').querySelector('.vsq[data-k="'+(SZ.length-1)+'"]');
+  if(r.full) toast('Ən çox 30 ölçü əlavə etmək olar');
+  else if(r.dup&&!r.added) toast('Bu ölçü artıq əlavə olunub');
+  const q=[...$('#pSzList').querySelectorAll('.vsq')].find(i=>!i.value);
   if(q) q.focus();
 }
 $('#pSzAdd').onclick=addSZ;
@@ -1035,6 +1058,7 @@ function fillSizeHints(){
 }
 function renderVars(){
   const cols=OPT.colors.filter(c=>c!=='Digər'),kid=isKid();
+  VARS.forEach(v=>v.sz.sort((x,y)=>sizeCmp(x.s,y.s)));
   fillSizeHints();
   $('#varRows').innerHTML=VARS.map((v,i)=>{
     const other=v.o||(v.color&&!cols.includes(v.color));
@@ -1046,7 +1070,7 @@ function renderVars(){
       '<div class="vimg"><div class="vtl">Bu rəngin şəkilləri ('+v.imgs.length+'/'+MAXIMG+')</div>'+
         v.imgs.map((m,k)=>'<div class="vi"><img src="'+esc(m.src)+'" alt=""><button type="button" class="vir" data-k="'+k+'" aria-label="Sil">✕</button></div>').join('')+
         (v.imgs.length<MAXIMG?'<label class="vadd-img" title="Şəkil əlavə et">+<input type="file" class="vfile" accept="image/*" multiple hidden></label>':'')+'</div>'+
-      (kid?'':'<div class="vadd"><input class="vsn" list="vsList" maxlength="20" placeholder="Ölçü (məs: M)" autocomplete="off"><button type="button" class="vplus" aria-label="Ölçü əlavə et">+</button></div>')+
+      (kid?'':'<div class="vadd"><input class="vsn" list="vsList" maxlength="120" placeholder="Ölçü(lər): M L XL və ya 15 20 14" autocomplete="off"><button type="button" class="vplus" aria-label="Ölçü əlavə et">+</button></div>')+
       (!kid&&v.sz.length?'<div class="vsl">'+v.sz.map((z,k)=>'<label class="vsi"><b>'+esc(z.s)+'</b><button type="button" class="vsr" data-k="'+k+'" aria-label="Sil">✕</button><input type="number" min="0" step="1" inputmode="numeric" class="vsq" data-k="'+k+'" placeholder="Stok" value="'+esc(z.q)+'"></label>').join('')+'</div>':'')+
       ((kid||!v.sz.length)?'<div class="vns">Bu rəngdə stok:<input type="number" min="0" step="1" inputmode="numeric" class="vstock" placeholder="0" value="'+esc(v.stock)+'"></div>':'')+
       '</div>';
@@ -1065,13 +1089,12 @@ function syncVarMode(){
 function addVarSize(row){
   const v=VARS[+row.dataset.i];if(!v)return;
   const inp=row.querySelector('.vsn');
-  const z=inp.value.trim().toUpperCase().replace(/,/g,' ');
-  if(!z)return toast('Əvvəl ölçünü yazın');
-  if(v.sz.some(x=>x.s===z))return toast('Bu ölçü artıq əlavə olunub');
-  if(v.sz.length>=30)return toast('Ən çox 30 ölçü əlavə etmək olar');
-  v.sz.push({s:z,q:''});
+  if(!parseSizes(inp.value).length)return toast('Əvvəl ölçünü yazın');
+  const r=mergeSizes(v.sz,inp.value);
+  if(r.full)toast('Ən çox 30 ölçü əlavə etmək olar');
+  else if(r.dup&&!r.added)toast('Bu ölçü artıq əlavə olunub');
   renderVars();
-  const q=$('#varRows').querySelector('.vr[data-i="'+row.dataset.i+'"] .vsq[data-k="'+(v.sz.length-1)+'"]');
+  const q=[...$('#varRows').querySelectorAll('.vr[data-i="'+row.dataset.i+'"] .vsq')].find(i=>!i.value);
   if(q)q.focus();
 }
 $('#useVar').addEventListener('change',syncVarMode);
@@ -1169,6 +1192,7 @@ function startEdit(id){
   SZ=(p.size_stock&&p.size_stock.length)
     ? p.size_stock.map(z=>({s:z.size,q:String(z.stock)}))
     : (p.sizes||[]).map(s=>({s:String(s).toUpperCase(),q:''}));
+  SZ.sort((a,b)=>sizeCmp(a.s,b.s));
   renderSZ();
   if(!SZ.length) $('#pStock').value=p.stock;
   $('#pAge').value=p.age_group||'';
@@ -1184,7 +1208,7 @@ function startEdit(id){
   $('#addTxt').textContent='Dəyişiklikləri saxla';
   $('#editBar').classList.remove('hide');
   if(p.variants&&p.variants.length){
-    VARS=p.variants.map(v=>({color:v.color,o:false,stock:v.stock||'',sz:(v.sizes||[]).map(q=>({s:q.size,q:String(q.stock)})),imgs:(v.images||[]).map(u=>({src:bu(u),url:u}))}));
+    VARS=p.variants.map(v=>({color:v.color,o:false,stock:v.stock||'',sz:(v.sizes||[]).map(q=>({s:q.size,q:String(q.stock)})).sort((a,b)=>sizeCmp(a.s,b.s)),imgs:(v.images||[]).map(u=>({src:bu(u),url:u}))}));
     $('#useVar').checked=true;
   }else{VARS=[];$('#useVar').checked=false}
   syncVarMode();
