@@ -84,6 +84,7 @@ PRODUCT_NEW_COLUMNS = [
     ("old_price", "REAL NOT NULL DEFAULT 0"),
     ("variants", "TEXT NOT NULL DEFAULT ''"),
     ("colors", "TEXT NOT NULL DEFAULT ''"),
+    ("size_stock", "TEXT NOT NULL DEFAULT ''"),
 ]
 
 
@@ -321,6 +322,7 @@ class ProductIn(BaseModel):
     material: str = Field(default="", max_length=60)
     video_url: str = Field(default="", max_length=500)
     variants: List[VariantIn] = Field(default_factory=list, max_length=10)
+    size_stock: List[VarSizeIn] = Field(default_factory=list, max_length=40)
 
 
 class ProfileIn(BaseModel):
@@ -542,6 +544,17 @@ def clean_product(data: ProductIn, seller_id: int) -> dict:
             for x in v["sizes"]:
                 if x["stock"] > 0 and x["size"] not in sizes:
                     sizes.append(x["size"])
+    # Rəngsiz məhsul: hər ölçünün öz stoku (0 olan ölçü saxlanır, saytda ✕ ilə görünür)
+    size_stock, ss_seen = [], set()
+    if not variants and gender not in KID_GENDERS:
+        for it in data.size_stock:
+            z = it.size.strip().upper().replace(",", " ")
+            if z and len(z) <= 20 and z not in ss_seen:
+                ss_seen.add(z)
+                size_stock.append({"size": z, "stock": it.stock})
+        if size_stock:
+            sizes = [x["size"] for x in size_stock if x["stock"] > 0]
+            stock_val = sum(x["stock"] for x in size_stock)
     colors = ",".join(v["color"] for v in variants) if variants else color.replace(",", " ")
     if not images:  # ümumi şəkil yoxdursa, ilk rəngin şəkilləri əsas şəkil olur
         for v in variants:
@@ -559,6 +572,7 @@ def clean_product(data: ProductIn, seller_id: int) -> dict:
         "stock": stock_val,
         "variants": json.dumps(variants, ensure_ascii=False) if variants else "",
         "colors": colors,
+        "size_stock": json.dumps(size_stock, ensure_ascii=False) if size_stock else "",
         "image_url": images[0] if images else "",
         "images": json.dumps(images),
         "description": data.description.strip(),
@@ -578,7 +592,7 @@ def clean_product(data: ProductIn, seller_id: int) -> dict:
 
 
 PRODUCT_FIELDS = (
-    "name", "price", "old_price", "stock", "variants", "colors", "image_url", "images", "description", "category",
+    "name", "price", "old_price", "stock", "variants", "colors", "size_stock", "image_url", "images", "description", "category",
     "brand", "gender", "age_group", "sizes", "color", "size_class",
     "dimensions", "material", "video_url", "department", "subcategory",
 )
@@ -918,6 +932,10 @@ def product_dict(r: sqlite3.Row) -> dict:
         data["variants"] = json.loads(r["variants"] or "[]") if "variants" in keys else []
     except ValueError:
         data["variants"] = []
+    try:
+        data["size_stock"] = json.loads(r["size_stock"] or "[]") if "size_stock" in keys else []
+    except ValueError:
+        data["size_stock"] = []
     cols = [x for x in ((r["colors"] if "colors" in keys else "") or "").split(",") if x]
     data["colors"] = cols or ([r["color"]] if r["color"] else [])
     imgs = []
