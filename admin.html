@@ -5,16 +5,19 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <title>ELFA — Admin panel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#f7f6f3;--text:#171717;--muted:#777;--line:#e8e6e1}
-body{font-family:Arial,sans-serif;background:var(--bg);color:var(--text)}
+:root{--bg:#F8F6F2;--text:#242424;--muted:#777;--line:#EAE7DF}
+body{font-family:'Montserrat',Arial,sans-serif;background:var(--bg);color:var(--text)}
 button,input,select{font:inherit}
 button{cursor:pointer;border:0}
-header{background:#171717;color:white}
+header{background:#263B35;color:white}
 .nav{width:min(1200px,94%);margin:auto;min-height:68px;display:flex;align-items:center;justify-content:space-between;gap:14px}
 .logo{font-size:23px;font-weight:800;letter-spacing:4px}
-.logo small{font-size:11px;letter-spacing:2px;color:#aaa;margin-left:8px}
+.logo small{font-size:11px;letter-spacing:2px;color:#E9B949;margin-left:8px}
 .nav-right{display:flex;align-items:center;gap:8px}
 .nav button{padding:10px 14px;border-radius:22px;background:#333;color:#fff}
 .wrap{width:min(1200px,94%);margin:28px auto 60px}
@@ -23,10 +26,10 @@ header{background:#171717;color:white}
 h1{font-size:25px;margin-bottom:8px}
 .sub{font-size:13px;line-height:1.6;color:var(--muted);margin-bottom:18px}
 input,select{width:100%;min-height:43px;border:1px solid #ddd;border-radius:9px;padding:10px 12px;background:white;outline:none}
-input:focus,select:focus{border-color:#171717}
-.btn{padding:11px 16px;border-radius:22px;background:#171717;color:white;font-weight:700}
+input:focus,select:focus{border-color:#263B35}
+.btn{padding:11px 16px;border-radius:22px;background:#263B35;color:white;font-weight:700}
 .btn:disabled{opacity:.5;cursor:wait}
-.btn.light{background:#eee;color:#171717}
+.btn.light{background:#eee;color:#263B35}
 .btn.green{background:#e3f6e8;color:#176a32}
 .btn.red{background:#fde4e4;color:#b42323}
 .btn.gold{background:#fff0ca;color:#785600}
@@ -35,12 +38,12 @@ input:focus,select:focus{border-color:#171717}
 .hide{display:none!important}
 .tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
 .tab{padding:12px 18px;border-radius:24px;background:#eae9e5;font-weight:700}
-.tab.active{background:#171717;color:white}
+.tab.active{background:#263B35;color:white}
 .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px}
 .stat{background:white;border:1px solid var(--line);border-radius:13px;padding:16px;text-align:left}
 .stat b{display:block;font-size:26px;margin-bottom:5px}
 .stat span{font-size:12px;color:var(--muted)}
-.stat.active{border:2px solid #171717;padding:15px}
+.stat.active{border:2px solid #263B35;padding:15px}
 .tools{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px;margin-bottom:16px}
 .item{background:white;border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:18px}
 .info{min-width:0;flex:1}
@@ -56,7 +59,9 @@ input:focus,select:focus{border-color:#171717}
 .product-info{display:flex;gap:13px;align-items:center;min-width:0;flex:1}
 .empty{padding:45px 15px;text-align:center;color:var(--muted);background:white;border:1px solid var(--line);border-radius:14px}
 .note{padding:13px 15px;border-radius:10px;background:#fff0ca;color:#785600;font-size:13px;line-height:1.6;margin-bottom:16px}
-.toast{position:fixed;left:50%;bottom:25px;transform:translateX(-50%);background:#171717;color:white;padding:12px 18px;border-radius:25px;font-size:13px;z-index:10;max-width:90%;text-align:center}
+.vchip{display:inline-flex;align-items:center;gap:5px}
+.vchip i{width:10px;height:10px;border-radius:50%;border:1px solid rgba(0,0,0,.2)}
+.toast{position:fixed;left:50%;bottom:25px;transform:translateX(-50%);background:#263B35;color:white;padding:12px 18px;border-radius:25px;font-size:13px;z-index:10;max-width:90%;text-align:center}
 @media(max-width:750px){
  .stats{grid-template-columns:1fr 1fr}
  .tools{grid-template-columns:1fr}
@@ -150,6 +155,16 @@ function toast(message){
  el.classList.remove('hide');
  clearTimeout(toastTimer);
  toastTimer=setTimeout(()=>el.classList.add('hide'),3200);
+}
+const COLOR_HEX={'Qara':'#1E1E1E','Ağ':'#FFFFFF','Qırmızı':'#C73E1D','Mavi':'#2F6FB3','Yaşıl':'#2E7D4F','Sarı':'#E9B949','Çəhrayı':'#E88FB0','Boz':'#8C8C8C','Qəhvəyi':'#7A5230','Bej':'#D8C3A5'};
+const colorHex=c=>COLOR_HEX[c]||'#CFCABD';
+function variantMeta(p){
+ const v=p.variants||[];
+ if(!v.length)return '';
+ return '<br>Variantlar: '+v.map(x=>{
+  const n=(x.sizes&&x.sizes.length)?x.sizes.map(z=>esc(z.size)+(z.stock>0?'':'✕')).join(' '):'stok '+esc(x.stock);
+  return '<span class="vchip"><i style="background:'+colorHex(x.color)+'"></i>'+esc(x.color)+' · '+n+'</span>';
+ }).join(' &nbsp; ');
 }
 function money(v){const n=Number(v);return Number.isFinite(n)?n.toFixed(2)+' AZN':'—'}
 function statusLabel(s){return ({pending:'Gözləyir',approved:'Təsdiqlənib',rejected:'Rədd edilib'})[s]||s||'Naməlum'}
@@ -355,7 +370,7 @@ function renderProducts(){
   const onHome=p.on_home||p.store_home_all;
   const homeText=p.on_home?'<b>bəli</b>':(p.store_home_all?'<b>bəli</b> (mağazanın bütün məhsulları)':'xeyr');
   const hidden=st!=='approved'?'<br><b style="color:#b42323">Saytda görünmür: mağaza təsdiqlənməyib</b>':'';
-  return '<article class="item"><div class="product-info">'+imageMarkup(p.image_url)+'<div class="info"><h3>'+esc(p.name||'Adsız məhsul')+'</h3><div class="meta">Mağaza: '+esc(storeName)+' <span class="badge '+esc(st)+'">'+esc(statusLabel(st))+'</span><br>Kateqoriya: '+esc(p.category||'—')+(p.brand?' · '+esc(p.brand):'')+'<br>Qiymət: <b>'+esc(money(p.price))+'</b> · Stok: '+esc(p.stock??'—')+'<br>Video: '+(p.video_url?'var':'yoxdur')+' · ID: '+esc(p.id)+'<br>Ana səhifə: '+homeText+hidden+'</div></div></div><div class="actions"><button class="btn gold small" data-home-product="'+esc(p.id)+'">'+(p.on_home?'Ana səhifədən çıxar':'Ana səhifəyə qoy')+'</button><button class="btn red small" data-delete-product="'+esc(p.id)+'">Məhsulu sil</button></div></article>';
+  return '<article class="item"><div class="product-info">'+imageMarkup(p.image_url)+'<div class="info"><h3>'+esc(p.name||'Adsız məhsul')+'</h3><div class="meta">Mağaza: '+esc(storeName)+' <span class="badge '+esc(st)+'">'+esc(statusLabel(st))+'</span><br>Kateqoriya: '+esc(p.category||'—')+(p.brand?' · '+esc(p.brand):'')+'<br>Qiymət: <b>'+esc(money(p.price))+'</b> · Stok: '+esc(p.stock??'—')+'<br>Video: '+(p.video_url?'var':'yoxdur')+'' · ID: '+esc(p.id)+variantMeta(p)+'<br>Ana səhifə: '+homeText+hidden+'</div></div></div><div class="actions"><button class="btn gold small" data-home-product="'+esc(p.id)+'">'+(p.on_home?'Ana səhifədən çıxar':'Ana səhifəyə qoy')+'</button><button class="btn red small" data-delete-product="'+esc(p.id)+'">Məhsulu sil</button></div></article>';
  }).join('');
 }
 
