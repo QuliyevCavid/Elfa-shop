@@ -1269,6 +1269,13 @@ def public_products(
     return [public_product_dict(r) for r in result[offset:offset + limit]]
 
 
+def cover_key(r) -> str:
+    """Şəkil üst kateqoriya + kateqoriya + alt kateqoriya üzrə ayrılır (Qadın Sviter ilə Kişi Sviter qarışmasın)."""
+    k = r.keys()
+    dep = (r["department"] if "department" in k else "") or (r["store_category"] if "store_category" in k else "")
+    return "|".join(fold(x) for x in (dep, r["category"] or "", r["subcategory"] or ""))
+
+
 @app.get("/api/category-images")
 def category_images():
     """Alt kateqoriya şəkli: ilk yüklənən məhsulun şəkli. O məhsul silinibsə (və ya təsdiqdən çıxıbsa),
@@ -1283,14 +1290,14 @@ def category_images():
         for r in rows:
             sub = (r["subcategory"] or "").strip()
             if sub and (r["image_url"] or "").strip():
-                groups.setdefault(fold(sub), []).append(r)
+                groups.setdefault(cover_key(r), []).append(r)
         for key, items in groups.items():
             chosen = by_id.get(cover.get(key))
-            if chosen is None or fold(chosen["subcategory"] or "") != key or not (chosen["image_url"] or "").strip():
+            if chosen is None or cover_key(chosen) != key or not (chosen["image_url"] or "").strip():
                 # yadda saxlanmış yoxdur və ya silinib: ilk dəfədirsə ən köhnəsi, silinibsə ən sonuncu
                 chosen = items[0] if key in cover else items[-1]
                 con.execute("INSERT OR REPLACE INTO category_cover (sub_key, product_id) VALUES (?, ?)", (key, chosen["id"]))
-            out[(chosen["subcategory"] or "").strip()] = chosen["image_url"].strip()
+            out["|".join(key.split("|"))] = chosen["image_url"].strip()
     return out
 
 
