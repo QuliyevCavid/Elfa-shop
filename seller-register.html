@@ -9,7 +9,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#F8F6F2;--text:#242424;--muted:#777;--line:#EAE7DF;--red:#d22;--sand:#f3ece3}
+:root{--bg:#F8F6F2;--text:#242424;--muted:#777;--line:#EAE7DF;--red:#d22;--sand:#f3ece3;
+  /* əlavə rəng paleti */
+  --navy:#000352;--forest:#3B6633;--orange:#FF6700;--gold:#FFD700;--metal:#D4AF37;--mint:#1CFFC7}
 body{font-family:'Montserrat',Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
 button,input,select,textarea{font:inherit}
 button{cursor:pointer;border:0}
@@ -72,8 +74,8 @@ input:focus,select:focus,textarea:focus{border-color:#263B35}
 .ok .big{font-size:46px;margin-bottom:10px}
 .hide{display:none!important}
 .badge{display:inline-block;border-radius:12px;padding:3px 10px;font-size:12px;background:#eee;white-space:nowrap}
-.badge.green{background:#e3f6e8;color:#1a7a35}
-.badge.wait{background:#fff3d6;color:#8a6200}
+.badge.green{background:rgba(59,102,51,.13);color:var(--forest)}
+.badge.wait{background:rgba(255,103,0,.13);color:#B84A00}
 .badge.red{background:#fde4e4;color:#b42323}
 .bar{height:8px;border-radius:6px;background:#eee;overflow:hidden;margin-top:8px}
 .bar i{display:block;height:100%;width:0;background:#263B35;transition:width .15s}
@@ -166,7 +168,7 @@ body.noside .side{display:none}
 .gal{background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:14px;display:grid;gap:12px}
 .main-img{aspect-ratio:1;border-radius:12px;background:#ece9e4;display:flex;align-items:center;justify-content:center;color:#999;font-size:13px;overflow:hidden;position:relative}
 .main-img img{width:100%;height:100%;object-fit:cover}
-.main-img span.tg{position:absolute;left:10px;top:10px;background:rgba(38,59,53,.75);color:#fff;font-size:11px;padding:4px 9px;border-radius:12px;z-index:2}
+.main-img span.tg{position:absolute;left:10px;top:10px;background:var(--navy);color:#fff;font-size:11px;padding:4px 9px;border-radius:12px;z-index:2}
 .trash{position:absolute;right:10px;top:10px;width:32px;height:32px;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;z-index:2;box-shadow:0 1px 4px rgba(0,0,0,.15)}
 .trash svg{width:16px;height:16px;stroke:#444;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .thumbs{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
