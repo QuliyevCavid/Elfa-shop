@@ -510,6 +510,9 @@ input:not([type=checkbox]):not([type=radio]){-webkit-appearance:none;appearance:
 .cov-it{display:flex;flex-direction:column;align-items:center;gap:7px;min-width:0;background:none;text-align:center;color:var(--text)}
 .cov-ic{width:100%;max-width:78px;aspect-ratio:1;border-radius:18px;background:var(--bg);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:var(--brand)}
 .cov-it:active .cov-ic{background:var(--soft)}
+.cov-ic{overflow:hidden;position:relative}
+.cov-ic img.cov-ph{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.cov-ic svg{width:48%;height:48%;stroke:var(--brand);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 .cov-it span{font-size:10.5px;font-weight:600;line-height:1.3;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .cov-all .cov-ic{background:#FBF1D6;border-color:#F1DDA0}
 .cov-all .cov-ic svg{width:30px;height:30px;fill:var(--accent)}
@@ -1312,11 +1315,135 @@ function covEl(){
   el.addEventListener('click',covClick);
   return el;
 }
+
+/* ---------- alt kateqoriya ikonları (telefon kateqoriya görünüşü) ---------- */
+const CI={
+ dress:'<path d="M9 3l-1 5 2 3-4 10h12L14 11l2-3-1-5"/><path d="M9 3c1 1.5 5 1.5 6 0"/>',
+ tshirt:'<path d="M8 4L3 7l2 4 3-1v10h8V10l3 1 2-4-5-3c-1 2-7 2-8 0z"/>',
+ shirt:'<path d="M8 4L3 7l2 4 3-1v10h8V10l3 1 2-4-5-3-4 4z"/><path d="M12 8v12"/>',
+ pants:'<path d="M7 3h10l1 18h-5l-1-10-1 10H6z"/><path d="M7 7h10"/>',
+ jacket:'<path d="M8 3L3 6v14h5V8l4 3 4-3v12h5V6l-5-3-4 4z"/><path d="M12 11v9"/>',
+ skirt:'<path d="M8 4h8l4 16H4z"/><path d="M8 4v3h8V4"/>',
+ shorts:'<path d="M6 5h12l1 12h-5l-2-5-2 5H5z"/>',
+ sweater:'<path d="M8 4L3 8l2 4 3-1v9h8v-9l3 1 2-4-5-4c-1 2-7 2-8 0z"/><path d="M8 16h8"/>',
+ suit:'<path d="M9 3l3 5 3-5 5 3-2 5v10H6V11L4 6z"/><path d="M12 8v13"/>',
+ bag:'<path d="M5 8h14l1 13H4z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>',
+ backpack:'<rect x="6" y="6" width="12" height="15" rx="4"/><path d="M9 6V4a3 3 0 0 1 6 0v2M9 14h6"/>',
+ wallet:'<rect x="3" y="6" width="18" height="13" rx="3"/><path d="M3 10h18M16 14.5h2"/>',
+ suitcase:'<rect x="4" y="8" width="16" height="12" rx="2"/><path d="M9 8V5h6v3M4 13h16"/>',
+ laptopbag:'<rect x="4" y="7" width="16" height="13" rx="3"/><path d="M9 7V4h6v3M8 13h8"/>',
+ sneaker:'<path d="M3 15c0-3 2-4 4-5l2 2 4-2c3 1 6 2 7 5v2H3z"/><path d="M3 17h18M10 12l1 2"/>',
+ heel:'<path d="M4 8c3 0 5 2 6 4l8 2c2 .5 3 2 2 4h-3l-1-2-4-.5v6H9V12C7 11 5 10 4 8z"/>',
+ boot:'<path d="M8 3h6v8l5 3c1 .6 1.5 2 1 4H5V3z"/><path d="M8 7h6"/>',
+ sandal:'<path d="M3 17h18"/><path d="M5 17c0-3 2-5 4-6l3 2 5 1c2 .5 3 2 3 3"/><path d="M9 11l1 6M13 13l1 4"/>',
+ sock:'<path d="M9 3h7v9l4 3c.8 3-1 6-4 6-3 0-4-2-5-4L9 12z"/><path d="M9 7h7"/>',
+ pajama:'<path d="M8 3L4 6l1 5 3-1v4h8v-4l3 1 1-5-4-3-4 3z"/><path d="M8 14l-1 7h3l2-5 2 5h3l-1-7"/>',
+ lingerie:'<path d="M4 5c0 6 3 8 8 8s8-2 8-8c-2 2-4 3-5 1-1-1-2-1-3 0-1 2-3 1-5-1z"/><path d="M12 13v4"/>',
+ belt:'<rect x="2" y="9" width="20" height="6" rx="2"/><rect x="9" y="8" width="6" height="8" rx="1.5"/><path d="M12 10.5v3"/>',
+ scarf:'<path d="M5 4c4 3 10 3 14 0v6c-4 3-10 3-14 0z"/><path d="M8 12l-1 8h4l1-7M15 12l1 8h-3"/>',
+ hair:'<circle cx="12" cy="9" r="4"/><path d="M9 14l-3 6M15 14l3 6M7 9H3M21 9h-4"/>',
+ gem:'<path d="M6 4h12l3 5-9 11L3 9z"/><path d="M3 9h18M9 4l-2 5 5 11 5-11-2-5"/>',
+ watch:'<rect x="7" y="7" width="10" height="10" rx="3"/><path d="M9 7l1-4h4l1 4M9 17l1 4h4l1-4M12 10v2.5l2 1"/>',
+ glasses:'<circle cx="7" cy="14" r="4"/><circle cx="17" cy="14" r="4"/><path d="M11 14h2M3 14L5 7M21 14l-2-7"/>',
+ lipstick:'<rect x="8" y="12" width="8" height="9" rx="1"/><path d="M9 12V9h6v3M10 9l1-6 3 2v4"/>',
+ jar:'<rect x="5" y="9" width="14" height="11" rx="3"/><path d="M6 9V6h12v3M8 14h8"/>',
+ bottle:'<path d="M10 3h4v3l2 3v11a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V9l2-3z"/><path d="M8 13h8"/>',
+ spray:'<rect x="7" y="9" width="8" height="12" rx="2"/><path d="M9 9V6h4l2-2h3M18 7h2M18 10h2"/>',
+ nail:'<rect x="8" y="12" width="8" height="9" rx="2"/><path d="M10 12V8h4v4M11 8V4h2v4"/>',
+ dryer:'<path d="M3 8c0-2 2-3 5-3h7c3 0 6 2 6 5s-3 4-6 4H9L6 19H3z"/><path d="M8 5v8"/>',
+ razor:'<path d="M5 20L16 5l3 2-9 14z"/><path d="M14 7l3 2M7 17l3 2"/>',
+ baby:'<circle cx="12" cy="7" r="3.5"/><path d="M6 21v-5c0-3 2-5 6-5s6 2 6 5v5"/><path d="M10 7h.01M14 7h.01"/>',
+ onesie:'<path d="M8 3l-4 3 1 4 3-1v4l-1 7h4l1-4 1 4h4l-1-7V9l3 1 1-4-4-3c-1 2-7 2-8 0z"/>',
+ stroller:'<path d="M4 6h3l2 9h10"/><path d="M8 11h11a6 6 0 0 0-6-6V11"/><circle cx="9" cy="19" r="1.7"/><circle cx="17" cy="19" r="1.7"/>',
+ blocks:'<rect x="3" y="12" width="8" height="8" rx="1"/><rect x="13" y="12" width="8" height="8" rx="1"/><rect x="8" y="4" width="8" height="8" rx="1"/>',
+ doll:'<circle cx="12" cy="5.5" r="2.7"/><path d="M9 21l1-6-3-3 2-3h6l2 3-3 3 1 6M7 12l-3 1M17 12l3 1"/>',
+ teddy:'<circle cx="12" cy="13" r="7"/><circle cx="6.5" cy="6.5" r="2.3"/><circle cx="17.5" cy="6.5" r="2.3"/><path d="M10 13h.01M14 13h.01M11 16c.7.6 1.3.6 2 0"/>',
+ pregnant:'<circle cx="11" cy="4.5" r="2"/><path d="M10 8c-2 2-1 5 0 7l-1 6h3l1-4c3-1 4-4 2-6-1-2-3-3-5-3z"/>',
+ pot:'<path d="M4 9h16v8a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3z"/><path d="M2 9h20M9 6h6M2 13h2M20 13h2"/>',
+ teapot:'<path d="M6 9h10v7a4 4 0 0 1-4 4h-2a4 4 0 0 1-4-4z"/><path d="M16 11h2a2 2 0 0 1 0 4h-2M6 12H4l-1-3M9 9V6h4v3"/>',
+ utensils:'<path d="M6 3v7c0 1 1 2 2 2v9M10 3v7c0 1-1 2-2 2M8 3v5M17 21V3c-3 1-4 5-4 8h4"/>',
+ box:'<path d="M3 8l9-5 9 5v9l-9 5-9-5z"/><path d="M3 8l9 5 9-5M12 13v9"/>',
+ appliance:'<rect x="5" y="3" width="14" height="18" rx="2"/><circle cx="12" cy="14" r="4"/><path d="M8 6.5h.01M11 6.5h5"/>',
+ bed:'<path d="M3 19V6M3 15h18v4M21 15v-3a3 3 0 0 0-3-3h-8v6"/><circle cx="6.5" cy="11" r="2"/>',
+ blanket:'<rect x="3" y="6" width="18" height="13" rx="3"/><path d="M3 11c3 2 5-2 9 0s6 0 9-1M3 15c3 2 5-2 9 0s6 0 9-1"/>',
+ rug:'<rect x="3" y="7" width="18" height="10" rx="1"/><path d="M6 7v10M18 7v10M3 12h18"/>',
+ curtain:'<path d="M3 4h18M5 4c0 6 1 12-1 16h5c-2-4-1-10-1-16M19 4c0 6-1 12 1 16h-5c2-4 1-10 1-16"/>',
+ towel:'<path d="M7 3h10v14H7zM7 17c0 2 1 3 2 4h6c1-1 2-2 2-4M7 7h10M7 11h10"/>',
+ pillow:'<path d="M4 7c5 2 11 2 16 0v10c-5-2-11-2-16 0z"/><path d="M4 7l1-2M20 7l-1-2"/>',
+ vase:'<path d="M9 3h6M10 3v4c-3 2-5 5-5 8a6 6 0 0 0 6 6h2a6 6 0 0 0 6-6c0-3-2-6-5-8V3"/>',
+ candle:'<rect x="7" y="11" width="10" height="10" rx="1.5"/><path d="M12 11V8M12 3c2 2 2 4 0 5-2-1-2-3 0-5z"/>',
+ frame:'<rect x="3" y="4" width="18" height="16" rx="1.5"/><rect x="6.5" y="7.5" width="11" height="9"/><path d="M8 15l3-3 2 2 2-2 2 3"/>',
+ mirror:'<ellipse cx="12" cy="10" rx="6" ry="7.5"/><path d="M12 17.5V21M8 21h8"/>',
+ brush:'<path d="M12 3v9M9 12h6l1 4H8zM8 16l-1 5M12 16v5M16 16l1 5"/>',
+ mop:'<path d="M14 3l-3 11M7 14h8l2 6H5z"/><path d="M8 17v3M11 17v3M14 17v3"/>',
+ basket:'<path d="M3 9h18l-2 11H5z"/><path d="M8 9l3-5M16 9l-3-5M9 13v4M12 13v4M15 13v4"/>',
+ phone:'<rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/>',
+ shield:'<path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/><path d="M9 12l2 2 4-4"/>',
+ phonecase:'<rect x="6" y="3" width="12" height="18" rx="3"/><circle cx="9.5" cy="7" r="1.5"/><path d="M9 14h6"/>',
+ plug:'<path d="M9 3v5M15 3v5M6 8h12v3a6 6 0 0 1-12 0zM12 17v4"/>',
+ battery:'<rect x="3" y="7" width="16" height="10" rx="2"/><path d="M21 10v4M8 12h4l-1.5 3M10 9l-.5 3"/>',
+ cable:'<path d="M6 3v4M10 3v4M5 7h6v3a3 3 0 0 1-6 0zM8 13v3a4 4 0 0 0 4 4h4M16 18h5v-4"/>',
+ laptop:'<rect x="5" y="5" width="14" height="10" rx="1.5"/><path d="M2 19h20l-2-4H4z"/>',
+ keyboard:'<rect x="2" y="7" width="20" height="11" rx="2"/><path d="M6 11h.01M10 11h.01M14 11h.01M18 11h.01M7 15h10"/>',
+ mouse:'<rect x="6" y="3" width="12" height="18" rx="6"/><path d="M12 3v7M6 10h12"/>',
+ monitor:'<rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8M12 16v4"/>',
+ tablet:'<rect x="4" y="3" width="16" height="18" rx="2.5"/><path d="M11 18h2"/>',
+ headphones:'<path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4" height="7" rx="1.5"/><rect x="17" y="14" width="4" height="7" rx="1.5"/>',
+ speaker:'<rect x="5" y="2.5" width="14" height="19" rx="3"/><circle cx="12" cy="15" r="3.5"/><circle cx="12" cy="7" r="1.2"/>',
+ mic:'<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M9 21h6"/>',
+ smartwatch:'<rect x="7" y="7" width="10" height="10" rx="3"/><path d="M9 7l1-4h4l1 4M9 17l1 4h4l1-4M12 10v3h2"/>',
+ band:'<path d="M8 3h8v18H8z"/><rect x="8" y="9" width="8" height="6" rx="1.5"/>',
+ home:'<path d="M3 11l9-8 9 8M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/>'
+};
+/* qaydalar fm() ilə sadələşdirilmiş (ə→e, ö→o, ü→u, ş→s, ç→c, ı→i) ada tətbiq olunur */
+const CI_RULES=[
+ [/hundurdaban/,'heel'],[/babet|sandalet/,'sandal'],[/cekme|\bbot\b/,'boot'],[/ayaqqabi/,'sneaker'],
+ [/corab/,'sock'],[/pijama|gece geyimi/,'pajama'],[/alt paltari|korset|kombinezon/,'lingerie'],
+ [/cins salvar|salvar/,'pants'],[/etek/,'skirt'],[/\bsort\b/,'shorts'],[/sviter/,'sweater'],[/kostyum/,'suit'],
+ [/godekce/,'jacket'],[/t-shirt|idman geyimi/,'tshirt'],[/koynek/,'shirt'],[/paltar|hamile geyimi/,'dress'],
+ [/hamile|emizdirme/,'pregnant'],[/sirt canta/,'backpack'],[/seyahet canta/,'suitcase'],[/noutbuk canta/,'laptopbag'],
+ [/pulqabi/,'wallet'],[/canta/,'bag'],
+ [/kemer/,'belt'],[/serf/,'scarf'],[/sac aksesuar/,'hair'],[/bezek|aksesuar/,'gem'],
+ [/^saat$/,'watch'],[/agilli saat/,'smartwatch'],[/eynek/,'glasses'],[/dodaq|makiyaj|pudra|tonal|^tus$/,'lipstick'],
+ [/dirnaq/,'nail'],[/^fen$|duzlesdirici/,'dryer'],[/sampun|sac yagi/,'bottle'],[/sac maskasi|maska|serum|krem|gunesden|temizleyici/,'jar'],
+ [/deriye qulluq|sac baximi/,'jar'],[/teras/,'razor'],[/dezodorant|etir|etri|parfum/,'spray'],
+ [/beden|tulum|belek/,'onesie'],[/qidalanma|gigiyena/,'baby'],[/araba/,'stroller'],
+ [/konstruktor|tehsil/,'blocks'],[/kukla/,'doll'],[/oyuncaq/,'teddy'],
+ [/qab-qacaq|saxlama qab/,'pot'],[/caydan/,'teapot'],[/metbex alet/,'utensils'],[/meiset/,'appliance'],
+ [/yataq dest/,'bed'],[/yorgan/,'blanket'],[/xalca/,'rug'],[/perde/,'curtain'],[/desmal/,'towel'],[/yastiq/,'pillow'],
+ [/vaza/,'vase'],[/^sam$/,'candle'],[/cercive|divar dekor/,'frame'],[/guzgu/,'mirror'],
+ [/temizlik|supurge/,'brush'],[/^mop$/,'mop'],[/sebet/,'basket'],
+ [/smartfon/,'phone'],[/qoruyucu suse/,'shield'],[/telefon qabi/,'phonecase'],[/adapter/,'plug'],[/powerbank/,'battery'],[/kabel/,'cable'],
+ [/noutbuk/,'laptop'],[/klaviatura/,'keyboard'],[/sican/,'mouse'],[/monitor/,'monitor'],[/planset/,'tablet'],
+ [/qulaqliq/,'headphones'],[/dinamik/,'speaker'],[/mikrofon/,'mic'],[/agilli qolbaq/,'band'],[/agilli ev/,'home'],
+ [/geyim/,'tshirt'],[/^diger$/,'box']
+];
+function catIcon(name){
+  const k=fm(name);
+  const hit=CI_RULES.find(r=>r[0].test(k));
+  return hit&&CI[hit[1]]?'<svg viewBox="0 0 24 24" aria-hidden="true">'+CI[hit[1]]+'</svg>':'';
+}
 function covGroups(){
   /* "Digər" şöbəsində satıcıların özü yazdığı kateqoriyalar da görünür */
   return MENU[menuTab]||[];
 }
+let CATIMG=null,catImgLoading=false;
+function loadCatImgs(){
+  if(CATIMG||catImgLoading)return;
+  catImgLoading=true;
+  getJSON('/api/category-images').then(d=>{
+    CATIMG={};
+    Object.keys(d||{}).forEach(k=>{const u=safeUrl(d[k]);if(u)CATIMG[fm(k)]=u});
+    const ov=$('#catOv');if(ov&&!ov.classList.contains('hide'))renderCov();
+  }).catch(()=>{CATIMG={}});
+}
+function covPic(i){
+  const u=CATIMG&&CATIMG[fm(i)];
+  const ic=catIcon(i)||esc(String(i).trim().charAt(0).toUpperCase());
+  return u?ic+'<img class="cov-ph" src="'+esc(u)+'" alt="" loading="lazy" onerror="this.remove()">':ic;
+}
 function renderCov(){
+  loadCatImgs();
   const tabs=$('#covTabs');
   tabs.innerHTML=Object.keys(MENU).map(k=>'<button type="button" class="cov-tab'+(k===menuTab?' on':'')+'" data-cov-tab="'+esc(k)+'">'+esc(k)+'</button>').join('');
   const gs=covGroups();
@@ -1324,7 +1451,7 @@ function renderCov(){
   $('#covSide').innerHTML=gs.map((g,n)=>'<button type="button" class="cov-g'+(n===covG?' on':'')+'" data-cov-g="'+n+'">'+esc(g.t)+'</button>').join('');
   const g=gs[covG];
   const all='<button type="button" class="cov-it cov-all" data-sub="'+esc(g?g.t:'')+'" data-grp=""><b class="cov-ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg></b><span>Hamısını gör</span></button>';
-  $('#covGrid').innerHTML=g?[...g.i,...g.x].map(i=>'<button type="button" class="cov-it" data-sub="'+esc(i)+'" data-grp="'+esc(g.t)+'"><b class="cov-ic">'+esc(String(i).trim().charAt(0).toUpperCase())+'</b><span>'+esc(i)+'</span></button>').join('')+all:'';
+  $('#covGrid').innerHTML=g?[...g.i,...g.x].map(i=>'<button type="button" class="cov-it" data-sub="'+esc(i)+'" data-grp="'+esc(g.t)+'"><b class="cov-ic">'+covPic(i)+'</b><span>'+esc(i)+'</span></button>').join('')+all:'';
   $('#covGrid').scrollTop=0;
   const on=tabs.querySelector('.on');
   if(on)tabs.scrollLeft=on.offsetLeft-(tabs.clientWidth-on.offsetWidth)/2;
