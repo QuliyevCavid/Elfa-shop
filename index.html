@@ -1433,12 +1433,12 @@ function loadCatImgs(){
   catImgLoading=true;
   getJSON('/api/category-images').then(d=>{
     CATIMG={};
-    Object.keys(d||{}).forEach(k=>{const u=safeUrl(d[k]);if(u)CATIMG[fm(k)]=u});
+    Object.keys(d||{}).forEach(k=>{const u=safeUrl(d[k]);if(u)CATIMG[k.split('|').map(fm).join('|')]=u});
     const ov=$('#catOv');if(ov&&!ov.classList.contains('hide'))renderCov();
   }).catch(()=>{CATIMG={}});
 }
-function covPic(i){
-  const u=CATIMG&&CATIMG[fm(i)];
+function covPic(i,g){
+  const u=CATIMG&&CATIMG[[menuTab,g?g.t:'',i].map(fm).join('|')];
   const ic=catIcon(i)||esc(String(i).trim().charAt(0).toUpperCase());
   return u?ic+'<img class="cov-ph" src="'+esc(u)+'" alt="" loading="lazy" onerror="this.remove()">':ic;
 }
@@ -1451,7 +1451,7 @@ function renderCov(){
   $('#covSide').innerHTML=gs.map((g,n)=>'<button type="button" class="cov-g'+(n===covG?' on':'')+'" data-cov-g="'+n+'">'+esc(g.t)+'</button>').join('');
   const g=gs[covG];
   const all='<button type="button" class="cov-it cov-all" data-sub="'+esc(g?g.t:'')+'" data-grp=""><b class="cov-ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg></b><span>Hamısını gör</span></button>';
-  $('#covGrid').innerHTML=g?[...g.i,...g.x].map(i=>'<button type="button" class="cov-it" data-sub="'+esc(i)+'" data-grp="'+esc(g.t)+'"><b class="cov-ic">'+covPic(i)+'</b><span>'+esc(i)+'</span></button>').join('')+all:'';
+  $('#covGrid').innerHTML=g?[...g.i,...g.x].map(i=>'<button type="button" class="cov-it" data-sub="'+esc(i)+'" data-grp="'+esc(g.t)+'"><b class="cov-ic">'+covPic(i,g)+'</b><span>'+esc(i)+'</span></button>').join('')+all:'';
   $('#covGrid').scrollTop=0;
   const on=tabs.querySelector('.on');
   if(on)tabs.scrollLeft=on.offsetLeft-(tabs.clientWidth-on.offsetWidth)/2;
