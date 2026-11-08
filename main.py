@@ -1269,6 +1269,31 @@ def public_products(
     return [public_product_dict(r) for r in result[offset:offset + limit]]
 
 
+@app.get("/api/category-images")
+def category_images():
+    """Alt kateqoriya şəkli: ilk yüklənən məhsulun şəkli. O məhsul silinibsə (və ya təsdiqdən çıxıbsa),
+    ən son yüklənən məhsulun şəkli seçilir və sonra o yadda saxlanır."""
+    out = {}
+    with db() as con:
+        con.execute("CREATE TABLE IF NOT EXISTS category_cover (sub_key TEXT PRIMARY KEY, product_id INTEGER NOT NULL)")
+        rows = approved_rows(con)  # ən yenisi əvvəldə
+        by_id = {r["id"]: r for r in rows}
+        cover = {r["sub_key"]: r["product_id"] for r in con.execute("SELECT sub_key, product_id FROM category_cover")}
+        groups = {}
+        for r in rows:
+            sub = (r["subcategory"] or "").strip()
+            if sub and (r["image_url"] or "").strip():
+                groups.setdefault(fold(sub), []).append(r)
+        for key, items in groups.items():
+            chosen = by_id.get(cover.get(key))
+            if chosen is None or fold(chosen["subcategory"] or "") != key or not (chosen["image_url"] or "").strip():
+                # yadda saxlanmış yoxdur və ya silinib: ilk dəfədirsə ən köhnəsi, silinibsə ən sonuncu
+                chosen = items[0] if key in cover else items[-1]
+                con.execute("INSERT OR REPLACE INTO category_cover (sub_key, product_id) VALUES (?, ?)", (key, chosen["id"]))
+            out[(chosen["subcategory"] or "").strip()] = chosen["image_url"].strip()
+    return out
+
+
 @app.get("/api/suggest")
 def suggest(q: str = Query("", max_length=60)):
     """Axtarış qutusu üçün sürətli təkliflər: məhsul, mağaza, kateqoriya."""
