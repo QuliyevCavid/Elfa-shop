@@ -240,6 +240,40 @@ input:disabled{background:#f4f2ee;color:#6b665c;cursor:not-allowed}
  .pnr>.f:nth-child(n){grid-column:span 3}
  .pnr>.f:nth-child(1),.pnr>.f:nth-child(2){grid-column:1/-1}
 }
+
+/* ===== Forma: kartlı düzən (şəkildəki dizayn) ===== */
+.card2{background:#fff;border:1px solid #ECE8DE;border-radius:16px;padding:14px 16px;margin-bottom:12px}
+.card2 .f{margin-bottom:12px}.card2 .f:last-child{margin-bottom:0}
+.card2>.two,.card2>.f{margin-bottom:12px}
+.card2 label{font-weight:700;font-size:14px;color:#242424}
+.card2 .pnr{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:end}
+.card2 .pnr>.f{grid-column:auto!important;margin:0}
+.card2 .pnr>.f label{min-height:0;display:block;line-height:1.2;margin-bottom:6px}
+.card2 .ic input,.card2 .ic select{height:46px;border-radius:12px;background:#fff}
+.bw{display:flex;align-items:center;gap:10px;margin:2px 0 0;font-size:14px}
+.bw label{font-weight:500!important;font-size:14px!important;margin:0}
+.bw input{width:48px!important;height:30px!important;padding:0!important;border-radius:15px!important;background:#F4EBDD!important;text-align:center;font-weight:700;border:0!important}
+.bwpv{display:none!important}
+.card2.vwrap,.vwrap{background:#F8EFE4;border-radius:12px;padding:12px 14px;margin:0}
+.vwrap .chk{display:flex;align-items:center;gap:10px;margin:0;font-weight:700}
+.vwrap .chk input{width:20px;height:20px;accent-color:#263B35}
+.card2.szc{padding:0;overflow:hidden;background:#fff}
+.szc .szh{border-radius:0;margin:0!important;padding:12px 16px}
+.szc .vsl{padding:12px 12px 0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.szc .vsi{width:auto;border:1px solid #E1DDD2;border-radius:6px;background:#fff}
+.szc .vsi b{display:block;text-align:center;font-size:14px;padding:12px 0 8px;background:#F4F2EC;border-radius:5px 5px 0 0;margin:0}
+.szc .vsi input{height:40px;border-radius:0 0 5px 5px;font-size:14px}
+.szc .vsi .vsr{right:4px;top:4px;width:18px;height:18px;background:#fff;border:1.5px solid #D93025;color:#D93025;font-size:10px;line-height:15px}
+.szopen{display:flex;align-items:center;justify-content:center;gap:10px;width:calc(100% - 24px);margin:12px;height:46px;border:1px solid #E1DDD2;border-radius:10px;background:#F4F2EC;font-weight:700;font-size:14px;color:#242424}
+.szopen svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round}
+.szopen.hide{display:none}
+.szc .vadd{margin:12px;max-width:none}.szc .hint{margin:0 12px 12px}
+.dh{display:flex!important;align-items:center;gap:10px;font-weight:800}
+.dh svg{width:18px;height:18px;stroke:#263B35;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.drop .big{font-size:13px;font-weight:500;color:#333}.drop .tip{display:block}
+.drop em{font-style:normal}
+.mfoot{padding:4px 0 0;justify-content:flex-end}
+@media(max-width:560px){.card2 .pnr{grid-template-columns:1fr 1fr 1fr;gap:8px}.szc .vsl{grid-template-columns:repeat(3,1fr)}}
 </style>
 </head>
 <body>
@@ -413,8 +447,9 @@ input:disabled{background:#f4f2ee;color:#6b665c;cursor:not-allowed}
               <div class="thumbs" id="thumbs"></div>
               <label class="drop" for="pFile">
                 <svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg>
-                Şəkil əlavə et (<span id="imgCnt">0/5</span>)
-                <small>Ən çox 5 şəkil seçə bilərsiniz (JPG, PNG, WEBP). Şəkillər avtomatik optimallaşdırılır. Birinci şəkil əsas şəkildir, başqa şəkli əsas etmək üçün üzərinə basın. iPhone HEIC şəkli oxunmursa, ayarlarda “Ən uyğun” formatını seçin.</small>
+                <span>Şəkil əlavə et <em id="imgCnt" class="hide">0/5</em></span>
+                <small class="big">(5-ə qədər şəkil)</small>
+                <small class="tip">JPG, PNG, WEBP · Birinci şəkil əsas şəkildir, başqa şəkli əsas etmək üçün üzərinə basın.</small>
                 <input id="pFile" type="file" accept="image/*" multiple>
               </label>
               <div id="videoField">
@@ -429,22 +464,29 @@ input:disabled{background:#f4f2ee;color:#6b665c;cursor:not-allowed}
             </div>
 
             <div>
-              <div class="pnr">
+              <div class="card2">
                 <div class="f"><label for="pName">Məhsul adı <i class="rq">*</i></label><div class="ic nm"><svg viewBox="0 0 24 24"><path d="M7 3h8l4 4v14H7z"/><path d="M10 12h6M10 16h6"/></svg><input id="pName" maxlength="150" placeholder="Ad, rəng, marka, cinsiyyət, ölçü və s. yazın"><span class="cnt" id="cName">0/150</span></div></div>
-                <div class="bw"><label for="pBold">Başdan neçə söz qalın:</label><input id="pBold" type="number" min="0" max="30" value="0" inputmode="numeric" title="0 = hamısı qalın"></div><div id="pBoldPv" class="bwpv"></div>
-                <div class="f"><label for="pStock">Stok sayı <i class="rq">*</i></label><div class="ic"><svg viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg><input id="pStock" type="number" min="0" step="1" inputmode="numeric" placeholder="0"></div></div>
-                <div class="f"><label for="pPrice">Qiymət (AZN) <i class="rq">*</i></label><div class="ic"><svg viewBox="0 0 24 24"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1"/></svg><input id="pPrice" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00"></div></div>
-                <div class="f"><label for="pOld">Köhnə qiymət (endirim üçün)</label><div class="ic"><svg viewBox="0 0 24 24"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1"/></svg><input id="pOld" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Boş qoy: endirim yoxdur"></div></div>
+                <div class="bw"><label for="pBold">Başdan neçə söz qalın:</label><input id="pBold" type="number" min="0" max="30" placeholder="0" inputmode="numeric" title="0 = hamısı qalın"></div><div id="pBoldPv" class="bwpv"></div>
               </div>
+              <div class="card2"><div class="pnr">
+                <div class="f"><label for="pPrice">Qiymət (AZN) <i class="rq">*</i></label><div class="ic"><svg viewBox="0 0 24 24"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1"/></svg><input id="pPrice" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00"></div></div>
+                <div class="f"><label for="pOld">Köhnə qiymət (endirim üçün)</label><div class="ic"><svg viewBox="0 0 24 24"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1"/></svg><input id="pOld" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Boş"></div></div>
+                <div class="f"><label for="pStock">Stok sayı <i class="rq">*</i></label><div class="ic"><svg viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg><input id="pStock" type="number" min="0" step="1" inputmode="numeric" placeholder="0"></div></div>
+              </div></div>
+              <div class="card2">
               <div class="two">
                 <div class="f"><label for="pDept">Üst kateqoriya</label><div class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><select id="pDept"><option value="">Seçin</option></select></div><input class="oth hide" id="pDeptO" maxlength="60" placeholder="Üst kateqoriyanı özünüz yazın"></div>
                 <div class="f"><label for="pCat">Kateqoriya</label><div class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><select id="pCat" disabled><option value="">Seçin</option></select></div><label class="hide" id="pCatGL" for="pCatG" style="margin-top:10px">Hansı başlıq</label><div class="ic hide" id="pCatGW"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h6"/></svg><select id="pCatG"></select></div><input class="oth hide" id="pCatO" maxlength="60" placeholder="Nə yazmaq istəyirsiniz? (məs: Paltar)"></div>
               </div>
               <div class="two">
-                <div class="f"><label for="pBrand">Marka</label><div class="ic"><svg viewBox="0 0 24 24"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1"/></svg><input id="pBrand" maxlength="60" placeholder="Məs: Nike"></div></div>
                 <div class="f"><label for="pGender">Cinsiyyət</label><div class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><select id="pGender"><option value="">Seçin</option></select></div></div>
+                <div class="f"><label for="pBrand">Marka</label><div class="ic"><svg viewBox="0 0 24 24"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1"/></svg><input id="pBrand" maxlength="60" placeholder="Məs: Nike"></div></div>
               </div>
               <div class="f hide" id="ageWrap"><label for="pAge">Yaş aralığı</label><select id="pAge"><option value="">Seçin</option></select></div>
+              <div class="two">
+                <div class="f"><label for="pMat">Material</label><div class="ic"><svg viewBox="0 0 24 24"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5M3 17.5l9 5 9-5" opacity=".6"/></svg><input id="pMat" maxlength="60" placeholder="Məsələn: Pambıq, dəri, metal"></div></div>
+                <div class="f"><label for="pDim">Ölçülər (sm)</label><div class="ic"><svg viewBox="0 0 24 24"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/></svg><input id="pDim" maxlength="60" placeholder="Məsələn: 10 x 20 x 5"></div></div>
+              </div>
               <div class="f vwrap">
                 <label class="chk" for="useVar"><input type="checkbox" id="useVar"> <span>Hər rəngin öz ölçüsü və stoku var</span></label>
                 <div id="varBox" class="hide">
@@ -455,11 +497,13 @@ input:disabled{background:#f4f2ee;color:#6b665c;cursor:not-allowed}
                 </div>
               </div>
 
+              </div>
               <!-- Ölçülər və stok (rəngsiz rejim) -->
-              <div class="f" id="sizeWrap">
+              <div class="card2 szc f" id="sizeWrap">
                 <label class="szh"><svg viewBox="0 0 24 24"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>Ölçülər və stok</label>
-                <div class="vadd"><input class="vsn" id="pSzIn" list="vsList" maxlength="120" placeholder="Ölçü(lər): 15 20 14 19 32" autocomplete="off"><button type="button" class="vplus" id="pSzAdd" aria-label="Ölçü əlavə et">+</button></div>
                 <div class="vsl" id="pSzList"></div>
+                <button type="button" class="szopen hide" id="pSzOpen"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Başqa ölçü əlavə et</button>
+                <div class="vadd" id="pSzRow"><input class="vsn" id="pSzIn" list="vsList" maxlength="120" placeholder="Ölçü(lər): 15 20 14 19 32" autocomplete="off"><button type="button" class="vplus" id="pSzAdd" aria-label="Ölçü əlavə et">+</button></div>
                 <p class="hint">Bir neçə ölçünü qarışıq yaza bilərsiniz (boşluq və ya vergüllə ayırın: <b>15 20 14 19 32</b>), "+" basın: ölçülər avtomatik artan sırada düzülür və hər biri ayrıca stok xanası ilə görünür. Stok 0 olan ölçü alıcıya ✕ ilə göstərilir. Ümumi stok avtomatik hesablanır.</p>
                 <div style="display:none"><div class="sizes" id="pSizes"></div><input id="pSizeO"></div>
               </div>
@@ -469,11 +513,9 @@ input:disabled{background:#f4f2ee;color:#6b665c;cursor:not-allowed}
                 <div class="f"><label for="pColor">Rəng</label><div class="ic"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18c1.5 0 2-1 1.5-2s0-2 1.5-2h2a3 3 0 0 0 3-3c0-6-3.6-11-8-11z"/><circle cx="8" cy="11" r="1"/><circle cx="12" cy="7.5" r="1"/><circle cx="16" cy="11" r="1"/></svg><select id="pColor"><option value="">Seçin</option></select></div><input class="oth hide" id="pColorO" maxlength="40" placeholder="Rəngi özünüz yazın"></div>
                 <div class="f"><label for="pSizeClass">Boyut</label><div class="ic"><svg viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg><select id="pSizeClass"><option value="">Seçin</option></select></div><input class="oth hide" id="pSizeClassO" maxlength="40" placeholder="Boyutu özünüz yazın"></div>
               </div>
-              <div class="two">
-                <div class="f"><label for="pDim">Ölçülər (sm)</label><div class="ic"><svg viewBox="0 0 24 24"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/></svg><input id="pDim" maxlength="60" placeholder="Məsələn: 10 x 20 x 5"></div></div>
-                <div class="f"><label for="pMat">Material</label><div class="ic"><svg viewBox="0 0 24 24"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5M3 17.5l9 5 9-5" opacity=".6"/></svg><input id="pMat" maxlength="60" placeholder="Məsələn: Pambıq, dəri, metal"></div></div>
+              <div class="card2">
+              <div class="f"><label for="pDesc" class="dh"><svg viewBox="0 0 24 24"><path d="M7 3h8l4 4v14H7z"/><path d="M10 12h6M10 16h6"/></svg>Təsvir <i class="rq">*</i></label><div class="ic ta"><svg viewBox="0 0 24 24"><path d="M7 3h8l4 4v14H7z"/><path d="M10 12h6M10 16h6"/></svg><textarea id="pDesc" maxlength="600" placeholder="Məhsul haqqında ətraflı məlumat yazın..."></textarea><span class="cnt" id="cDesc">0/600</span></div></div>
               </div>
-              <div class="f"><label for="pDesc">Təsvir</label><div class="ic ta"><svg viewBox="0 0 24 24"><path d="M7 3h8l4 4v14H7z"/><path d="M10 12h6M10 16h6"/></svg><textarea id="pDesc" maxlength="600" placeholder="Məhsul haqqında ətraflı məlumat yazın..."></textarea><span class="cnt" id="cDesc">0/600</span></div></div>
               <div class="mfoot">
                 <button class="btn alt fit hide" id="cancelEdit">Redaktəni ləğv et</button>
                 <button class="btn fit" id="addP"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span id="addTxt">Məhsulu əlavə et</span></button>
@@ -900,7 +942,10 @@ function renderSZ(){
   fillSizeHints();
   $('#pSzList').innerHTML=SZ.map((z,k)=>'<label class="vsi"><b>'+esc(z.s)+'</b><button type="button" class="vsr" data-k="'+k+'" aria-label="Sil">✕</button><input type="number" min="0" step="1" inputmode="numeric" class="vsq" data-k="'+k+'" placeholder="Stok" value="'+esc(z.q)+'"></label>').join('');
   syncSZStock();
+  szRowUI();
 }
+let szOpen=false;
+function szRowUI(){const has=SZ.length>0;$('#pSzOpen').classList.toggle('hide',!has||szOpen);$('#pSzRow').classList.toggle('hide',has&&!szOpen)}
 /* Ölçü varsa ümumi stok avtomatik hesablanır və əl ilə dəyişdirilmir */
 function syncSZStock(){
   const st=$('#pStock');
@@ -942,7 +987,8 @@ function addSZ(){
   const q=[...$('#pSzList').querySelectorAll('.vsq')].find(i=>!i.value);
   if(q) q.focus();
 }
-$('#pSzAdd').onclick=addSZ;
+$('#pSzAdd').onclick=()=>{addSZ();szOpen=false;szRowUI()};
+$('#pSzOpen').onclick=()=>{szOpen=true;szRowUI();$('#pSzIn').focus()};
 $('#pSzIn').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addSZ()}});
 $('#pSzList').addEventListener('input',e=>{
   if(e.target.classList.contains('vsq')){SZ[+e.target.dataset.k].q=e.target.value;syncSZStock()}
