@@ -49,7 +49,9 @@ CLOTHING_SIZES = ["XS", "S", "M", "L", "XL", "XXL"]
 SHOE_SIZES = [str(n) for n in range(36, 46)]
 COLORS = [
     "Qara", "Ağ", "Qırmızı", "Mavi", "Yaşıl", "Sarı",
-    "Çəhrayı", "Boz", "Qəhvəyi", "Bej", "Rəngarəng", "Digər",
+    "Çəhrayı", "Boz", "Qəhvəyi", "Bej",
+    "Lacivərd", "Meşə yaşılı", "Narıncı", "Parlaq qızılı", "Metal qızıl", "Nanə-firuzəyi",
+    "Rəngarəng", "Digər",
 ]
 SIZE_CLASSES = ["Kiçik", "Orta", "Böyük"]
 SELLER_CATEGORIES = [
